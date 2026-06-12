@@ -1,5 +1,12 @@
 import api from "./api";
-import type { ILoginRequest, IRegistroRequest, ITokenResponse, IUsuarioPerfil } from "@/types/auth";
+import type {
+  IActualizarPerfil,
+  ICambiarPassword,
+  ILoginRequest,
+  IRegistroRequest,
+  ITokenResponse,
+  IUsuarioPerfil,
+} from "@/types/auth";
 
 export const authService = {
   async solicitarAcceso(telefono: string): Promise<{ mensaje: string }> {
@@ -24,6 +31,16 @@ export const authService = {
 
   async obtenerPerfil(): Promise<IUsuarioPerfil> {
     const { data } = await api.get("/api/v1/auth/perfil");
+    return data;
+  },
+
+  async actualizarPerfil(body: IActualizarPerfil): Promise<IUsuarioPerfil> {
+    const { data } = await api.patch<IUsuarioPerfil>("/api/v1/auth/perfil", body);
+    return data;
+  },
+
+  async cambiarPassword(body: ICambiarPassword): Promise<{ mensaje: string }> {
+    const { data } = await api.post<{ mensaje: string }>("/api/v1/auth/cambiar-password", body);
     return data;
   },
 };

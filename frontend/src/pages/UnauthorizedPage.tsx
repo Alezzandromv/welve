@@ -3,43 +3,17 @@ import { ShieldOff } from "lucide-react";
 
 export default function UnauthorizedPage() {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "var(--surface-bg)",
-        fontFamily: "var(--font-sans)",
-        gap: "1rem",
-        padding: "1.5rem",
-        textAlign: "center",
-      }}
-    >
-      <ShieldOff size={32} strokeWidth={1.5} style={{ color: "var(--ink-muted)" }} />
-      <h1
-        style={{
-          margin: 0,
-          fontSize: "1.25rem",
-          fontWeight: 600,
-          color: "var(--ink-strong)",
-        }}
-      >
+    <div className="min-h-screen flex flex-col items-center justify-center bg-surface-bg gap-4 p-6 text-center">
+      <ShieldOff size={32} strokeWidth={1.5} className="text-ink-muted" />
+      <h1 className="m-0 text-xl font-semibold text-ink-strong">
         Acceso no autorizado
       </h1>
-      <p style={{ margin: 0, fontSize: "0.875rem", color: "var(--ink-muted)", maxWidth: "36ch" }}>
+      <p className="m-0 text-sm text-ink-muted max-w-[36ch]">
         No tienes permisos para ver esta página.
       </p>
       <Link
         to="/login"
-        style={{
-          marginTop: "0.5rem",
-          fontSize: "0.875rem",
-          fontWeight: 500,
-          color: "var(--accent)",
-          textDecoration: "none",
-        }}
+        className="mt-2 text-sm font-medium text-accent no-underline"
       >
         Volver al inicio
       </Link>

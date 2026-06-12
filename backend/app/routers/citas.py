@@ -7,7 +7,9 @@ from app.schemas.citas import (
     CambiarEstadoRequest,
     CancelarCitaRequest,
     CitaResponse,
+    CitaServicioResponse,
     CrearCitaRequest,
+    RegistrarLlegadaRequest,
 )
 from app.services import citas_service
 
@@ -19,7 +21,7 @@ async def crear_cita(
     body: CrearCitaRequest,
     usuario: dict = Depends(obtener_usuario_actual),
 ) -> CitaResponse:
-    cita = await citas_service.crear(body, cliente_id=UUID(usuario["sub"]))
+    cita = await citas_service.crear(body, UUID(usuario["sub"]))
     return CitaResponse.model_validate(cita.model_dump())
 
 
@@ -47,3 +49,22 @@ async def cambiar_estado(
 ) -> CitaResponse:
     cita = await citas_service.cambiar_estado(cita_id, body, usuario)
     return CitaResponse.model_validate(cita.model_dump())
+
+
+@router.patch("/{cita_id}/llegada", response_model=CitaResponse)
+async def registrar_llegada(
+    cita_id: UUID,
+    body: RegistrarLlegadaRequest,
+    usuario: dict = Depends(requerir_rol("admin", "trabajador")),
+) -> CitaResponse:
+    cita = await citas_service.registrar_llegada(cita_id, body.hora_llegada_real, usuario)
+    return CitaResponse.model_validate(cita.model_dump())
+
+
+@router.get("/{cita_id}/servicios", response_model=list[CitaServicioResponse])
+async def servicios_de_cita(
+    cita_id: UUID,
+    usuario: dict = Depends(requerir_rol("admin", "trabajador")),
+) -> list[CitaServicioResponse]:
+    servicios = await citas_service.servicios_de_cita(cita_id)
+    return [CitaServicioResponse.model_validate(s.model_dump()) for s in servicios]

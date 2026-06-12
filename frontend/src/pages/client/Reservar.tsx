@@ -43,20 +43,26 @@ const PASO_LABEL: Record<Paso, string> = { servicio: 'Servicio', especialista: '
 function BarraPasos({ actual }: { actual: Paso }) {
   const idx = PASOS.indexOf(actual);
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-6)' }}>
+    <div className="flex items-center gap-2 mb-6">
       {PASOS.map((p, i) => {
         const hecho = i < idx;
         const activo = i === idx;
         return (
-          <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flex: i < PASOS.length - 1 ? 1 : undefined }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <div style={{ width: 26, height: 26, borderRadius: 'var(--radius-full)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: hecho ? 'var(--success)' : activo ? 'var(--accent)' : 'var(--border-subtle)', color: hecho || activo ? 'white' : 'var(--ink-muted)', fontSize: 'var(--text-xs)', fontWeight: 700, transition: 'all 200ms ease-out', flexShrink: 0 }}>
+          <div key={p} className={`flex items-center gap-2${i < PASOS.length - 1 ? ' flex-1' : ''}`}>
+            <div className="flex flex-col items-center gap-1">
+              <div className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200 shrink-0 ${
+                hecho ? 'bg-success text-white' : activo ? 'bg-accent text-white' : 'bg-border-subtle text-ink-muted'
+              }`}>
                 {hecho ? <Check size={12} strokeWidth={2.5} /> : i + 1}
               </div>
-              <span style={{ fontSize: 'var(--text-2xs)', color: activo ? 'var(--accent)' : 'var(--ink-subtle)', whiteSpace: 'nowrap', fontWeight: activo ? 600 : 400 }}>{PASO_LABEL[p]}</span>
+              <span className={`text-2xs whitespace-nowrap ${activo ? 'text-accent font-semibold' : 'text-ink-subtle font-normal'}`}>
+                {PASO_LABEL[p]}
+              </span>
             </div>
             {i < PASOS.length - 1 && (
-              <div style={{ height: 2, flex: 1, background: hecho ? 'var(--success)' : 'var(--border-subtle)', borderRadius: 'var(--radius-full)', transition: 'background 300ms ease-out', marginBottom: 18 }} />
+              <div
+                className={`h-0.5 flex-1 rounded-full mb-[18px] transition-colors duration-300 ${hecho ? 'bg-success' : 'bg-border-subtle'}`}
+              />
             )}
           </div>
         );
@@ -72,39 +78,48 @@ function PasoServicio({ onSeleccionar }: { onSeleccionar: (s: typeof SERVICIOS[0
   const servicios = SERVICIOS.filter((s) => s.catId === catActiva);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+    <div className="flex flex-col gap-4">
       <div>
-        <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--ink-strong)', margin: '0 0 var(--space-1)' }}>¿Qué servicio deseas?</h2>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', margin: 0 }}>Selecciona una categoría y luego el servicio.</p>
+        <h2 className="text-xl font-bold text-ink-strong m-0 mb-1">¿Qué servicio deseas?</h2>
+        <p className="text-sm text-ink-muted m-0">Selecciona una categoría y luego el servicio.</p>
       </div>
 
-      <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+      <div className="flex gap-2">
         {CATEGORIAS.map((c) => (
-          <button key={c.id} onClick={() => setCatActiva(c.id)}
-            style={{ padding: 'var(--space-2) var(--space-3)', borderRadius: 'var(--radius-full)', border: '1px solid', borderColor: catActiva === c.id ? 'var(--accent)' : 'var(--border-subtle)', background: catActiva === c.id ? 'var(--accent-subtle)' : 'white', color: catActiva === c.id ? 'var(--accent)' : 'var(--ink-muted)', fontSize: 'var(--text-sm)', fontWeight: 500, cursor: 'pointer', transition: 'all 150ms ease-out', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button
+            key={c.id}
+            onClick={() => setCatActiva(c.id)}
+            className={`flex items-center gap-1.5 py-2 px-3 rounded-full border text-sm font-medium cursor-pointer transition-all duration-150 ${
+              catActiva === c.id
+                ? 'border-accent bg-accent-subtle text-accent'
+                : 'border-border-subtle bg-white text-ink-muted'
+            }`}
+          >
             <span>{c.emoji}</span> {c.nombre}
           </button>
         ))}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+      <div className="flex flex-col gap-3">
         {servicios.map((s) => (
-          <motion.button key={s.id} onClick={() => onSeleccionar(s)} whileTap={{ scale: 0.99 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-4)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-subtle)', background: 'white', cursor: 'pointer', textAlign: 'left', transition: 'border-color 150ms ease-out', width: '100%' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-subtle)'; }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--ink-strong)' }}>{s.nombre}</div>
-              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: 2 }}>{s.descripcion}</div>
+          <motion.button
+            key={s.id}
+            onClick={() => onSeleccionar(s)}
+            whileTap={{ scale: 0.99 }}
+            className="flex items-center gap-4 p-4 rounded-2xl border border-border-subtle bg-white cursor-pointer text-left transition-[border-color] duration-150 w-full hover:border-accent"
+          >
+            <div className="flex-1">
+              <div className="text-base font-semibold text-ink-strong">{s.nombre}</div>
+              <div className="text-xs text-ink-muted mt-0.5">{s.descripcion}</div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end', flexShrink: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--ink-muted)' }}>
+            <div className="flex flex-col gap-1 items-end shrink-0">
+              <div className="flex items-center gap-1 text-ink-muted">
                 <Clock size={11} strokeWidth={1.5} />
-                <span style={{ fontSize: 'var(--text-xs)' }}>{s.duracionMin} min</span>
+                <span className="text-xs">{s.duracionMin} min</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--accent)' }}>
+              <div className="flex items-center gap-1 text-accent">
                 <Tag size={11} strokeWidth={1.5} />
-                <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>S/ {s.precio}</span>
+                <span className="text-sm font-semibold">S/ {s.precio}</span>
               </div>
             </div>
           </motion.button>
@@ -119,23 +134,28 @@ function PasoServicio({ onSeleccionar }: { onSeleccionar: (s: typeof SERVICIOS[0
 function PasoEspecialista({ catId, onSeleccionar }: { catId: string; onSeleccionar: (e: typeof ESPECIALISTAS[0]) => void }) {
   const disponibles = ESPECIALISTAS.filter((e) => e.catIds.includes(catId));
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+    <div className="flex flex-col gap-4">
       <div>
-        <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--ink-strong)', margin: '0 0 var(--space-1)' }}>Elige tu especialista</h2>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', margin: 0 }}>{disponibles.length} especialistas disponibles.</p>
+        <h2 className="text-xl font-bold text-ink-strong m-0 mb-1">Elige tu especialista</h2>
+        <p className="text-sm text-ink-muted m-0">{disponibles.length} especialistas disponibles.</p>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+      <div className="flex flex-col gap-3">
         {disponibles.map((e) => (
-          <motion.button key={e.id} onClick={() => onSeleccionar(e)} whileTap={{ scale: 0.99 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-4)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-subtle)', background: 'white', cursor: 'pointer', textAlign: 'left', transition: 'border-color 150ms ease-out', width: '100%' }}
-            onMouseEnter={(e2) => { (e2.currentTarget as HTMLElement).style.borderColor = 'var(--accent)'; }}
-            onMouseLeave={(e2) => { (e2.currentTarget as HTMLElement).style.borderColor = 'var(--border-subtle)'; }}>
-            <div style={{ width: 44, height: 44, borderRadius: 'var(--radius-full)', background: e.color, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--text-sm)', fontWeight: 700, flexShrink: 0 }}>
+          <motion.button
+            key={e.id}
+            onClick={() => onSeleccionar(e)}
+            whileTap={{ scale: 0.99 }}
+            className="flex items-center gap-4 p-4 rounded-2xl border border-border-subtle bg-white cursor-pointer text-left transition-[border-color] duration-150 w-full hover:border-accent"
+          >
+            <div
+              style={{ background: e.color }}
+              className="w-11 h-11 rounded-full text-white flex items-center justify-center text-sm font-bold shrink-0"
+            >
               {e.iniciales}
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--ink-strong)' }}>{e.nombre}</div>
-              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: 2 }}>{e.especialidad}</div>
+            <div className="flex-1">
+              <div className="text-base font-semibold text-ink-strong">{e.nombre}</div>
+              <div className="text-xs text-ink-muted mt-0.5">{e.especialidad}</div>
             </div>
           </motion.button>
         ))}
@@ -178,32 +198,38 @@ function PasoFecha({ onSeleccionar }: { onSeleccionar: (fecha: Date, hora: strin
   const mesNombre = new Date(año, mes, 1).toLocaleDateString('es-PE', { month: 'long', year: 'numeric' });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+    <div className="flex flex-col gap-5">
       <div>
-        <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--ink-strong)', margin: '0 0 var(--space-1)' }}>Selecciona fecha y hora</h2>
+        <h2 className="text-xl font-bold text-ink-strong m-0 mb-1">Selecciona fecha y hora</h2>
       </div>
 
       {/* Calendario compacto */}
-      <div style={{ background: 'white', borderRadius: 'var(--radius-2xl)', border: '1px solid var(--border-subtle)', padding: 'var(--space-4)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-3)' }}>
-          <motion.button whileTap={{ scale: 0.97 }} onClick={() => navMes(-1)}
-            style={{ width: 28, height: 28, borderRadius: 'var(--radius-full)', border: '1px solid var(--border-subtle)', background: 'white', color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+      <div className="bg-white rounded-3xl border border-border-subtle p-4">
+        <div className="flex items-center justify-between mb-3">
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navMes(-1)}
+            className="w-7 h-7 rounded-full border border-border-subtle bg-white text-ink-muted flex items-center justify-center cursor-pointer"
+          >
             <ChevronLeft size={13} strokeWidth={1.5} />
           </motion.button>
-          <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--ink-strong)', textTransform: 'capitalize' }}>{mesNombre}</span>
-          <motion.button whileTap={{ scale: 0.97 }} onClick={() => navMes(1)}
-            style={{ width: 28, height: 28, borderRadius: 'var(--radius-full)', border: '1px solid var(--border-subtle)', background: 'white', color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <span className="text-sm font-semibold text-ink-strong capitalize">{mesNombre}</span>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navMes(1)}
+            className="w-7 h-7 rounded-full border border-border-subtle bg-white text-ink-muted flex items-center justify-center cursor-pointer"
+          >
             <ChevronRight size={13} strokeWidth={1.5} />
           </motion.button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: 'var(--space-2)' }}>
+        <div className="grid grid-cols-7 mb-2">
           {DIAS_SEMANA.map((d) => (
-            <div key={d} style={{ fontSize: 'var(--text-2xs)', color: 'var(--ink-subtle)', fontWeight: 600, textAlign: 'center', padding: '4px 0' }}>{d}</div>
+            <div key={d} className="text-2xs text-ink-subtle font-semibold text-center py-1">{d}</div>
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+        <div className="grid grid-cols-7 gap-0.5">
           {dias.map(({ fecha, esMes }, i) => {
             const pasado = fecha < hoy && fecha.toDateString() !== hoy.toDateString();
             const domingo = fecha.getDay() === 0;
@@ -212,9 +238,19 @@ function PasoFecha({ onSeleccionar }: { onSeleccionar: (fecha: Date, hora: strin
             const disponible = esMes && !pasado && !domingo;
 
             return (
-              <button key={i}
+              <button
+                key={i}
                 onClick={() => disponible && setDiaSeleccionado(fecha)}
-                style={{ height: 34, borderRadius: 'var(--radius-base)', border: 'none', cursor: disponible ? 'pointer' : 'default', background: seleccionado ? 'var(--accent)' : esHoyDia ? 'var(--accent-subtle)' : 'transparent', color: seleccionado ? 'white' : esHoyDia ? 'var(--accent)' : esMes && disponible ? 'var(--ink-strong)' : 'var(--ink-subtle)', fontSize: 'var(--text-xs)', fontWeight: seleccionado || esHoyDia ? 600 : 400, opacity: !esMes || (pasado && !esHoyDia) ? 0.3 : 1, transition: 'all 120ms ease-out' }}>
+                className={`h-[34px] rounded-lg border-none text-xs transition-all duration-[120ms] ${
+                  seleccionado
+                    ? 'bg-accent text-white font-semibold cursor-pointer'
+                    : esHoyDia
+                      ? 'bg-accent-subtle text-accent font-semibold cursor-pointer'
+                      : esMes && disponible
+                        ? 'bg-transparent text-ink-strong font-normal cursor-pointer hover:bg-accent-subtle/50'
+                        : 'bg-transparent text-ink-subtle font-normal cursor-default'
+                } ${!esMes || (pasado && !esHoyDia) ? 'opacity-30' : ''}`}
+              >
                 {fecha.getDate()}
               </button>
             );
@@ -225,11 +261,18 @@ function PasoFecha({ onSeleccionar }: { onSeleccionar: (fecha: Date, hora: strin
       {/* Horas */}
       {diaSeleccionado && (
         <div>
-          <h3 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--ink-strong)', margin: '0 0 var(--space-3)' }}>Horarios disponibles</h3>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+          <h3 className="text-sm font-semibold text-ink-strong m-0 mb-3">Horarios disponibles</h3>
+          <div className="flex flex-wrap gap-2">
             {HORARIOS_DISPONIBLES.map((h) => (
-              <button key={h} onClick={() => setHoraSeleccionada(h)}
-                style={{ padding: 'var(--space-2) var(--space-3)', borderRadius: 'var(--radius-base)', border: '1px solid', borderColor: horaSeleccionada === h ? 'var(--accent)' : 'var(--border-subtle)', background: horaSeleccionada === h ? 'var(--accent)' : 'white', color: horaSeleccionada === h ? 'white' : 'var(--ink-base)', fontSize: 'var(--text-sm)', fontWeight: 500, cursor: 'pointer', transition: 'all 150ms ease-out', fontFamily: 'monospace' }}>
+              <button
+                key={h}
+                onClick={() => setHoraSeleccionada(h)}
+                className={`py-2 px-3 rounded-lg border text-sm font-medium cursor-pointer transition-all duration-150 font-mono ${
+                  horaSeleccionada === h
+                    ? 'border-accent bg-accent text-white'
+                    : 'border-border-subtle bg-white text-ink-base'
+                }`}
+              >
                 {h}
               </button>
             ))}
@@ -239,10 +282,13 @@ function PasoFecha({ onSeleccionar }: { onSeleccionar: (fecha: Date, hora: strin
 
       {diaSeleccionado && horaSeleccionada && (
         <motion.button
-          initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, ease: EASE }}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, ease: EASE }}
           whileTap={{ scale: 0.98 }}
           onClick={() => onSeleccionar(diaSeleccionado, horaSeleccionada)}
-          style={{ padding: 'var(--space-3)', borderRadius: 'var(--radius-xl)', background: 'var(--accent)', color: 'var(--accent-foreground)', border: 'none', fontSize: 'var(--text-base)', fontWeight: 600, cursor: 'pointer' }}>
+          className="p-3 rounded-2xl bg-accent text-accent-foreground border-none text-base font-semibold cursor-pointer"
+        >
           Continuar con {diaSeleccionado.toLocaleDateString('es-PE', { day: 'numeric', month: 'long' })} a las {horaSeleccionada}
         </motion.button>
       )}
@@ -262,13 +308,13 @@ function PasoConfirmar({
   onConfirmar: () => void;
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+    <div className="flex flex-col gap-5">
       <div>
-        <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--ink-strong)', margin: '0 0 var(--space-1)' }}>Confirma tu reserva</h2>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', margin: 0 }}>Revisa los detalles antes de confirmar.</p>
+        <h2 className="text-xl font-bold text-ink-strong m-0 mb-1">Confirma tu reserva</h2>
+        <p className="text-sm text-ink-muted m-0">Revisa los detalles antes de confirmar.</p>
       </div>
 
-      <div style={{ background: 'white', borderRadius: 'var(--radius-2xl)', border: '1px solid var(--border-subtle)', overflow: 'hidden' }}>
+      <div className="bg-white rounded-3xl border border-border-subtle overflow-hidden">
         {[
           { label: 'Servicio',     valor: servicio.nombre },
           { label: 'Especialista', valor: especialista.nombre },
@@ -278,22 +324,24 @@ function PasoConfirmar({
           { label: 'Precio total', valor: `S/ ${servicio.precio}` },
           { label: 'Depósito',     valor: `S/ ${servicio.deposito} (requerido)` },
         ].map(({ label, valor }) => (
-          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: 'var(--space-3) var(--space-5)', borderBottom: '1px solid var(--border-subtle)' }}>
-            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)' }}>{label}</span>
-            <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--ink-strong)', textTransform: label === 'Fecha' ? 'capitalize' : undefined }}>{valor}</span>
+          <div key={label} className="flex justify-between py-3 px-5 border-b border-border-subtle">
+            <span className="text-sm text-ink-muted">{label}</span>
+            <span className={`text-sm font-medium text-ink-strong${label === 'Fecha' ? ' capitalize' : ''}`}>{valor}</span>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)', padding: 'var(--space-4)', background: 'var(--info-light)', borderRadius: 'var(--radius-xl)' }}>
-        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--info)', lineHeight: 'var(--leading-relaxed)' }}>
+      <div className="flex items-start gap-3 p-4 bg-info-light rounded-2xl">
+        <span className="text-xs text-info leading-relaxed">
           Para confirmar la reserva deberás pagar el depósito de <strong>S/ {servicio.deposito}</strong> vía Yape, Plin o transferencia bancaria. Recibirás un enlace de confirmación por WhatsApp.
         </span>
       </div>
 
       <motion.button
-        whileTap={{ scale: 0.98 }} onClick={onConfirmar}
-        style={{ padding: 'var(--space-4)', borderRadius: 'var(--radius-xl)', background: 'var(--accent)', color: 'var(--accent-foreground)', border: 'none', fontSize: 'var(--text-base)', fontWeight: 700, cursor: 'pointer' }}>
+        whileTap={{ scale: 0.98 }}
+        onClick={onConfirmar}
+        className="p-4 rounded-2xl bg-accent text-accent-foreground border-none text-base font-bold cursor-pointer"
+      >
         Confirmar reserva
       </motion.button>
     </div>
@@ -305,18 +353,23 @@ function PasoConfirmar({
 function PasoExito({ onVolver }: { onVolver: () => void }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3, ease: EASE }}
-      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-5)', textAlign: 'center', padding: 'var(--space-8) 0' }}
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, ease: EASE }}
+      className="flex flex-col items-center gap-5 text-center py-8"
     >
-      <div style={{ width: 64, height: 64, borderRadius: 'var(--radius-full)', background: 'var(--success-light)', color: 'var(--success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="w-16 h-16 rounded-full bg-success-light text-success flex items-center justify-center">
         <Check size={28} strokeWidth={2} />
       </div>
       <div>
-        <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--ink-strong)', margin: '0 0 var(--space-2)' }}>¡Reserva confirmada!</h2>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', margin: 0 }}>Recibirás la confirmación por WhatsApp en breve.</p>
+        <h2 className="text-2xl font-bold text-ink-strong m-0 mb-2">¡Reserva confirmada!</h2>
+        <p className="text-sm text-ink-muted m-0">Recibirás la confirmación por WhatsApp en breve.</p>
       </div>
-      <motion.button whileTap={{ scale: 0.97 }} onClick={onVolver}
-        style={{ padding: 'var(--space-3) var(--space-6)', borderRadius: 'var(--radius-xl)', background: 'var(--accent)', color: 'var(--accent-foreground)', border: 'none', fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer' }}>
+      <motion.button
+        whileTap={{ scale: 0.97 }}
+        onClick={onVolver}
+        className="py-3 px-6 rounded-2xl bg-accent text-accent-foreground border-none text-sm font-semibold cursor-pointer"
+      >
         Ver mis citas
       </motion.button>
     </motion.div>
@@ -343,25 +396,30 @@ export default function ClienteReservar() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--surface-bg)', display: 'flex', flexDirection: 'column' }}>
+    <div className="min-h-screen bg-surface-bg flex flex-col">
       {/* Top bar */}
-      <div style={{ background: 'white', borderBottom: '1px solid var(--border-subtle)', padding: 'var(--space-3) var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-        <div style={{ fontWeight: 700, fontSize: 'var(--text-lg)', color: 'var(--accent)', letterSpacing: 'var(--tracking-tight)' }}>Eunoia</div>
-        <div style={{ flex: 1 }}>
-          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)' }}>Nueva reserva</span>
+      <div className="bg-white border-b border-border-subtle px-6 py-3 flex items-center gap-4">
+        <div className="text-lg font-bold text-accent tracking-tight">Eunoia</div>
+        <div className="flex-1">
+          <span className="text-sm text-ink-muted">Nueva reserva</span>
         </div>
-        <button onClick={cerrarSesion}
-          style={{ width: 32, height: 32, borderRadius: 'var(--radius-base)', border: '1px solid var(--border-subtle)', background: 'white', color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+        <button
+          onClick={cerrarSesion}
+          className="w-8 h-8 rounded-lg border border-border-subtle bg-white text-ink-muted flex items-center justify-center cursor-pointer"
+        >
           <LogOut size={13} strokeWidth={1.5} />
         </button>
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, padding: 'var(--space-6)', maxWidth: 560, margin: '0 auto', width: '100%' }}>
+      <div className="flex-1 p-6 max-w-[560px] mx-auto w-full">
         {paso !== 'exito' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-5)' }}>
-            <motion.button whileTap={{ scale: 0.97 }} onClick={volver}
-              style={{ width: 32, height: 32, borderRadius: 'var(--radius-full)', border: '1px solid var(--border-subtle)', background: 'white', color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+          <div className="flex items-center gap-3 mb-5">
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={volver}
+              className="w-8 h-8 rounded-full border border-border-subtle bg-white text-ink-muted flex items-center justify-center cursor-pointer shrink-0"
+            >
               <ArrowLeft size={14} strokeWidth={1.5} />
             </motion.button>
             <BarraPasos actual={paso as Paso} />
@@ -369,12 +427,13 @@ export default function ClienteReservar() {
         )}
 
         <AnimatePresence mode="wait">
-          <motion.div key={paso}
+          <motion.div
+            key={paso}
             initial={{ opacity: 0, x: reducedMotion ? 0 : 24 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: reducedMotion ? 0 : -24 }}
-            transition={{ duration: 0.22, ease: EASE }}>
-
+            transition={{ duration: 0.22, ease: EASE }}
+          >
             {paso === 'servicio' && (
               <PasoServicio onSeleccionar={(s) => { setSelServicio(s); setPaso('especialista'); }} />
             )}
@@ -386,8 +445,12 @@ export default function ClienteReservar() {
             )}
             {paso === 'confirmar' && selServicio && selEspecialista && selFecha && selHora && (
               <PasoConfirmar
-                servicio={selServicio} especialista={selEspecialista} fecha={selFecha} hora={selHora}
-                onConfirmar={() => setPaso('exito')} />
+                servicio={selServicio}
+                especialista={selEspecialista}
+                fecha={selFecha}
+                hora={selHora}
+                onConfirmar={() => setPaso('exito')}
+              />
             )}
             {paso === 'exito' && (
               <PasoExito onVolver={() => navigate('/cliente/citas')} />

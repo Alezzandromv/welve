@@ -3,7 +3,122 @@
 @tailwind utilities;
 
 :root {
-  /* Espaciado */
+  /* ─── Primitivos de color ──────────────────────────────────────────────── */
+
+  /* Escala violet (marca) */
+  --color-violet-50:  oklch(0.97 0.015 285);   /* Blue Chalk */
+  --color-violet-100: oklch(0.93 0.028 284);
+  --color-violet-200: oklch(0.87 0.055 284);
+  --color-violet-300: oklch(0.78 0.098 284);
+  --color-violet-400: oklch(0.67 0.158 285);
+  --color-violet-500: oklch(0.51 0.261 286);   /* Electric Violet */
+  --color-violet-600: oklch(0.45 0.230 286);
+  --color-violet-700: oklch(0.38 0.190 287);
+  --color-violet-800: oklch(0.30 0.140 288);
+  --color-violet-900: oklch(0.20 0.075 288);
+  --color-violet-950: oklch(0.12 0.038 288);   /* Haiti */
+
+  /* Amarillo Turbo */
+  --color-turbo-400: oklch(0.92 0.178 106);
+  --color-turbo-500: oklch(0.877 0.196 105);   /* Turbo */
+  --color-turbo-600: oklch(0.79 0.165 96);
+
+  /* Semánticos primitivos */
+  --color-success-light: oklch(0.92 0.08 152);
+  --color-success:       oklch(0.58 0.155 152);
+  --color-success-dark:  oklch(0.38 0.12 152);
+
+  --color-warning-light: oklch(0.95 0.08 88);
+  --color-warning:       oklch(0.76 0.17 72);
+  --color-warning-dark:  oklch(0.52 0.14 68);
+
+  --color-error-light:   oklch(0.94 0.06 22);
+  --color-error:         oklch(0.57 0.21 22);
+  --color-error-dark:    oklch(0.40 0.17 22);
+
+  --color-info-light:    oklch(0.93 0.06 245);
+  --color-info:          oklch(0.56 0.17 245);
+  --color-info-dark:     oklch(0.39 0.13 245);
+
+  /* ─── Superficies ──────────────────────────────────────────────────────── */
+  --surface-bg:             var(--color-violet-50);    /* fondo general */
+  --surface-base:           oklch(0.99 0.006 285);     /* tarjetas */
+  --surface-raised:         oklch(1 0 0);              /* modales, popovers */
+  --surface-sidebar:        var(--color-violet-950);   /* sidebar Haiti */
+  --surface-sidebar-hover:  oklch(0.17 0.05 287);
+  --surface-sidebar-active: oklch(0.22 0.065 286);
+
+  /* ─── Texto en superficies claras ─────────────────────────────────────── */
+  --ink-strong:  oklch(0.15 0.025 285);   /* títulos, datos clave */
+  --ink-base:    oklch(0.28 0.020 285);   /* cuerpo */
+  --ink-muted:   oklch(0.48 0.018 285);   /* labels secundarios */
+  --ink-subtle:  oklch(0.66 0.012 285);   /* placeholders — solo UI, no cuerpo */
+
+  /* ─── Texto en sidebar oscuro ─────────────────────────────────────────── */
+  --sidebar-ink-strong: oklch(0.94 0.010 285);
+  --sidebar-ink-base:   oklch(0.75 0.018 285);
+  --sidebar-ink-muted:  oklch(0.52 0.018 286);
+
+  /* ─── Bordes ───────────────────────────────────────────────────────────── */
+  --border-subtle:  oklch(0.90 0.018 284);
+  --border-base:    oklch(0.83 0.025 284);
+  --border-strong:  oklch(0.65 0.045 284);
+  --sidebar-border: oklch(0.22 0.048 287);
+
+  /* ─── Acento primario (violet) ────────────────────────────────────────── */
+  --accent:            var(--color-violet-500);   /* Electric Violet */
+  --accent-glow:       oklch(0.51 0.261 286 / 0.15);
+  --accent-hover:      oklch(0.47 0.245 286);
+  --accent-active:     oklch(0.43 0.228 286);
+  --accent-subtle:     var(--color-violet-100);   /* fondos de pill activo */
+  --accent-foreground: oklch(1 0 0);              /* texto sobre acento */
+
+  /* ─── Acento secundario (Turbo — solo estados de alta energía) ────────── */
+  --turbo:        var(--color-turbo-500);
+  --turbo-subtle: oklch(0.95 0.065 106);
+
+  /* ─── Estados de cita ──────────────────────────────────────────────────── */
+  --estado-pendiente:            var(--color-warning);
+  --estado-pendiente-bg:         oklch(0.76 0.17 72 / 0.15);
+  --estado-confirmada:           var(--color-info);
+  --estado-confirmada-bg:        oklch(0.56 0.17 245 / 0.15);
+  --estado-en-curso:             var(--accent);
+  --estado-en-curso-bg:          oklch(0.51 0.261 286 / 0.15);
+  --estado-completada:           var(--color-success);
+  --estado-completada-bg:        oklch(0.58 0.155 152 / 0.15);
+  --estado-cancelada:            oklch(0.66 0.012 285);
+  --estado-cancelada-bg:         oklch(0.66 0.012 285 / 0.15);
+  --estado-cancelada-tardia:     var(--color-error);
+  --estado-cancelada-tardia-bg:  oklch(0.57 0.21 22 / 0.15);
+  --estado-no-show:              var(--color-error);
+  --estado-no-show-bg:           oklch(0.57 0.21 22 / 0.15);
+
+  /* ─── Semánticos de estado (aliases para uso general) ─────────────────── */
+  --success:       var(--color-success);
+  --success-light: var(--color-success-light);
+  --warning:       var(--color-warning);
+  --warning-light: var(--color-warning-light);
+  --error:         var(--color-error);
+  --error-light:   var(--color-error-light);
+  --error-dark:    var(--color-error-dark);
+  --info:          var(--color-info);
+  --info-light:    var(--color-info-light);
+
+  /* ─── Sombras ───────────────────────────────────────────────────────────── */
+  --shadow-sm:    0 1px 3px  oklch(0.12 0.038 288 / 0.10);
+  --shadow-base:  0 2px 6px  oklch(0.12 0.038 288 / 0.12);
+  --shadow-lg:    0 4px 16px oklch(0.12 0.038 288 / 0.10);
+  --shadow-modal: 0 8px 32px oklch(0.12 0.038 288 / 0.18);
+
+  /* ─── Radios ────────────────────────────────────────────────────────────── */
+  --radius-sm:   4px;
+  --radius-base: 8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  24px;
+  --radius-full: 9999px;
+
+  /* ─── Espaciado (escala 4px) ────────────────────────────────────────────── */
   --space-1:  0.25rem;
   --space-2:  0.5rem;
   --space-3:  0.75rem;
@@ -15,22 +130,24 @@
   --space-12: 3rem;
   --space-16: 4rem;
 
-  /* Dimensiones de sidebar y contenido */
-  --sidebar-width: 240px;
+  /* ─── Layout ────────────────────────────────────────────────────────────── */
+  --sidebar-width:     240px;
   --sidebar-collapsed: 56px;
-  --sidebar-padding: var(--space-4);
-  --content-padding: var(--space-6);
+  --sidebar-padding:   var(--space-4);
+  --content-padding:   var(--space-6);
   --content-max-width: 1200px;
 
-  /* Tipografía */
-  --text-2xs: 0.625rem;
-  --text-xs:  0.75rem;
-  --text-sm:  0.875rem;
-  --text-base: 1rem;
-  --text-lg:  1.125rem;
-  --text-xl:  1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 1.875rem;
+  /* ─── Tipografía ────────────────────────────────────────────────────────── */
+  --font-sans: 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, sans-serif;
+
+  --text-2xs:  0.625rem;   /* 10px — badges, timestamps densos */
+  --text-xs:   0.75rem;    /* 12px — labels de metadato */
+  --text-sm:   0.875rem;   /* 14px — cuerpo sidebar, labels de formulario */
+  --text-base: 1rem;       /* 16px — cuerpo principal */
+  --text-lg:   1.125rem;   /* 18px — subtítulos de sección */
+  --text-xl:   1.25rem;    /* 20px — títulos de panel */
+  --text-2xl:  1.5rem;     /* 24px — títulos de página */
+  --text-3xl:  1.875rem;   /* 30px — KPIs del dashboard admin */
 
   --font-regular:  400;
   --font-medium:   500;
@@ -46,98 +163,16 @@
   --leading-normal:  1.5;
   --leading-relaxed: 1.625;
 
-  /* Radio adicional */
-  --radius-full: 9999px;
-
-  /* Superficies */
-  --surface-bg: oklch(0.97 0.015 285);
-  --surface-base: oklch(0.99 0.006 285);
-  --surface-raised: oklch(1 0 0);
-  --surface-sidebar: oklch(0.12 0.038 288);
-  --surface-sidebar-hover: oklch(0.17 0.05 287);
-  --surface-sidebar-active: oklch(0.22 0.065 286);
-
-  /* Texto en superficies claras */
-  --ink-strong: oklch(0.15 0.025 285);
-  --ink-base: oklch(0.28 0.02 285);
-  --ink-muted: oklch(0.48 0.018 285);
-  --ink-subtle: oklch(0.66 0.012 285);
-
-  /* Texto en sidebar oscuro */
-  --sidebar-ink-strong: oklch(0.94 0.01 285);
-  --sidebar-ink-base: oklch(0.75 0.018 285);
-  --sidebar-ink-muted: oklch(0.52 0.018 286);
-
-  /* Bordes */
-  --border-subtle: oklch(0.9 0.018 284);
-  --border-base: oklch(0.83 0.025 284);
-  --border-strong: oklch(0.65 0.045 284);
-  --sidebar-border: oklch(0.22 0.048 287);
-
-  /* Acento primario */
-  --accent: oklch(0.51 0.261 286);
-  --accent-glow: oklch(0.51 0.261 286 / 0.15);
-  --accent-hover: oklch(0.47 0.245 286);
-  --accent-active: oklch(0.43 0.228 286);
-  --accent-subtle: oklch(0.93 0.028 284);
-  --accent-foreground: oklch(1 0 0);
-
-  /* Acento secundario (Turbo — solo estados de alta energía) */
-  --turbo: oklch(0.877 0.196 105);
-  --turbo-subtle: oklch(0.95 0.065 106);
-
-  /* Estados de cita — color sólido + fondo 15% opacidad */
-  --estado-pendiente:            oklch(0.76 0.17 72);
-  --estado-pendiente-bg:         oklch(0.76 0.17 72 / 0.15);
-  --estado-confirmada:           oklch(0.56 0.17 245);
-  --estado-confirmada-bg:        oklch(0.56 0.17 245 / 0.15);
-  --estado-en-curso:             oklch(0.51 0.261 286);
-  --estado-en-curso-bg:          oklch(0.51 0.261 286 / 0.15);
-  --estado-completada:           oklch(0.58 0.155 152);
-  --estado-completada-bg:        oklch(0.58 0.155 152 / 0.15);
-  --estado-cancelada:            oklch(0.66 0.012 285);
-  --estado-cancelada-bg:         oklch(0.66 0.012 285 / 0.15);
-  --estado-cancelada-tardia:     oklch(0.57 0.21 22);
-  --estado-cancelada-tardia-bg:  oklch(0.57 0.21 22 / 0.15);
-  --estado-no-show:              oklch(0.57 0.21 22);
-  --estado-no-show-bg:           oklch(0.57 0.21 22 / 0.15);
-
-  /* Semánticos de estado */
-  --success: oklch(0.58 0.155 152);
-  --success-light: oklch(0.92 0.08 152);
-  --warning: oklch(0.76 0.17 72);
-  --warning-light: oklch(0.95 0.08 88);
-  --error: oklch(0.57 0.21 22);
-  --error-light: oklch(0.94 0.06 22);
-  --error-dark: oklch(0.4 0.17 22);
-  --info: oklch(0.56 0.17 245);
-  --info-light: oklch(0.93 0.06 245);
-
-  /* Sombras */
-  --shadow-sm: 0 1px 3px oklch(0.12 0.038 288 / 0.1);
-  --shadow-base: 0 2px 6px oklch(0.12 0.038 288 / 0.12);
-  --shadow-lg: 0 4px 16px oklch(0.12 0.038 288 / 0.1);
-  --shadow-modal: 0 8px 32px oklch(0.12 0.038 288 / 0.18);
-
-  /* Radios */
-  --radius-sm: 4px;
-  --radius-base: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 24px;
-
-  /* Z-index */
-  --z-dropdown: 100;
-  --z-sticky: 200;
+  /* ─── Z-index ───────────────────────────────────────────────────────────── */
+  --z-dropdown:       100;
+  --z-sticky:         200;
   --z-modal-backdrop: 300;
-  --z-modal: 400;
-  --z-toast: 500;
-  --z-tooltip: 600;
-
-  /* Tipografía */
-  --font-sans: 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, sans-serif;
+  --z-modal:          400;
+  --z-toast:          500;
+  --z-tooltip:        600;
 }
 
+/* ─── Reset base ────────────────────────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -156,4 +191,53 @@ h1,
 h2,
 h3 {
   text-wrap: balance;
+}
+
+/* ─── Utilities ─────────────────────────────────────────────────────────────── */
+@layer utilities {
+  .shimmer {
+    background: var(--border-subtle);
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      oklch(0.97 0.003 280 / 0.6) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ─── Keyframes ─────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes fadeInRow {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

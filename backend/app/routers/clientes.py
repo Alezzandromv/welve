@@ -5,7 +5,9 @@ from fastapi import APIRouter, Depends
 from app.core.security import requerir_rol
 from app.schemas.citas import CitaResponse
 from app.schemas.clientes import (
+    ActualizarClienteRequest,
     BloquearClienteRequest,
+    ClienteResponse,
     FichaSaludRequest,
     FichaSaludResponse,
 )
@@ -16,10 +18,38 @@ router = APIRouter()
 _admin = Depends(requerir_rol("admin"))
 
 
+@router.get("", response_model=list[ClienteResponse])
+async def listar_clientes(usuario: dict = _admin) -> list[ClienteResponse]:
+    clientes = await clientes_service.listar_todos_con_usuario()
+    return [ClienteResponse.model_validate(c) for c in clientes]
+
+
+@router.get("/{cliente_id}", response_model=ClienteResponse)
+async def obtener_cliente(cliente_id: UUID, usuario: dict = _admin) -> ClienteResponse:
+    cliente = await clientes_service.obtener_por_id(cliente_id)
+    return ClienteResponse.model_validate(cliente.model_dump())
+
+
+@router.patch("/{cliente_id}", response_model=ClienteResponse)
+async def actualizar_cliente(
+    cliente_id: UUID,
+    body: ActualizarClienteRequest,
+    usuario: dict = _admin,
+) -> ClienteResponse:
+    data = await clientes_service.actualizar(cliente_id, body)
+    return ClienteResponse.model_validate(data)
+
+
 @router.get("/{cliente_id}/historial", response_model=list[CitaResponse])
 async def historial(cliente_id: UUID, usuario: dict = _admin) -> list[CitaResponse]:
     citas = await clientes_service.historial(cliente_id)
-    return [CitaResponse.model_validate(c.model_dump()) for c in citas]
+    return [CitaResponse.model_validate(c) for c in citas]
+
+
+@router.get("/{cliente_id}/fichas-salud", response_model=list[FichaSaludResponse])
+async def listar_fichas(cliente_id: UUID, usuario: dict = _admin) -> list[FichaSaludResponse]:
+    fichas = await clientes_service.listar_fichas(cliente_id)
+    return [FichaSaludResponse.model_validate(f.model_dump()) for f in fichas]
 
 
 @router.post("/{cliente_id}/fichas-salud", response_model=FichaSaludResponse, status_code=201)

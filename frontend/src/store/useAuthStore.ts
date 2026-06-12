@@ -13,6 +13,7 @@ interface AuthState {
   cerrarSesion: () => void;
   estaAutenticado: () => boolean;
   cargarPerfil: () => Promise<void>;
+  actualizarUsuario: (datos: Partial<IUsuarioPerfil>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -35,6 +36,11 @@ export const useAuthStore = create<AuthState>()(
         const perfil = await authService.obtenerPerfil();
         set({ usuario: perfil, rol: perfil.rol as Rol });
       },
+
+      actualizarUsuario: (datos) =>
+        set((s) => ({
+          usuario: s.usuario ? { ...s.usuario, ...datos } : s.usuario,
+        })),
     }),
     { name: "welve-auth" }
   )

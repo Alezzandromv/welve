@@ -1,6 +1,7 @@
+from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SolicitarAccesoRequest(BaseModel):
@@ -46,3 +47,16 @@ class PerfilResponse(BaseModel):
     rol: str
     foto_perfil_url: str | None
     acepta_whatsapp: bool
+    fecha_creacion: datetime | None = None
+    ultimo_acceso: datetime | None = None
+
+
+class ActualizarPerfilRequest(BaseModel):
+    nombre_completo: str | None = None
+    correo: str | None = None
+    telefono: str | None = None
+
+
+class CambiarPasswordRequest(BaseModel):
+    password_actual: str
+    password_nueva: str = Field(min_length=8)

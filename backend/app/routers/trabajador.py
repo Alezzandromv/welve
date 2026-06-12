@@ -1,3 +1,4 @@
+from datetime import date
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -12,9 +13,9 @@ _trabajador = Depends(requerir_rol("trabajador", "admin"))
 
 
 @router.get("/agenda", response_model=list[CitaResponse])
-async def agenda(fecha: str | None = None, usuario: dict = _trabajador) -> list[CitaResponse]:
-    citas = await citas_service.agenda_trabajador(
-        personal_id=UUID(usuario["sub"]),
-        fecha=fecha,
-    )
+async def agenda(
+    fecha: date | None = None,
+    usuario: dict = _trabajador,
+) -> list[CitaResponse]:
+    citas = await citas_service.agenda_trabajador(UUID(usuario["sub"]), fecha)
     return [CitaResponse.model_validate(c.model_dump()) for c in citas]

@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.database import init_db
-from app.routers import admin, auth, citas, clientes, fidelizacion, servicios, trabajador
+from app.routers import admin, auth, citas, clientes, fidelizacion, servicios, trabajador, usuarios
 
 
 @asynccontextmanager
@@ -37,6 +37,7 @@ app.include_router(admin.router, prefix="/api/v1/admin", tags=["admin"])
 app.include_router(trabajador.router, prefix="/api/v1/trabajador", tags=["trabajador"])
 app.include_router(clientes.router, prefix="/api/v1/clientes", tags=["clientes"])
 app.include_router(fidelizacion.router, prefix="/api/v1/fidelizacion", tags=["fidelizacion"])
+app.include_router(usuarios.router, prefix="/api/v1/admin/usuarios", tags=["usuarios"])
 
 
 @app.get("/health")

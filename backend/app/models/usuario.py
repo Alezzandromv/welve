@@ -1,12 +1,12 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID, uuid4
-from zoneinfo import ZoneInfo
 
 from beanie import Document
-from pydantic import Field
+from pydantic import Field, field_validator
 from pymongo import ASCENDING, IndexModel
 
-LIMA_TZ = ZoneInfo("America/Lima")
+from app.utils.timezone import a_lima, ahora_lima
 
 
 class Usuario(Document):
@@ -16,17 +16,32 @@ class Usuario(Document):
     correo: str | None = None
     hashed_password: str | None = None
     correo_verificado: bool = False
-    rol: str  # 'cliente' | 'trabajador' | 'admin'
+    rol: Literal["cliente", "trabajador", "admin"]
     esta_activo: bool = True
     foto_perfil_url: str | None = None
     acepta_whatsapp: bool = True
     ultimo_acceso: datetime | None = None
-    fecha_creacion: datetime = Field(default_factory=lambda: datetime.now(LIMA_TZ))
-    actualizado_en: datetime = Field(default_factory=lambda: datetime.now(LIMA_TZ))
+    fecha_creacion: datetime = Field(default_factory=ahora_lima)
+    actualizado_en: datetime = Field(default_factory=ahora_lima)
+
+    @field_validator("ultimo_acceso", "fecha_creacion", "actualizado_en", mode="before")
+    @classmethod
+    def _normalizar_tz(cls, v: object) -> object:
+        if isinstance(v, datetime) and v.tzinfo is None:
+            return a_lima(v)
+        return v
 
     class Settings:
         name = "usuarios"
         indexes = [
-            IndexModel([("correo", ASCENDING)], unique=True, sparse=True),
-            IndexModel([("telefono", ASCENDING)], unique=True, sparse=True),
+            IndexModel(
+                [("correo", ASCENDING)],
+                unique=True,
+                partialFilterExpression={"correo": {"$type": "string"}},
+            ),
+            IndexModel(
+                [("telefono", ASCENDING)],
+                unique=True,
+                partialFilterExpression={"telefono": {"$type": "string"}},
+            ),
         ]

@@ -26,4 +26,17 @@ export interface IUsuarioPerfil {
   rol: string;
   foto_perfil_url: string | null;
   acepta_whatsapp: boolean;
+  fecha_creacion: string | null;
+  ultimo_acceso: string | null;
+}
+
+export interface IActualizarPerfil {
+  nombre_completo?: string;
+  correo?: string;
+  telefono?: string;
+}
+
+export interface ICambiarPassword {
+  password_actual: string;
+  password_nueva: string;
 }

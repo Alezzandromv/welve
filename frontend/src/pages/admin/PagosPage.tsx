@@ -17,11 +17,11 @@ const TIPO_LABEL: Record<IPago['tipo'], string> = {
   deposito: 'Depósito', saldo: 'Saldo', total: 'Total', penalizacion: 'Penalización', reembolso: 'Reembolso',
 };
 
-const ESTADO_CFG: Record<IPago['estado'], { label: string; color: string; bg: string }> = {
-  pendiente:   { label: 'Pendiente',   color: 'var(--warning)',  bg: 'var(--warning-light)'  },
-  confirmado:  { label: 'Confirmado',  color: 'var(--success)',  bg: 'var(--success-light)'  },
-  rechazado:   { label: 'Rechazado',   color: 'var(--error)',    bg: 'var(--error-light)'    },
-  reembolsado: { label: 'Reembolsado', color: 'var(--info)',     bg: 'var(--info-light)'     },
+const ESTADO_CFG: Record<IPago['estado'], { label: string; colorCls: string; bgCls: string }> = {
+  pendiente:   { label: 'Pendiente',   colorCls: 'text-warning',  bgCls: 'bg-warning-light'  },
+  confirmado:  { label: 'Confirmado',  colorCls: 'text-success',  bgCls: 'bg-success-light'  },
+  rechazado:   { label: 'Rechazado',   colorCls: 'text-error',    bgCls: 'bg-error-light'    },
+  reembolsado: { label: 'Reembolsado', colorCls: 'text-info',     bgCls: 'bg-info-light'     },
 };
 
 const PAGOS: IPagoRow[] = [
@@ -41,6 +41,11 @@ const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const variantesLista = { visible: { transition: { staggerChildren: 0.04 } } };
 const variantesFila  = { oculto: { opacity: 0, y: 6 }, visible: { opacity: 1, y: 0, transition: { duration: 0.28, ease: EASE } } };
 
+const STATS_CFG = [
+  { key: 'pendiente', label: 'Por confirmar', valorFn: (p: IPagoRow[]) => `S/ ${p.filter(x => x.estado === 'pendiente').reduce((s, x) => s + x.monto, 0)}`, subFn: (p: IPagoRow[]) => `${p.filter(x => x.estado === 'pendiente').length} pagos`, colorCls: 'text-warning', bgCls: 'bg-warning-light', icon: Clock },
+  { key: 'confirmado', label: 'Cobrado hoy', valorFn: (p: IPagoRow[]) => `S/ ${p.filter(x => x.estado === 'confirmado' && x.fechaConfirmacion?.startsWith('2026-06-10')).reduce((s, x) => s + x.monto, 0)}`, subFn: (p: IPagoRow[]) => `${p.filter(x => x.estado === 'confirmado' && x.fechaConfirmacion?.startsWith('2026-06-10')).length} confirmados`, colorCls: 'text-success', bgCls: 'bg-success-light', icon: Check },
+];
+
 export default function PagosPage() {
   const [filtro, setFiltro] = useState<EstadoFiltro>('todos');
   const [hoverId, setHoverId] = useState<string | null>(null);
@@ -48,62 +53,66 @@ export default function PagosPage() {
 
   const visibles = PAGOS.filter((p) => filtro === 'todos' || p.estado === filtro);
 
-  const totalPendiente = PAGOS.filter((p) => p.estado === 'pendiente').reduce((s, p) => s + p.monto, 0);
-  const confirmadosHoy = PAGOS.filter((p) => p.estado === 'confirmado' && p.fechaConfirmacion?.startsWith('2026-06-10')).reduce((s, p) => s + p.monto, 0);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: reducedMotion ? 0 : 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: EASE }}
-      style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}
+      className="flex flex-col gap-5"
     >
       {/* Header */}
       <div>
-        <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--ink-strong)', letterSpacing: 'var(--tracking-tight)', margin: 0 }}>
+        <h1 className="text-2xl font-bold text-ink-strong tracking-tight m-0">
           Pagos
         </h1>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', margin: '4px 0 0 0' }}>
+        <p className="text-sm text-ink-muted mt-1 mb-0">
           Gestión de cobros y confirmaciones
         </p>
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--space-4)' }}>
-        {[
-          { label: 'Por confirmar', valor: `S/ ${totalPendiente}`, sub: `${PAGOS.filter((p) => p.estado === 'pendiente').length} pagos`, color: 'var(--warning)', bg: 'var(--warning-light)', icon: Clock },
-          { label: 'Cobrado hoy',   valor: `S/ ${confirmadosHoy}`,  sub: `${PAGOS.filter((p) => p.estado === 'confirmado' && p.fechaConfirmacion?.startsWith('2026-06-10')).length} confirmados`, color: 'var(--success)', bg: 'var(--success-light)', icon: Check },
-        ].map(({ label, valor, sub, color, bg, icon: Icon }) => (
-          <div key={label} style={{ background: 'white', borderRadius: 'var(--radius-2xl)', boxShadow: 'var(--shadow-sm)', padding: 'var(--space-5)', display: 'flex', gap: 'var(--space-4)', alignItems: 'center' }}>
-            <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-base)', background: bg, color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
+        {STATS_CFG.map(({ key, label, valorFn, subFn, colorCls, bgCls, icon: Icon }) => (
+          <div key={key} className="bg-white rounded-3xl shadow-sm p-5 flex gap-4 items-center">
+            <div className={`w-10 h-10 rounded-lg ${bgCls} ${colorCls} flex items-center justify-center shrink-0`}>
               <Icon size={18} strokeWidth={1.5} />
             </div>
             <div>
-              <div style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--ink-strong)', letterSpacing: 'var(--tracking-tight)' }}>{valor}</div>
-              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: 2 }}>{label} · {sub}</div>
+              <div className={`text-xl font-bold text-ink-strong tracking-tight`}>{valorFn(PAGOS)}</div>
+              <div className="text-xs text-ink-muted mt-0.5">{label} · {subFn(PAGOS)}</div>
             </div>
           </div>
         ))}
       </div>
 
       {/* Filtros */}
-      <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+      <div className="flex gap-2">
         {(['todos', 'pendiente', 'confirmado'] as const).map((f) => (
-          <button key={f} onClick={() => setFiltro(f)}
-            style={{ padding: 'var(--space-1) var(--space-3)', borderRadius: 'var(--radius-full)', border: '1px solid', borderColor: filtro === f ? 'var(--accent)' : 'var(--border-subtle)', background: filtro === f ? 'var(--accent-subtle)' : 'white', color: filtro === f ? 'var(--accent)' : 'var(--ink-muted)', fontSize: 'var(--text-xs)', fontWeight: 500, cursor: 'pointer', transition: 'all 150ms ease-out' }}>
+          <button
+            key={f}
+            onClick={() => setFiltro(f)}
+            className={`py-1 px-3 rounded-full border text-xs font-medium cursor-pointer transition-all duration-150 ${
+              filtro === f
+                ? 'border-accent bg-accent-subtle text-accent'
+                : 'border-border-subtle bg-white text-ink-muted'
+            }`}
+          >
             {f === 'todos' ? 'Todos' : f.charAt(0).toUpperCase() + f.slice(1)}
             {f !== 'todos' && (
-              <span style={{ marginLeft: 4 }}>({PAGOS.filter((p) => p.estado === f).length})</span>
+              <span className="ml-1">({PAGOS.filter((p) => p.estado === f).length})</span>
             )}
           </button>
         ))}
       </div>
 
       {/* Tabla */}
-      <div style={{ background: 'white', borderRadius: 'var(--radius-2xl)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 80px 80px 90px 100px 80px', padding: 'var(--space-3) var(--space-5)', borderBottom: '1px solid var(--border-base)', gap: 'var(--space-3)', alignItems: 'center' }}>
+      <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
+        <div
+          className="grid px-5 py-3 border-b border-border-base gap-3 items-center"
+          style={{ gridTemplateColumns: '2fr 1.5fr 80px 80px 90px 100px 80px' }}
+        >
           {['Cliente', 'Servicio', 'Monto', 'Método', 'Tipo', 'Estado', ''].map((col) => (
-            <span key={col} style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{col}</span>
+            <span key={col} className="text-xs font-semibold text-ink-muted uppercase tracking-[0.04em]">{col}</span>
           ))}
         </div>
 
@@ -111,29 +120,37 @@ export default function PagosPage() {
           {visibles.map((p) => {
             const cfg = ESTADO_CFG[p.estado];
             return (
-              <motion.div key={p.id} variants={reducedMotion ? undefined : variantesFila}
-                onMouseEnter={() => setHoverId(p.id)} onMouseLeave={() => setHoverId(null)}
-                style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 80px 80px 90px 100px 80px', padding: 'var(--space-3) var(--space-5)', borderBottom: '1px solid var(--border-subtle)', gap: 'var(--space-3)', alignItems: 'center', background: hoverId === p.id ? 'oklch(0.93 0.028 284 / 0.4)' : 'transparent', transition: 'background 120ms ease-out' }}>
-
+              <motion.div
+                key={p.id}
+                variants={reducedMotion ? undefined : variantesFila}
+                onMouseEnter={() => setHoverId(p.id)}
+                onMouseLeave={() => setHoverId(null)}
+                className={`grid px-5 py-3 border-b border-border-subtle gap-3 items-center transition-colors duration-[120ms] ${
+                  hoverId === p.id ? 'bg-accent-subtle/40' : 'bg-transparent'
+                }`}
+                style={{ gridTemplateColumns: '2fr 1.5fr 80px 80px 90px 100px 80px' }}
+              >
                 <div>
-                  <div style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--ink-strong)' }}>{p.clienteNombre}</div>
+                  <div className="text-sm font-medium text-ink-strong">{p.clienteNombre}</div>
                   {p.referenciaExterna && (
-                    <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--ink-subtle)', marginTop: 1 }}>{p.referenciaExterna}</div>
+                    <div className="text-2xs text-ink-subtle mt-px">{p.referenciaExterna}</div>
                   )}
                 </div>
-                <span style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-base)' }}>{p.servicioNombre}</span>
-                <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--ink-strong)' }}>S/ {p.monto}</span>
-                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>{METODO_LABEL[p.metodo]}</span>
-                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>{TIPO_LABEL[p.tipo]}</span>
+                <span className="text-sm text-ink-base">{p.servicioNombre}</span>
+                <span className="text-sm font-semibold text-ink-strong">S/ {p.monto}</span>
+                <span className="text-xs text-ink-muted">{METODO_LABEL[p.metodo]}</span>
+                <span className="text-xs text-ink-muted">{TIPO_LABEL[p.tipo]}</span>
 
-                <span style={{ padding: '3px 8px', borderRadius: 'var(--radius-full)', fontSize: 'var(--text-2xs)', fontWeight: 600, color: cfg.color, background: cfg.bg, display: 'inline-block' }}>
+                <span className={`py-0.5 px-2 rounded-full text-2xs font-semibold ${cfg.colorCls} ${cfg.bgCls} inline-block`}>
                   {cfg.label}
                 </span>
 
-                <div style={{ opacity: p.estado === 'pendiente' || hoverId === p.id ? 1 : 0, transition: 'opacity 150ms' }}>
+                <div className={`transition-opacity duration-150 ${p.estado === 'pendiente' || hoverId === p.id ? 'opacity-100' : 'opacity-0'}`}>
                   {p.estado === 'pendiente' && (
-                    <motion.button whileTap={{ scale: 0.97 }}
-                      style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 'var(--radius-base)', background: 'var(--success)', color: 'white', border: 'none', fontSize: 'var(--text-xs)', fontWeight: 600, cursor: 'pointer' }}>
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      className="flex items-center gap-1 py-1 px-2.5 rounded-lg bg-success text-white border-none text-xs font-semibold cursor-pointer"
+                    >
                       <Check size={11} strokeWidth={2} />
                       Confirmar
                     </motion.button>
@@ -145,8 +162,8 @@ export default function PagosPage() {
         </motion.div>
 
         {visibles.length === 0 && (
-          <div style={{ padding: 'var(--space-12)', textAlign: 'center' }}>
-            <p style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)' }}>No hay pagos con ese filtro.</p>
+          <div className="p-12 text-center">
+            <p className="text-sm text-ink-muted">No hay pagos con ese filtro.</p>
           </div>
         )}
       </div>

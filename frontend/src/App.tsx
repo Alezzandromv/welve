@@ -16,6 +16,9 @@ import ServiciosPage from '@/pages/admin/ServiciosPage';
 import PagosPage from '@/pages/admin/PagosPage';
 import FidelizacionPage from '@/pages/admin/FidelizacionPage';
 import ConfiguracionPage from '@/pages/admin/ConfiguracionPage';
+import PerfilPage from '@/pages/admin/PerfilPage';
+import PersonalPage from '@/pages/admin/PersonalPage';
+import UsuariosPage from '@/pages/admin/UsuariosPage';
 
 import TrabajadorAgenda from '@/pages/worker/Agenda';
 import ClienteCitas from '@/pages/client/MisCitas';
@@ -75,6 +78,9 @@ export default function App() {
         <Route path="pagos"         element={<PagosPage />} />
         <Route path="fidelizacion"  element={<FidelizacionPage />} />
         <Route path="configuracion" element={<ConfiguracionPage />} />
+        <Route path="personal"      element={<PersonalPage />} />
+        <Route path="usuarios"      element={<UsuariosPage />} />
+        <Route path="perfil"        element={<PerfilPage />} />
       </Route>
 
       {/* Trabajador */}

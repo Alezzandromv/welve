@@ -75,22 +75,24 @@ export default function TrabajadorAgenda() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--surface-bg)', display: 'flex', flexDirection: 'column' }}>
+    <div className="min-h-screen bg-surface-bg flex flex-col">
       {/* Top bar */}
-      <div style={{ background: 'white', borderBottom: '1px solid var(--border-subtle)', padding: 'var(--space-3) var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-        <div style={{ fontWeight: 700, fontSize: 'var(--text-lg)', color: 'var(--accent)', letterSpacing: 'var(--tracking-tight)' }}>
+      <div className="bg-white border-b border-border-subtle px-6 py-3 flex items-center gap-4">
+        <div className="text-lg font-bold text-accent tracking-tight">
           Eunoia
         </div>
-        <div style={{ flex: 1 }}>
-          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)' }}>Mi Agenda</span>
+        <div className="flex-1">
+          <span className="text-sm text-ink-muted">Mi Agenda</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--ink-strong)' }}>{nombre ?? 'Trabajadora'}</div>
-            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>Trabajadora</div>
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <div className="text-sm font-semibold text-ink-strong">{nombre ?? 'Trabajadora'}</div>
+            <div className="text-xs text-ink-muted">Trabajadora</div>
           </div>
-          <button onClick={cerrarSesion}
-            style={{ width: 32, height: 32, borderRadius: 'var(--radius-base)', border: '1px solid var(--border-subtle)', background: 'white', color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <button
+            onClick={cerrarSesion}
+            className="w-8 h-8 rounded-lg border border-border-subtle bg-white text-ink-muted flex items-center justify-center cursor-pointer"
+          >
             <LogOut size={13} strokeWidth={1.5} />
           </button>
         </div>
@@ -101,58 +103,70 @@ export default function TrabajadorAgenda() {
         initial={{ opacity: 0, y: reducedMotion ? 0 : 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: EASE }}
-        style={{ flex: 1, padding: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-5)', maxWidth: 800, margin: '0 auto', width: '100%' }}
+        className="flex-1 p-6 flex flex-col gap-5 max-w-[800px] mx-auto w-full"
       >
         {/* Header navegación */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex gap-2">
             {([-1, 1] as const).map((dir) => (
-              <motion.button key={dir} onClick={() => navDia(dir)} whileTap={{ scale: 0.97 }}
-                style={{ width: 32, height: 32, borderRadius: 'var(--radius-full)', border: '1px solid var(--border-subtle)', background: 'white', color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <motion.button
+                key={dir}
+                onClick={() => navDia(dir)}
+                whileTap={{ scale: 0.97 }}
+                className="w-8 h-8 rounded-full border border-border-subtle bg-white text-ink-muted flex items-center justify-center cursor-pointer"
+              >
                 {dir === -1 ? <ChevronLeft size={14} strokeWidth={1.5} /> : <ChevronRight size={14} strokeWidth={1.5} />}
               </motion.button>
             ))}
           </div>
-          <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--ink-strong)', letterSpacing: 'var(--tracking-tight)', margin: 0 }}>
+          <div className="flex-1">
+            <h1 className="text-xl font-bold text-ink-strong tracking-tight m-0">
               {formatearFecha(fecha)}
             </h1>
             {!esHoy(fecha) && (
-              <button onClick={() => setFecha(new Date())}
-                style={{ marginTop: 2, fontSize: 'var(--text-xs)', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 500 }}>
+              <button
+                onClick={() => setFecha(new Date())}
+                className="mt-0.5 text-xs text-accent bg-transparent border-none cursor-pointer p-0 font-medium"
+              >
                 Ir a hoy
               </button>
             )}
           </div>
-          <motion.button whileTap={{ scale: 0.97 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-base)', background: 'var(--accent)', color: 'var(--accent-foreground)', border: 'none', fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer' }}>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            className="flex items-center gap-2 py-2 px-4 rounded-lg bg-accent text-accent-foreground border-none text-sm font-semibold cursor-pointer"
+          >
             <Plus size={14} strokeWidth={2} />
             Nueva cita
           </motion.button>
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
+        <div className="flex gap-3 flex-wrap">
           {[
-            { label: 'Total hoy',    valor: stats.total,       color: 'var(--ink-strong)', bg: 'white' },
-            { label: 'Completadas',  valor: stats.completadas,  color: 'var(--success)',    bg: 'var(--success-light)' },
-            { label: 'En curso',     valor: stats.enCurso,      color: 'var(--accent)',     bg: 'var(--accent-subtle)' },
-          ].map(({ label, valor, color, bg }) => (
-            <div key={label} style={{ background: bg, borderRadius: 'var(--radius-xl)', padding: 'var(--space-3) var(--space-5)', border: '1px solid var(--border-subtle)', minWidth: 100 }}>
-              <div style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color, letterSpacing: 'var(--tracking-tight)' }}>{valor}</div>
-              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: 2 }}>{label}</div>
+            { label: 'Total hoy',    valor: stats.total,       colorCls: 'text-ink-strong', bgCls: 'bg-white' },
+            { label: 'Completadas',  valor: stats.completadas,  colorCls: 'text-success',    bgCls: 'bg-success-light' },
+            { label: 'En curso',     valor: stats.enCurso,      colorCls: 'text-accent',     bgCls: 'bg-accent-subtle' },
+          ].map(({ label, valor, colorCls, bgCls }) => (
+            <div key={label} className={`${bgCls} rounded-2xl py-3 px-5 border border-border-subtle min-w-[100px]`}>
+              <div className={`text-2xl font-bold ${colorCls} tracking-tight`}>{valor}</div>
+              <div className="text-xs text-ink-muted mt-0.5">{label}</div>
             </div>
           ))}
         </div>
 
         {/* Grid de tiempo */}
-        <div style={{ background: 'white', borderRadius: 'var(--radius-2xl)', boxShadow: 'var(--shadow-sm)', overflow: 'auto', flex: 1 }}>
+        <div className="bg-white rounded-3xl shadow-sm overflow-auto flex-1">
           <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr' }}>
             {/* Horas */}
             <div>
               {horas.map((h) => (
-                <div key={h} style={{ height: PX_POR_HORA, display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', paddingRight: 'var(--space-2)', paddingTop: 'var(--space-1)', borderTop: '1px solid var(--border-subtle)' }}>
-                  <span style={{ fontSize: 'var(--text-2xs)', color: 'var(--ink-subtle)', fontFamily: 'monospace' }}>
+                <div
+                  key={h}
+                  style={{ height: PX_POR_HORA }}
+                  className="flex items-start justify-end pr-2 pt-1 border-t border-border-subtle"
+                >
+                  <span className="text-2xs text-ink-subtle font-mono">
                     {String(h).padStart(2, '0')}:00
                   </span>
                 </div>
@@ -160,27 +174,41 @@ export default function TrabajadorAgenda() {
             </div>
 
             {/* Columna citas */}
-            <div style={{ position: 'relative', height: TOTAL_PX, borderLeft: '1px solid var(--border-subtle)' }}>
+            <div style={{ position: 'relative', height: TOTAL_PX }} className="border-l border-border-subtle">
               {horas.map((h) => (
-                <div key={h} style={{ position: 'absolute', top: (h - HORA_INICIO) * PX_POR_HORA, left: 0, right: 0, height: 1, background: 'var(--border-subtle)' }} />
+                <div
+                  key={h}
+                  style={{ position: 'absolute', top: (h - HORA_INICIO) * PX_POR_HORA, left: 0, right: 0, height: 1 }}
+                  className="bg-border-subtle"
+                />
               ))}
               {CITAS.map((cita) => {
                 const cfg = ESTADO_CFG[cita.estado];
                 const top = topDesdeComienzo(cita.inicioHora, cita.inicioMin);
                 const altura = alturaPorDuracion(cita.duracionMin);
                 return (
-                  <div key={cita.id}
-                    style={{ position: 'absolute', top, left: 4, right: 4, height: altura, borderRadius: 'var(--radius-base)', borderLeft: `3px solid ${cfg.color}`, background: cfg.bg, padding: '6px 8px', overflow: 'hidden', cursor: 'pointer' }}>
-                    <div style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--ink-strong)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div
+                    key={cita.id}
+                    style={{
+                      position: 'absolute', top, left: 4, right: 4, height: altura,
+                      borderLeft: `3px solid ${cfg.color}`,
+                      background: cfg.bg,
+                    }}
+                    className="rounded-lg px-2 py-1.5 overflow-hidden cursor-pointer"
+                  >
+                    <div className="text-xs font-semibold text-ink-strong whitespace-nowrap overflow-hidden text-ellipsis">
                       {cita.cliente}
                     </div>
                     {altura >= 48 && (
-                      <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--ink-muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div className="text-2xs text-ink-muted mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
                         {cita.servicio}
                       </div>
                     )}
                     {altura >= 60 && (
-                      <span style={{ display: 'inline-flex', marginTop: 4, padding: '2px 6px', borderRadius: 'var(--radius-full)', fontSize: 'var(--text-2xs)', fontWeight: 500, color: cfg.color, background: 'white' }}>
+                      <span
+                        style={{ color: cfg.color }}
+                        className="inline-flex mt-1 px-1.5 py-0.5 rounded-full text-2xs font-medium bg-white"
+                      >
                         {cfg.label}
                       </span>
                     )}

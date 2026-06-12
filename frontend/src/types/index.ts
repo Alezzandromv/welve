@@ -2,74 +2,17 @@ export type Rol = "admin" | "trabajador" | "cliente";
 
 export interface IUsuario {
   id: string;
-  nombreCompleto: string;
-  telefono: string;
+  nombre_completo: string;
+  telefono: string | null;
   correo: string | null;
   rol: Rol;
-  fotoPerfil: string | null;
-  aceptaWhatsapp: boolean;
+  foto_perfil_url: string | null;
+  acepta_whatsapp: boolean;
 }
 
-export interface ICita {
-  id: string;
-  clienteId: string;
-  personalId: string;
-  programadaEn: string; // ISO datetime aware Lima
-  terminaEn: string;
-  estado: EstadoCita;
-  notasCliente: string | null;
-  notasEspecialista: string | null;
-  penalizacionAplicada: boolean;
-}
-
-export type EstadoCita =
-  | "pendiente"
-  | "confirmada"
-  | "en_curso"
-  | "completada"
-  | "cancelada"
-  | "cancelada_tardia"
-  | "no_show";
-
-export interface IServicio {
-  id: string;
-  categoriaId: string;
-  nombre: string;
-  descripcionTecnica: string | null;
-  duracionMinutos: number;
-  precio: number;
-  montoDeposito: number;
-  requiereFichaSalud: boolean;
-  horasCancelacionSinPenalidad: number;
-  imagenReferenciaUrl: string | null;
-}
-
-export interface ICategoria {
-  id: string;
-  nombre: string;
-  descripcion: string | null;
-  iconoUrl: string | null;
-  colorHex: string;
-  ordenVisualizacion: number;
-}
-
-export interface IFichaSalud {
-  id: string;
-  tipoRestriccion: string;
-  descripcion: string;
-  severidad: "informativa" | "moderada" | "critica";
-  estaActivo: boolean;
-}
-
-export interface IPago {
-  id: string;
-  citaId: string;
-  clienteId: string;
-  tipo: "deposito" | "saldo" | "total" | "penalizacion" | "reembolso";
-  metodo: "efectivo" | "transferencia" | "yape" | "plin" | "tarjeta";
-  estado: "pendiente" | "confirmado" | "rechazado" | "reembolsado";
-  monto: number;
-  referenciaExterna: string | null;
-  confirmadoPor: string | null;
-  fechaConfirmacion: string | null;
-}
+export type { EstadoCita, ICita, ICitaCreate, ICitaServicio, ICancelarCita, ICambiarEstado, IFiltrosCitas } from "./citas";
+export type { ICategoria, ICategoriaCreate, IServicio, IServicioCreate, IServicioUpdate, ISlotDisponible, IHorarioDisponible } from "./servicios";
+export type { ICliente, IClienteUpdate, IFichaSalud, IFichaSaludCreate, SeveridadFicha } from "./clientes";
+export type { IPersonal, IPersonalCreate, IPersonalUpdate, IDisponibilidad, IDisponibilidadCreate, IDisponibilidadUpdate } from "./personal";
+export type { IPago, IPagoCreate, IConfirmarPago, IFiltrosPagos, TipoPago, MetodoPago, EstadoPago } from "./pagos";
+export type { IReto, IRetoCreate, IRetoProgreso, IDescuento, IDescuentoCreate, IDescuentoUso, RecompensaTipo, TipoDescuento, ScopeDescuento } from "./fidelizacion";

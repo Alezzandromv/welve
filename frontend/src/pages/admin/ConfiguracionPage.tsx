@@ -33,23 +33,23 @@ const HORARIO = [
 
 function Seccion({ titulo, icono: Icono, children }: { titulo: string; icono: React.ElementType; children: React.ReactNode }) {
   return (
-    <div style={{ background: 'white', borderRadius: 'var(--radius-2xl)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-4) var(--space-5)', borderBottom: '1px solid var(--border-subtle)' }}>
-        <div style={{ width: 32, height: 32, borderRadius: 'var(--radius-base)', background: 'var(--accent-subtle)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-border-subtle">
+        <div className="w-8 h-8 rounded-lg bg-accent-subtle text-accent flex items-center justify-center">
           <Icono size={15} strokeWidth={1.5} />
         </div>
-        <h2 style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--ink-strong)', margin: 0 }}>{titulo}</h2>
+        <h2 className="text-base font-semibold text-ink-strong m-0">{titulo}</h2>
       </div>
-      <div style={{ padding: 'var(--space-5)' }}>{children}</div>
+      <div className="p-5">{children}</div>
     </div>
   );
 }
 
 function Campo({ label, valor }: { label: string; valor: string }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <label style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</label>
-      <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-strong)', padding: 'var(--space-2) var(--space-3)', background: 'var(--surface-bg)', borderRadius: 'var(--radius-base)', border: '1px solid var(--border-subtle)' }}>
+    <div className="flex flex-col gap-1">
+      <label className="text-xs font-semibold text-ink-muted uppercase tracking-[0.04em]">{label}</label>
+      <div className="text-sm text-ink-strong py-2 px-3 bg-surface-bg rounded-lg border border-border-subtle">
         {valor}
       </div>
     </div>
@@ -64,20 +64,20 @@ export default function ConfiguracionPage() {
       initial={{ opacity: 0, y: reducedMotion ? 0 : 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: EASE }}
-      style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}
+      className="flex flex-col gap-6"
     >
       <div>
-        <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--ink-strong)', letterSpacing: 'var(--tracking-tight)', margin: 0 }}>
+        <h1 className="text-2xl font-bold text-ink-strong tracking-tight m-0">
           Configuración
         </h1>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', margin: '4px 0 0 0' }}>
+        <p className="text-sm text-ink-muted mt-1 mb-0">
           Información del salón y parámetros del sistema
         </p>
       </div>
 
       {/* Información del salón */}
       <Seccion titulo="Información del salón" icono={MapPin}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 'var(--space-4)' }}>
+        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
           <Campo label="Nombre" valor="Eunoia Beauty Salon" />
           <Campo label="RUC" valor="20612345678" />
           <Campo label="Teléfono" valor="+51 1 234 5678" />
@@ -91,22 +91,25 @@ export default function ConfiguracionPage() {
 
       {/* Horario */}
       <Seccion titulo="Horario de atención" icono={Clock}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+        <div className="flex flex-col gap-2">
           {HORARIO.map(({ dia, apertura, cierre, activo }) => (
-            <div key={dia} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-2) var(--space-3)', borderRadius: 'var(--radius-base)', background: 'var(--surface-bg)', opacity: activo ? 1 : 0.5 }}>
-              <div style={{ width: 88, fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--ink-strong)', flexShrink: 0 }}>{dia}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flex: 1 }}>
+            <div
+              key={dia}
+              className={`flex items-center gap-4 py-2 px-3 rounded-lg bg-surface-bg${activo ? '' : ' opacity-50'}`}
+            >
+              <div className="w-[88px] text-sm font-medium text-ink-strong shrink-0">{dia}</div>
+              <div className="flex items-center gap-2 flex-1">
                 {activo ? (
                   <>
-                    <span style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-base)', fontFamily: 'monospace' }}>{apertura}</span>
-                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-subtle)' }}>–</span>
-                    <span style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-base)', fontFamily: 'monospace' }}>{cierre}</span>
+                    <span className="text-sm text-ink-base font-mono">{apertura}</span>
+                    <span className="text-xs text-ink-subtle">–</span>
+                    <span className="text-sm text-ink-base font-mono">{cierre}</span>
                   </>
                 ) : (
-                  <span style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-subtle)' }}>Cerrado</span>
+                  <span className="text-sm text-ink-subtle">Cerrado</span>
                 )}
               </div>
-              <span style={{ fontSize: 'var(--text-2xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-full)', color: activo ? 'var(--success)' : 'var(--ink-muted)', background: activo ? 'var(--success-light)' : 'var(--border-subtle)' }}>
+              <span className={`text-2xs font-semibold px-2 py-0.5 rounded-full ${activo ? 'text-success bg-success-light' : 'text-ink-muted bg-border-subtle'}`}>
                 {activo ? 'Abierto' : 'Cerrado'}
               </span>
             </div>
@@ -116,17 +119,23 @@ export default function ConfiguracionPage() {
 
       {/* Personal */}
       <Seccion titulo="Personal" icono={Users}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+        <div className="flex flex-col gap-3">
           {PERSONAL.map((p) => (
-            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-3)', borderRadius: 'var(--radius-base)', border: '1px solid var(--border-subtle)', opacity: p.activo ? 1 : 0.55 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-full)', background: p.color, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--text-xs)', fontWeight: 700, flexShrink: 0 }}>
+            <div
+              key={p.id}
+              className={`flex items-center gap-3 p-3 rounded-lg border border-border-subtle${p.activo ? '' : ' opacity-55'}`}
+            >
+              <div
+                style={{ background: p.color }}
+                className="w-9 h-9 rounded-full text-white flex items-center justify-center text-xs font-bold shrink-0"
+              >
                 {p.iniciales}
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--ink-strong)' }}>{p.nombre}</div>
-                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: 1 }}>{p.especialidad} · {p.tipo}</div>
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-ink-strong">{p.nombre}</div>
+                <div className="text-xs text-ink-muted mt-px">{p.especialidad} · {p.tipo}</div>
               </div>
-              <span style={{ fontSize: 'var(--text-2xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-full)', color: p.activo ? 'var(--success)' : 'var(--ink-muted)', background: p.activo ? 'var(--success-light)' : 'var(--border-subtle)' }}>
+              <span className={`text-2xs font-semibold px-2 py-0.5 rounded-full ${p.activo ? 'text-success bg-success-light' : 'text-ink-muted bg-border-subtle'}`}>
                 {p.activo ? 'Activo' : 'Inactivo'}
               </span>
             </div>
@@ -136,23 +145,23 @@ export default function ConfiguracionPage() {
 
       {/* Auth */}
       <Seccion titulo="Autenticación" icono={Shield}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 'var(--space-4)' }}>
+        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
           <Campo label="Método" valor="Magic Link vía WhatsApp" />
           <Campo label="TTL del enlace" valor="60 minutos (uso único)" />
           <Campo label="JWT Access Token" valor="60 minutos" />
           <Campo label="Algoritmo" valor="HS256" />
         </div>
-        <div style={{ marginTop: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-3)', background: 'var(--info-light)', borderRadius: 'var(--radius-base)' }}>
-          <Link size={14} strokeWidth={1.5} style={{ color: 'var(--info)', flexShrink: 0 }} />
-          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--info)' }}>
+        <div className="mt-4 flex items-center gap-2 p-3 bg-info-light rounded-lg">
+          <Link size={14} strokeWidth={1.5} className="text-info shrink-0" />
+          <span className="text-xs text-info">
             Los magic links se invalidan automáticamente después del primer uso. No se almacenan contraseñas.
           </span>
         </div>
       </Seccion>
 
-      {/* Contacto WhatsApp */}
+      {/* WhatsApp Business */}
       <Seccion titulo="WhatsApp Business" icono={Phone}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 'var(--space-4)' }}>
+        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
           <Campo label="Número registrado" valor="+51 987 654 321" />
           <Campo label="Proveedor" valor="Meta Cloud API" />
           <Campo label="Recordatorio 24h" valor="Habilitado" />

@@ -37,10 +37,10 @@ const PROXIMAS: ICitaCliente[] = [
 ];
 
 const HISTORIAL: ICitaCliente[] = [
-  { id: 'hc1', servicio: 'Corte clásico',    especialista: 'Sofía Martínez',  iniciales: 'SM', colorEsp: 'oklch(0.67 0.158 285)', fecha: '10 jun 2026', hora: '10:00', duracionMin: 45,  precio: 70,  deposito: 30, estado: 'completada'      },
-  { id: 'hc2', servicio: 'Tratamiento capilar', especialista: 'Sofía Martínez', iniciales: 'SM', colorEsp: 'oklch(0.67 0.158 285)', fecha: '3 jun 2026',  hora: '09:00', duracionMin: 60,  precio: 110, deposito: 40, estado: 'completada'      },
-  { id: 'hc3', servicio: 'Gel completo',      especialista: 'Andrea López',   iniciales: 'AL', colorEsp: 'oklch(0.58 0.155 152)', fecha: '28 may 2026', hora: '14:00', duracionMin: 90,  precio: 85,  deposito: 30, estado: 'completada'      },
-  { id: 'hc4', servicio: 'Facial rejuvenecedor', especialista: 'Karla Fuentes', iniciales: 'KF', colorEsp: 'oklch(0.57 0.21 22)',  fecha: '20 may 2026', hora: '16:00', duracionMin: 75,  precio: 140, deposito: 50, estado: 'cancelada_tardia' },
+  { id: 'hc1', servicio: 'Corte clásico',       especialista: 'Sofía Martínez',  iniciales: 'SM', colorEsp: 'oklch(0.67 0.158 285)', fecha: '10 jun 2026', hora: '10:00', duracionMin: 45,  precio: 70,  deposito: 30, estado: 'completada'      },
+  { id: 'hc2', servicio: 'Tratamiento capilar',  especialista: 'Sofía Martínez',  iniciales: 'SM', colorEsp: 'oklch(0.67 0.158 285)', fecha: '3 jun 2026',  hora: '09:00', duracionMin: 60,  precio: 110, deposito: 40, estado: 'completada'      },
+  { id: 'hc3', servicio: 'Gel completo',         especialista: 'Andrea López',    iniciales: 'AL', colorEsp: 'oklch(0.58 0.155 152)', fecha: '28 may 2026', hora: '14:00', duracionMin: 90,  precio: 85,  deposito: 30, estado: 'completada'      },
+  { id: 'hc4', servicio: 'Facial rejuvenecedor', especialista: 'Karla Fuentes',   iniciales: 'KF', colorEsp: 'oklch(0.57 0.21 22)',   fecha: '20 may 2026', hora: '16:00', duracionMin: 75,  precio: 140, deposito: 50, estado: 'cancelada_tardia' },
 ];
 
 function CitaCard({ cita, onCancelar }: { cita: ICitaCliente; onCancelar?: () => void }) {
@@ -53,32 +53,38 @@ function CitaCard({ cita, onCancelar }: { cita: ICitaCliente; onCancelar?: () =>
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
       transition={{ duration: 0.25, ease: EASE }}
-      style={{ background: 'white', borderRadius: 'var(--radius-2xl)', boxShadow: 'var(--shadow-sm)', padding: 'var(--space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}
+      className="bg-white rounded-3xl shadow-sm p-5 flex flex-col gap-3"
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)' }}>
-        <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-full)', background: cita.colorEsp, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--text-xs)', fontWeight: 700, flexShrink: 0 }}>
+      <div className="flex items-start gap-3">
+        <div
+          style={{ background: cita.colorEsp }}
+          className="w-10 h-10 rounded-full text-white flex items-center justify-center text-xs font-bold shrink-0"
+        >
           {cita.iniciales}
         </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--ink-strong)' }}>{cita.servicio}</div>
-          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: 2 }}>{cita.especialista}</div>
+        <div className="flex-1">
+          <div className="text-base font-semibold text-ink-strong">{cita.servicio}</div>
+          <div className="text-xs text-ink-muted mt-0.5">{cita.especialista}</div>
         </div>
-        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-full)', fontSize: 'var(--text-2xs)', fontWeight: 600, color: cfg.color, background: cfg.bg, flexShrink: 0 }}>
+        <span
+          style={{ color: cfg.color, background: cfg.bg }}
+          className="py-0.5 px-2.5 rounded-full text-2xs font-semibold shrink-0"
+        >
           {cfg.label}
         </span>
       </div>
 
-      <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', borderTop: '1px solid var(--border-subtle)', paddingTop: 'var(--space-3)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)', color: 'var(--ink-muted)' }}>
+      <div className="flex gap-4 flex-wrap border-t border-border-subtle pt-3">
+        <div className="flex items-center gap-1 text-ink-muted">
           <Calendar size={12} strokeWidth={1.5} />
-          <span style={{ fontSize: 'var(--text-xs)' }}>{cita.fecha}</span>
+          <span className="text-xs">{cita.fecha}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)', color: 'var(--ink-muted)' }}>
+        <div className="flex items-center gap-1 text-ink-muted">
           <Clock size={12} strokeWidth={1.5} />
-          <span style={{ fontSize: 'var(--text-xs)' }}>{cita.hora} · {cita.duracionMin} min</span>
+          <span className="text-xs">{cita.hora} · {cita.duracionMin} min</span>
         </div>
-        <div style={{ marginLeft: 'auto', fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>
-          S/ {cita.precio} <span style={{ color: 'var(--ink-subtle)' }}>(depósito S/ {cita.deposito})</span>
+        <div className="ml-auto text-xs text-ink-muted">
+          S/ {cita.precio} <span className="text-ink-subtle">(depósito S/ {cita.deposito})</span>
         </div>
       </div>
 
@@ -86,7 +92,7 @@ function CitaCard({ cita, onCancelar }: { cita: ICitaCliente; onCancelar?: () =>
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={onCancelar}
-          style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 'var(--radius-base)', border: '1px solid var(--border-subtle)', background: 'white', color: 'var(--error)', fontSize: 'var(--text-xs)', fontWeight: 500, cursor: 'pointer' }}
+          className="self-start flex items-center gap-1.5 py-1.5 px-3 rounded-lg border border-border-subtle bg-white text-error text-xs font-medium cursor-pointer"
         >
           <X size={11} strokeWidth={2} />
           Cancelar cita
@@ -108,20 +114,25 @@ export default function ClienteCitas() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--surface-bg)', display: 'flex', flexDirection: 'column' }}>
+    <div className="min-h-screen bg-surface-bg flex flex-col">
       {/* Top bar */}
-      <div style={{ background: 'white', borderBottom: '1px solid var(--border-subtle)', padding: 'var(--space-3) var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-        <div style={{ fontWeight: 700, fontSize: 'var(--text-lg)', color: 'var(--accent)', letterSpacing: 'var(--tracking-tight)' }}>Eunoia</div>
-        <div style={{ flex: 1 }} />
-        <motion.button whileTap={{ scale: 0.97 }} onClick={() => navigate('/cliente/reservar')}
-          style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-base)', background: 'var(--accent)', color: 'var(--accent-foreground)', border: 'none', fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer' }}>
+      <div className="bg-white border-b border-border-subtle px-6 py-3 flex items-center gap-4">
+        <div className="text-lg font-bold text-accent tracking-tight">Eunoia</div>
+        <div className="flex-1" />
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={() => navigate('/cliente/reservar')}
+          className="flex items-center gap-2 py-2 px-4 rounded-lg bg-accent text-accent-foreground border-none text-sm font-semibold cursor-pointer"
+        >
           <Plus size={13} strokeWidth={2} />
           Reservar
         </motion.button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)' }}>{nombre ?? 'Clienta'}</span>
-          <button onClick={cerrarSesion}
-            style={{ width: 32, height: 32, borderRadius: 'var(--radius-base)', border: '1px solid var(--border-subtle)', background: 'white', color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-ink-muted">{nombre ?? 'Clienta'}</span>
+          <button
+            onClick={cerrarSesion}
+            className="w-8 h-8 rounded-lg border border-border-subtle bg-white text-ink-muted flex items-center justify-center cursor-pointer"
+          >
             <LogOut size={13} strokeWidth={1.5} />
           </button>
         </div>
@@ -132,24 +143,27 @@ export default function ClienteCitas() {
         initial={{ opacity: 0, y: reducedMotion ? 0 : 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: EASE }}
-        style={{ flex: 1, padding: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-8)', maxWidth: 680, margin: '0 auto', width: '100%' }}
+        className="flex-1 p-6 flex flex-col gap-8 max-w-[680px] mx-auto w-full"
       >
         {/* Próximas */}
         <section>
-          <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--ink-strong)', letterSpacing: 'var(--tracking-tight)', margin: '0 0 var(--space-4)' }}>
+          <h2 className="text-lg font-bold text-ink-strong tracking-tight m-0 mb-4">
             Próximas citas
           </h2>
           {proximas.length === 0 ? (
-            <div style={{ background: 'white', borderRadius: 'var(--radius-2xl)', padding: 'var(--space-10)', textAlign: 'center', boxShadow: 'var(--shadow-sm)' }}>
-              <p style={{ color: 'var(--ink-muted)', fontSize: 'var(--text-sm)', margin: '0 0 var(--space-4)' }}>No tienes citas próximas.</p>
-              <motion.button whileTap={{ scale: 0.97 }} onClick={() => navigate('/cliente/reservar')}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: 'var(--space-2) var(--space-4)', borderRadius: 'var(--radius-base)', background: 'var(--accent)', color: 'var(--accent-foreground)', border: 'none', fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer' }}>
+            <div className="bg-white rounded-3xl p-10 text-center shadow-sm">
+              <p className="text-ink-muted text-sm m-0 mb-4">No tienes citas próximas.</p>
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate('/cliente/reservar')}
+                className="inline-flex items-center gap-1.5 py-2 px-4 rounded-lg bg-accent text-accent-foreground border-none text-sm font-semibold cursor-pointer"
+              >
                 <Plus size={13} strokeWidth={2} />
                 Reservar ahora
               </motion.button>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+            <div className="flex flex-col gap-3">
               <AnimatePresence mode="popLayout">
                 {proximas.map((c) => (
                   <CitaCard key={c.id} cita={c} onCancelar={() => cancelar(c.id)} />
@@ -161,10 +175,10 @@ export default function ClienteCitas() {
 
         {/* Historial */}
         <section>
-          <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--ink-strong)', letterSpacing: 'var(--tracking-tight)', margin: '0 0 var(--space-4)' }}>
+          <h2 className="text-lg font-bold text-ink-strong tracking-tight m-0 mb-4">
             Historial
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+          <div className="flex flex-col gap-3">
             {HISTORIAL.map((c) => (
               <CitaCard key={c.id} cita={c} />
             ))}

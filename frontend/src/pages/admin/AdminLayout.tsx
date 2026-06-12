@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,25 +13,31 @@ import {
   Menu,
   Scissors,
   Settings,
+  ShieldCheck,
+  UserCog,
   Users,
   X,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
+import { citasService } from '@/services/citas.service';
 
 const SIDEBAR_EXPANDED = 260;
-const SIDEBAR_COLLAPSED = 56;
+const SIDEBAR_COLLAPSED = 88;
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 interface NavItemConfig {
   icon: React.ElementType;
   label: string;
   to: string;
+  badge?: number;
 }
 
-const NAV_ITEMS: NavItemConfig[] = [
+const BASE_NAV: Omit<NavItemConfig, 'badge'>[] = [
   { icon: LayoutDashboard, label: 'Dashboard',    to: '/admin/dashboard' },
   { icon: CalendarDays,    label: 'Agenda',        to: '/admin/agenda' },
   { icon: Users,           label: 'Clientes',      to: '/admin/clientes' },
+  { icon: UserCog,         label: 'Personal',      to: '/admin/personal' },
+  { icon: ShieldCheck,     label: 'Usuarios',      to: '/admin/usuarios' },
   { icon: Scissors,        label: 'Servicios',     to: '/admin/servicios' },
   { icon: CreditCard,      label: 'Pagos',         to: '/admin/pagos' },
   { icon: Gift,            label: 'Fidelización',  to: '/admin/fidelizacion' },
@@ -53,6 +59,16 @@ function useMediaQuery(query: string): boolean {
   return matches;
 }
 
+function PulseDot() {
+  return (
+    <motion.span
+      animate={{ scale: [1, 1.4, 1], opacity: [0.9, 0.5, 0.9] }}
+      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+      className="inline-block w-[7px] h-[7px] rounded-full bg-accent shrink-0"
+    />
+  );
+}
+
 interface SidebarNavItemProps {
   item: NavItemConfig;
   showLabels: boolean;
@@ -63,9 +79,10 @@ function SidebarNavItem({ item, showLabels }: SidebarNavItemProps) {
   const [tooltipY, setTooltipY] = useState(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const Icon = item.icon;
+  const isCollapsed = !showLabels;
 
   const handleHoverStart = () => {
-    if (!showLabels && wrapperRef.current) {
+    if (isCollapsed && wrapperRef.current) {
       const rect = wrapperRef.current.getBoundingClientRect();
       setTooltipY(rect.top + rect.height / 2);
       setShowTooltip(true);
@@ -74,70 +91,71 @@ function SidebarNavItem({ item, showLabels }: SidebarNavItemProps) {
 
   return (
     <div ref={wrapperRef}>
-      <NavLink to={item.to} end style={{ textDecoration: 'none', display: 'block' }}>
+      <NavLink to={item.to} end className="no-underline block">
         {({ isActive }) => (
           <motion.div
-            whileHover={{ x: showLabels && !isActive ? 4 : 0 }}
             onHoverStart={handleHoverStart}
             onHoverEnd={() => setShowTooltip(false)}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className={`relative flex items-center rounded-2xl text-sm overflow-visible whitespace-nowrap cursor-pointer ${
+              isCollapsed ? 'justify-center' : 'justify-start'
+            } ${isActive ? 'text-accent font-semibold' : 'text-sidebar-ink-base font-medium'}`}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: showLabels ? 'flex-start' : 'center',
-              gap: 10,
-              padding: showLabels ? 'var(--space-3) var(--space-4)' : 'var(--space-3) 0',
-              borderRadius: isActive ? 'var(--radius-xl)' : 'var(--radius-lg)',
-              background: isActive
-                ? 'var(--accent)'
-                : 'transparent',
-              color: isActive ? 'var(--accent-foreground)' : 'var(--sidebar-ink-base)',
-              cursor: 'pointer',
-              fontSize: 'var(--text-sm)',
-              fontWeight: isActive ? 600 : 400,
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
+              width: isCollapsed ? 48 : 'auto',
+              height: isCollapsed ? 44 : 'auto',
+              margin: isCollapsed ? '0 auto' : '0 16px',
+              padding: isCollapsed ? 0 : '12px 16px',
+              gap: isCollapsed ? 0 : 12,
+              background: isActive ? 'oklch(0.51 0.261 286 / 0.12)' : 'transparent',
             }}
-            whileHover={isActive ? {} : {
-              x: showLabels ? 4 : 0,
-              backgroundColor: 'oklch(0.51 0.261 286 / 0.12)',
-            }}
+            whileHover={
+              isActive
+                ? {}
+                : {
+                    backgroundColor: 'oklch(0.51 0.261 286 / 0.05)',
+                    scale: isCollapsed ? 1.05 : 1,
+                  }
+            }
           >
-            <Icon size={18} strokeWidth={1.5} style={{ flexShrink: 0 }} />
+            <Icon size={isCollapsed ? 22 : 18} strokeWidth={isActive ? 2 : 1.5} className="shrink-0" />
+
             <AnimatePresence>
               {showLabels && (
                 <motion.span
                   key={item.to}
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 1, transition: { duration: 0.15, delay: 0.1 } }}
+                  animate={{ opacity: 1, transition: { duration: 0.15, delay: 0.08 } }}
                   exit={{ opacity: 0, transition: { duration: 0.08 } }}
+                  className="flex-1"
                 >
                   {item.label}
                 </motion.span>
               )}
             </AnimatePresence>
+
+            {showLabels && item.badge !== undefined && item.badge > 0 && (
+              <motion.span
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="py-[2px] px-2 rounded-full bg-turbo text-2xs font-bold shrink-0"
+                style={{ color: 'oklch(0.12 0.038 288)' }}
+              >
+                {item.badge}
+              </motion.span>
+            )}
+
+            {isCollapsed && item.badge !== undefined && item.badge > 0 && (
+              <span className="absolute top-2 right-2 w-[10px] h-[10px] rounded-full bg-turbo border-2 border-surface-sidebar" />
+            )}
           </motion.div>
         )}
       </NavLink>
 
-      {!showLabels && showTooltip &&
+      {isCollapsed && showTooltip &&
         createPortal(
           <div
-            style={{
-              position: 'fixed',
-              top: tooltipY,
-              left: SIDEBAR_COLLAPSED + 8,
-              transform: 'translateY(-50%)',
-              background: 'var(--surface-raised)',
-              color: 'var(--ink-strong)',
-              padding: '4px var(--space-2)',
-              borderRadius: 'var(--radius-base)',
-              fontSize: 'var(--text-xs)',
-              boxShadow: 'var(--shadow-base)',
-              zIndex: 600,
-              pointerEvents: 'none',
-              whiteSpace: 'nowrap',
-            }}
+            className="fixed -translate-y-1/2 bg-surface-raised text-ink-strong py-1.5 px-3 rounded-lg text-xs font-medium shadow-[0_4px_12px_rgba(0,0,0,0.1)] z-tooltip pointer-events-none whitespace-nowrap"
+            style={{ top: tooltipY, left: SIDEBAR_COLLAPSED + 12 }}
           >
             {item.label}
           </div>,
@@ -149,48 +167,61 @@ function SidebarNavItem({ item, showLabels }: SidebarNavItemProps) {
 
 function Divider() {
   return (
-    <div
-      style={{
-        height: 1,
-        background: 'var(--sidebar-border)',
-        margin: 'var(--space-2) 0',
-        flexShrink: 0,
-      }}
-    />
+    <div className="h-px bg-sidebar-border opacity-40 my-2 mx-6 shrink-0" />
   );
 }
 
-interface LogoutBtnProps {
+interface LogoutSectionProps {
   showLabel: boolean;
   onLogout: () => void;
 }
 
-function LogoutBtn({ showLabel, onLogout }: LogoutBtnProps) {
-  const [hovered, setHovered] = useState(false);
+function LogoutSection({ showLabel, onLogout }: LogoutSectionProps) {
+  const [confirmando, setConfirmando] = useState(false);
+  const isCollapsed = !showLabel;
+
+  if (confirmando && showLabel) {
+    return (
+      <div
+        className="flex items-center gap-2 py-3 px-4 mx-4 rounded-2xl"
+        style={{ background: 'oklch(0.57 0.21 22 / 0.1)' }}
+      >
+        <span className="flex-1 text-xs text-sidebar-ink-muted">
+          ¿Salir?
+        </span>
+        <button
+          onClick={onLogout}
+          className="py-1 px-3 rounded-lg bg-error text-white border-none text-xs font-semibold cursor-pointer"
+        >
+          Sí
+        </button>
+        <button
+          onClick={() => setConfirmando(false)}
+          className="py-1 px-3 rounded-lg bg-sidebar-border text-sidebar-ink-base border-none text-xs font-semibold cursor-pointer"
+        >
+          No
+        </button>
+      </div>
+    );
+  }
 
   return (
     <button
-      onClick={onLogout}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onClick={() => (showLabel ? setConfirmando(true) : onLogout())}
       aria-label="Cerrar sesión"
-      style={{
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        gap: showLabel ? 10 : 0,
-        justifyContent: showLabel ? 'flex-start' : 'center',
-        padding: showLabel ? 'var(--space-2) var(--space-3)' : 'var(--space-2) 0',
-        borderRadius: 'var(--radius-lg)',
-        background: hovered ? 'oklch(0.57 0.21 22 / 0.1)' : 'transparent',
-        border: 'none',
-        color: hovered ? 'var(--error)' : 'var(--sidebar-ink-muted)',
-        cursor: 'pointer',
-        transition: 'color 150ms, background 150ms',
-        fontSize: 'var(--text-sm)',
+      className={`flex items-center rounded-2xl bg-transparent border-none text-sidebar-ink-muted cursor-pointer transition-[color,background] duration-200 text-sm font-medium hover:text-error ${
+        isCollapsed
+          ? 'w-12 h-12 mx-auto my-0 gap-0 justify-center p-0'
+          : 'w-[calc(100%-32px)] h-auto mx-4 my-0 gap-3 justify-start py-3 px-4'
+      }`}
+      onMouseEnter={(e) => {
+        (e.currentTarget).style.background = 'oklch(0.57 0.21 22 / 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget).style.background = 'transparent';
       }}
     >
-      <LogOut size={16} strokeWidth={1.5} style={{ flexShrink: 0 }} />
+      <LogOut size={isCollapsed ? 20 : 18} strokeWidth={1.5} className="shrink-0" />
       {showLabel && <span>Cerrar sesión</span>}
     </button>
   );
@@ -209,12 +240,25 @@ export default function AdminLayout() {
     () => window.matchMedia('(min-width: 1025px)').matches
   );
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [citasPendientes, setCitasPendientes] = useState(0);
 
   useEffect(() => {
-    if (isDesktop) setExpanded(true);
-    else if (isTabletOrMore) setExpanded(false);
-    else setDrawerOpen(false);
+    queueMicrotask(() => {
+      if (isDesktop) setExpanded(true);
+      else if (isTabletOrMore) setExpanded(false);
+      else setDrawerOpen(false);
+    });
   }, [isDesktop, isTabletOrMore]);
+
+  useEffect(() => {
+    const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+    citasService
+      .obtenerCitasAdmin({ fecha: hoy })
+      .then((citas) =>
+        setCitasPendientes(citas.filter((c) => c.estado === 'pendiente').length)
+      )
+      .catch(() => {});
+  }, []);
 
   const handleCerrarSesion = () => {
     cerrarSesion();
@@ -224,12 +268,19 @@ export default function AdminLayout() {
   const iniciales = usuario ? obtenerIniciales(usuario.nombre_completo) : '?';
   const showLabels = expanded || isMobile;
 
-  const sidebarBorderRadius = isMobile ? '0' : '0 16px 16px 0';
+  const navItems: NavItemConfig[] = useMemo(
+    () =>
+      BASE_NAV.map((item) =>
+        item.to === '/admin/agenda'
+          ? { ...item, badge: citasPendientes > 0 ? citasPendientes : undefined }
+          : item
+      ),
+    [citasPendientes]
+  );
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--surface-bg)' }}>
+    <div className="flex h-screen overflow-hidden bg-surface-bg">
 
-      {/* Overlay móvil */}
       <AnimatePresence>
         {isMobile && drawerOpen && (
           <motion.div
@@ -239,48 +290,35 @@ export default function AdminLayout() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => setDrawerOpen(false)}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'oklch(0.12 0.038 288 / 0.6)',
-              zIndex: 300,
-            }}
+            className="fixed inset-0 z-modal-backdrop"
+            style={{ background: 'oklch(0.12 0.038 288 / 0.6)' }}
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
       <motion.aside
         animate={
           isMobile
             ? { x: drawerOpen ? 0 : -SIDEBAR_EXPANDED, width: SIDEBAR_EXPANDED }
             : { x: 0, width: expanded ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED }
         }
-        transition={{ duration: 0.3, ease: EASE }}
+        transition={{ duration: 0.4, ease: EASE }}
+        className="h-screen bg-surface-sidebar flex flex-col overflow-visible shrink-0"
         style={{
           ...(isMobile
-            ? { position: 'fixed' as const, top: 0, left: 0, zIndex: 400 }
+            ? { position: 'fixed' as const, top: 0, left: 0, zIndex: 'var(--z-modal)' as unknown as number }
             : { position: 'relative' as const }),
-          height: '100vh',
-          background: 'var(--surface-sidebar)',
-          borderRadius: sidebarBorderRadius,
-          flexShrink: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
+          borderRadius: isMobile ? '0' : '0 48px 48px 0',
+          borderRight: 'none',
+          boxShadow: isMobile ? 'none' : '4px 0 24px rgba(0,0,0,0.03)',
         }}
         aria-label="Navegación principal"
       >
-        {/* Cabecera: logo + toggle */}
+        {/* Header */}
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: showLabels ? 'var(--space-5) var(--space-4)' : 'var(--space-5) var(--space-3)',
-            flexShrink: 0,
-            minHeight: 64,
-          }}
+          className={`flex items-center shrink-0 min-h-[88px] ${
+            showLabels ? 'flex-row justify-between gap-0 pt-8 px-6 pb-6' : 'flex-col justify-center gap-5 pt-8 px-0 pb-6'
+          }`}
         >
           <AnimatePresence mode="wait">
             {showLabels ? (
@@ -290,33 +328,15 @@ export default function AdminLayout() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.12 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                className="flex items-center gap-2.5"
               >
-                <div
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 8,
-                    background: 'var(--accent)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <Scissors size={14} strokeWidth={2} color="white" />
+                <div className="w-8 h-8 rounded-[10px] bg-accent flex items-center justify-center shrink-0">
+                  <Scissors size={16} strokeWidth={2} color="white" />
                 </div>
-                <span
-                  style={{
-                    color: 'var(--sidebar-ink-strong)',
-                    fontSize: 'var(--text-base)',
-                    fontWeight: 700,
-                    letterSpacing: 'var(--tracking-tight)',
-                    userSelect: 'none',
-                  }}
-                >
+                <span className="text-sidebar-ink-strong text-lg font-bold tracking-tight select-none">
                   Eunoia
                 </span>
+                <PulseDot />
               </motion.div>
             ) : (
               <motion.div
@@ -325,184 +345,106 @@ export default function AdminLayout() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.12 }}
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 8,
-                  background: 'var(--accent)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+                className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center"
               >
-                <Scissors size={14} strokeWidth={2} color="white" />
+                <Scissors size={18} strokeWidth={2} color="white" />
               </motion.div>
             )}
           </AnimatePresence>
 
           {isMobile ? (
-            <button onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú" style={estiloIconBtn()}>
-              <X size={16} strokeWidth={1.5} />
+            <button
+              onClick={() => setDrawerOpen(false)}
+              aria-label="Cerrar menú"
+              className="flex items-center justify-center bg-transparent border-none text-sidebar-ink-muted cursor-pointer p-0 shrink-0 transition-all duration-200"
+            >
+              <X size={18} strokeWidth={1.5} />
             </button>
           ) : (
             <button
               onClick={() => setExpanded((p) => !p)}
               aria-label={expanded ? 'Colapsar sidebar' : 'Expandir sidebar'}
-              style={estiloIconBtn()}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sidebar-ink-strong)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sidebar-ink-muted)'; }}
+              className="flex items-center justify-center bg-surface-base border border-border-base rounded-full w-7 h-7 shadow-[0_2px_8px_rgba(0,0,0,0.04)] text-sidebar-ink-muted cursor-pointer p-0 shrink-0 transition-all duration-200 hover:text-sidebar-ink-strong"
             >
-              {expanded ? <ChevronLeft size={15} strokeWidth={1.5} /> : <ChevronRight size={15} strokeWidth={1.5} />}
+              {expanded ? <ChevronLeft size={16} strokeWidth={2} /> : <ChevronRight size={16} strokeWidth={2} />}
             </button>
           )}
         </div>
 
-        <Divider />
-
-        {/* Navegación */}
+        {/* Nav */}
         <nav
           aria-label="Menú de administración"
-          style={{
-            flex: 1,
-            padding: showLabels ? 'var(--space-2) var(--space-3)' : 'var(--space-2)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            overflowY: 'auto',
-            overflowX: 'hidden',
-          }}
+          className={`flex-1 py-4 flex flex-col overflow-y-auto overflow-x-hidden ${showLabels ? 'gap-1' : 'gap-1.5'}`}
+          style={{ scrollbarWidth: 'thin', scrollbarColor: 'oklch(0.51 0.261 286 / 0.2) transparent' }}
         >
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <SidebarNavItem key={item.to} item={item} showLabels={showLabels} />
           ))}
         </nav>
 
         <Divider />
 
-        {/* Sección usuario */}
-        <div style={{ padding: showLabels ? 'var(--space-3)' : 'var(--space-2)', flexShrink: 0 }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: showLabels ? 10 : 0,
-              justifyContent: showLabels ? 'flex-start' : 'center',
-              marginBottom: 'var(--space-2)',
-              padding: showLabels ? 'var(--space-2)' : 0,
-              overflow: 'hidden',
-            }}
+        <div className="py-6 shrink-0 flex flex-col gap-2">
+          <button
+            onClick={() => navigate('/admin/perfil')}
+            aria-label="Ver perfil"
+            className={`bg-transparent border-none cursor-pointer flex items-center transition-[background] duration-200 ${
+              showLabels
+                ? 'w-[calc(100%-32px)] h-auto mx-4 my-0 gap-3 justify-start py-2 px-3 rounded-2xl'
+                : 'w-12 h-12 mx-auto my-0 gap-0 justify-center p-0 rounded-full'
+            }`}
+            onMouseEnter={(e) => { (e.currentTarget).style.background = 'var(--surface-sidebar-hover)'; }}
+            onMouseLeave={(e) => { (e.currentTarget).style.background = 'transparent'; }}
           >
-            <div
-              title={usuario?.nombre_completo}
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 'var(--radius-full)',
-                background: 'var(--accent)',
-                color: 'var(--accent-foreground)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 'var(--text-xs)',
-                fontWeight: 700,
-                flexShrink: 0,
-                boxShadow: '0 0 0 2px oklch(0.51 0.261 286 / 0.3)',
-              }}
-            >
-              {iniciales}
-            </div>
+            {usuario?.foto_perfil_url ? (
+              <img
+                src={usuario.foto_perfil_url}
+                alt={usuario.nombre_completo}
+                className={`rounded-full object-cover shrink-0 ${showLabels ? 'w-9 h-9' : 'w-10 h-10'}`}
+                style={{ boxShadow: '0 0 0 2px oklch(0.51 0.261 286 / 0.2)' }}
+              />
+            ) : (
+              <div
+                title={usuario?.nombre_completo}
+                className={`rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-bold shrink-0 ${
+                  showLabels ? 'w-9 h-9' : 'w-10 h-10'
+                }`}
+                style={{ boxShadow: '0 0 0 2px oklch(0.51 0.261 286 / 0.2)' }}
+              >
+                {iniciales}
+              </div>
+            )}
             {showLabels && (
-              <div style={{ overflow: 'hidden', minWidth: 0 }}>
-                <div
-                  style={{
-                    color: 'var(--sidebar-ink-strong)',
-                    fontSize: 'var(--text-sm)',
-                    fontWeight: 600,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
+              <div className="overflow-hidden min-w-0 text-left">
+                <div className="text-sidebar-ink-strong text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
                   {usuario?.nombre_completo ?? ''}
                 </div>
-                <div
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    marginTop: 2,
-                    padding: '1px 6px',
-                    borderRadius: 'var(--radius-full)',
-                    background: 'oklch(0.51 0.261 286 / 0.2)',
-                    color: 'var(--sidebar-ink-base)',
-                    fontSize: 'var(--text-2xs)',
-                    fontWeight: 500,
-                    textTransform: 'capitalize',
-                  }}
-                >
+                <div className="text-sidebar-ink-muted text-xs font-medium capitalize mt-0.5">
                   {usuario?.rol ?? ''}
                 </div>
               </div>
             )}
-          </div>
-          <LogoutBtn showLabel={showLabels} onLogout={handleCerrarSesion} />
+          </button>
+
+          <LogoutSection showLabel={showLabels} onLogout={handleCerrarSesion} />
         </div>
       </motion.aside>
 
-      {/* Área de contenido */}
       <main
-        style={{
-          flex: 1,
-          overflow: 'auto',
-          background: 'var(--surface-bg)',
-          padding: 'var(--content-padding)',
-          minWidth: 0,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
+        className="flex-1 overflow-auto bg-surface-bg min-w-0 flex flex-col"
+        style={{ padding: 'var(--content-padding)' }}
       >
         {isMobile && (
           <button
             onClick={() => setDrawerOpen(true)}
             aria-label="Abrir menú"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              alignSelf: 'flex-start',
-              width: 36,
-              height: 36,
-              borderRadius: 'var(--radius-base)',
-              background: 'var(--surface-base)',
-              border: '1px solid var(--border-base)',
-              color: 'var(--ink-base)',
-              cursor: 'pointer',
-              marginBottom: 'var(--space-4)',
-              flexShrink: 0,
-            }}
+            className="inline-flex items-center justify-center self-start w-10 h-10 rounded-xl bg-surface-base border border-border-base text-ink-base cursor-pointer mb-4 shrink-0"
           >
-            <Menu size={18} strokeWidth={1.5} />
+            <Menu size={20} strokeWidth={1.5} />
           </button>
         )}
         <Outlet />
       </main>
     </div>
   );
-}
-
-function estiloIconBtn(): React.CSSProperties {
-  return {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 24,
-    height: 24,
-    borderRadius: 'var(--radius-base)',
-    background: 'transparent',
-    border: 'none',
-    color: 'var(--sidebar-ink-muted)',
-    cursor: 'pointer',
-    padding: 0,
-    flexShrink: 0,
-    transition: 'color 150ms',
-  };
 }

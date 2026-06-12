@@ -60,9 +60,9 @@ const DESCUENTOS: IDescuentoActivo[] = [
 ];
 
 const RECOMPENSA_CFG = {
-  descuento:      { color: 'var(--accent)',  bg: 'var(--accent-subtle)', icon: Gift  },
-  servicio_gratis:{ color: 'var(--success)', bg: 'var(--success-light)', icon: Star  },
-  credito:        { color: 'var(--warning)', bg: 'var(--warning-light)', icon: Award },
+  descuento:      { colorCls: 'text-accent',   bgCls: 'bg-accent-subtle',  icon: Gift  },
+  servicio_gratis:{ colorCls: 'text-success',  bgCls: 'bg-success-light',  icon: Star  },
+  credito:        { colorCls: 'text-warning',  bgCls: 'bg-warning-light',  icon: Award },
 };
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -81,62 +81,73 @@ export default function FidelizacionPage() {
       initial={{ opacity: 0, y: reducedMotion ? 0 : 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: EASE }}
-      style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}
+      className="flex flex-col gap-8"
     >
       {/* Header */}
       <div>
-        <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--ink-strong)', letterSpacing: 'var(--tracking-tight)', margin: 0 }}>
+        <h1 className="text-2xl font-bold text-ink-strong tracking-tight m-0">
           Fidelización
         </h1>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', margin: '4px 0 0 0' }}>
+        <p className="text-sm text-ink-muted mt-1 mb-0">
           Retos de visitas y descuentos activos
         </p>
       </div>
 
       {/* Retos */}
       <section>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
-          <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--ink-strong)', margin: 0 }}>Retos activos</h2>
-          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>{RETOS.length} retos</span>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-ink-strong m-0">Retos activos</h2>
+          <span className="text-xs text-ink-muted">{RETOS.length} retos</span>
         </div>
 
-        <motion.div variants={variantesGrid} initial="oculto" animate="visible"
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--space-4)' }}>
+        <motion.div
+          variants={variantesGrid}
+          initial="oculto"
+          animate="visible"
+          className="grid gap-4"
+          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}
+        >
           {RETOS.map((r) => {
             const cfg = RECOMPENSA_CFG[r.recompensaTipo];
             const Icon = cfg.icon;
             const pctCurso = Math.round((r.clientesEnCurso / (r.clientesEnCurso + r.clientesCompletaron + 1)) * 100);
             return (
-              <motion.div key={r.id} variants={reducedMotion ? undefined : variantesTarjeta}
-                style={{ background: 'white', borderRadius: 'var(--radius-2xl)', boxShadow: 'var(--shadow-sm)', padding: 'var(--space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)' }}>
-                  <div style={{ width: 38, height: 38, borderRadius: 'var(--radius-base)', background: cfg.bg, color: cfg.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <motion.div
+                key={r.id}
+                variants={reducedMotion ? undefined : variantesTarjeta}
+                className="bg-white rounded-3xl shadow-sm p-5 flex flex-col gap-4"
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`w-[38px] h-[38px] rounded-lg ${cfg.bgCls} ${cfg.colorCls} flex items-center justify-center shrink-0`}>
                     <Icon size={17} strokeWidth={1.5} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--ink-strong)' }}>{r.nombre}</div>
-                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: 2 }}>{r.descripcion}</div>
+                    <div className="text-base font-semibold text-ink-strong">{r.nombre}</div>
+                    <div className="text-xs text-ink-muted mt-0.5">{r.descripcion}</div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 'var(--text-2xs)', color: cfg.color, background: cfg.bg, padding: '2px 8px', borderRadius: 'var(--radius-full)', fontWeight: 600 }}>
+                <div className="flex gap-2 flex-wrap">
+                  <span className={`text-2xs ${cfg.colorCls} ${cfg.bgCls} py-0.5 px-2 rounded-full font-semibold`}>
                     {r.recompensaValor}
                   </span>
-                  <span style={{ fontSize: 'var(--text-2xs)', color: 'var(--ink-muted)', padding: '2px 8px', borderRadius: 'var(--radius-full)', border: '1px solid var(--border-subtle)' }}>
+                  <span className="text-2xs text-ink-muted py-0.5 px-2 rounded-full border border-border-subtle">
                     {r.visitasRequeridas} visitas · {r.diasVentana} días
                   </span>
                 </div>
 
-                <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 'var(--space-3)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-2)' }}>
-                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>Clientas en curso</span>
-                    <span style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--ink-strong)' }}>{r.clientesEnCurso}</span>
+                <div className="border-t border-border-subtle pt-3">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-xs text-ink-muted">Clientas en curso</span>
+                    <span className="text-xs font-semibold text-ink-strong">{r.clientesEnCurso}</span>
                   </div>
-                  <div style={{ height: 6, background: 'var(--border-subtle)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
-                    <div style={{ width: `${pctCurso}%`, height: '100%', background: cfg.color, borderRadius: 'var(--radius-full)', transition: 'width 600ms ease-out' }} />
+                  <div className="h-1.5 bg-border-subtle rounded-full overflow-hidden">
+                    <div
+                      style={{ width: `${pctCurso}%` }}
+                      className={`h-full rounded-full transition-[width] duration-[600ms] ease-out ${cfg.colorCls.replace('text-', 'bg-')}`}
+                    />
                   </div>
-                  <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--ink-subtle)', marginTop: 4 }}>
+                  <div className="text-2xs text-ink-subtle mt-1">
                     {r.clientesCompletaron} completaron este reto
                   </div>
                 </div>
@@ -148,39 +159,49 @@ export default function FidelizacionPage() {
 
       {/* Descuentos */}
       <section>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
-          <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--ink-strong)', margin: 0 }}>Descuentos</h2>
-          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>{DESCUENTOS.filter((d) => d.activo).length} activos</span>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-ink-strong m-0">Descuentos</h2>
+          <span className="text-xs text-ink-muted">{DESCUENTOS.filter((d) => d.activo).length} activos</span>
         </div>
 
-        <div style={{ background: 'white', borderRadius: 'var(--radius-2xl)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 90px 100px 130px 80px', padding: 'var(--space-3) var(--space-5)', borderBottom: '1px solid var(--border-base)', gap: 'var(--space-3)' }}>
+        <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
+          <div
+            className="grid px-5 py-3 border-b border-border-base gap-3"
+            style={{ gridTemplateColumns: '120px 1fr 90px 100px 130px 80px' }}
+          >
             {['Código', 'Valor', 'Tipo', 'Usos', 'Vigencia', 'Estado'].map((col) => (
-              <span key={col} style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{col}</span>
+              <span key={col} className="text-xs font-semibold text-ink-muted uppercase tracking-[0.04em]">{col}</span>
             ))}
           </div>
 
           {DESCUENTOS.map((d) => (
-            <div key={d.id} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 90px 100px 130px 80px', padding: 'var(--space-3) var(--space-5)', borderBottom: '1px solid var(--border-subtle)', gap: 'var(--space-3)', alignItems: 'center', opacity: d.activo ? 1 : 0.5 }}>
-              <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--ink-strong)', fontFamily: 'monospace' }}>
-                {d.codigo ?? <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 400, color: 'var(--ink-subtle)' }}>Sin código</span>}
+            <div
+              key={d.id}
+              className={`grid px-5 py-3 border-b border-border-subtle gap-3 items-center${d.activo ? '' : ' opacity-50'}`}
+              style={{ gridTemplateColumns: '120px 1fr 90px 100px 130px 80px' }}
+            >
+              <div className="text-sm font-semibold text-ink-strong font-mono">
+                {d.codigo ?? <span className="font-sans font-normal text-ink-subtle">Sin código</span>}
               </div>
-              <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--accent)' }}>
+              <div className="text-sm font-semibold text-accent">
                 {d.tipo === 'porcentaje' ? `${d.valor}% off` : `S/ ${d.valor} off`}
               </div>
-              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', textTransform: 'capitalize' }}>{d.scope}</span>
-              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-base)' }}>
+              <span className="text-xs text-ink-muted capitalize">{d.scope}</span>
+              <span className="text-xs text-ink-base">
                 {d.usosActuales}{d.maxUsosGlobal !== null ? ` / ${d.maxUsosGlobal}` : ''}
                 {d.maxUsosGlobal !== null && (
-                  <div style={{ height: 3, background: 'var(--border-subtle)', borderRadius: 'var(--radius-full)', marginTop: 3, overflow: 'hidden' }}>
-                    <div style={{ width: `${Math.round((d.usosActuales / d.maxUsosGlobal) * 100)}%`, height: '100%', background: 'var(--accent)', borderRadius: 'var(--radius-full)' }} />
+                  <div className="h-[3px] bg-border-subtle rounded-full mt-[3px] overflow-hidden">
+                    <div
+                      style={{ width: `${Math.round((d.usosActuales / d.maxUsosGlobal) * 100)}%` }}
+                      className="h-full bg-accent rounded-full"
+                    />
                   </div>
                 )}
               </span>
-              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>
+              <span className="text-xs text-ink-muted">
                 {formatFecha(d.vigentaDesde)} – {formatFecha(d.vigentaHasta)}
               </span>
-              <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-full)', fontSize: 'var(--text-2xs)', fontWeight: 600, color: d.activo ? 'var(--success)' : 'var(--ink-muted)', background: d.activo ? 'var(--success-light)' : 'var(--border-subtle)' }}>
+              <span className={`py-0.5 px-2 rounded-full text-2xs font-semibold ${d.activo ? 'text-success bg-success-light' : 'text-ink-muted bg-border-subtle'}`}>
                 {d.activo ? 'Activo' : 'Expirado'}
               </span>
             </div>

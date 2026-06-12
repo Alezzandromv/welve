@@ -169,3 +169,50 @@ async def obtener_perfil(user_id: str) -> Usuario:
             detail="Usuario no encontrado",
         )
     return usuario
+
+
+async def actualizar_perfil(user_id: UUID, nombre_completo: str | None, correo: str | None, telefono: str | None) -> Usuario:
+    usuario = await Usuario.get(user_id)
+    if not usuario:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
+
+    if nombre_completo is not None:
+        usuario.nombre_completo = nombre_completo.strip()
+
+    if correo is not None:
+        existente = await Usuario.find_one(Usuario.correo == correo)
+        if existente and existente.id != user_id:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El correo ya está registrado por otro usuario")
+        usuario.correo = correo
+
+    if telefono is not None:
+        telefono_val = telefono.strip() or None
+        if telefono_val:
+            existente = await Usuario.find_one(Usuario.telefono == telefono_val)
+            if existente and existente.id != user_id:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El teléfono ya está registrado por otro usuario")
+        usuario.telefono = telefono_val
+
+    usuario.actualizado_en = ahora_lima()
+    await usuario.save()
+    return usuario
+
+
+async def cambiar_password(user_id: UUID, password_actual: str, password_nueva: str) -> dict:
+    usuario = await Usuario.get(user_id)
+    if not usuario:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
+
+    if not usuario.hashed_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Esta cuenta usa magic link y no tiene contraseña configurada",
+        )
+
+    if not verificar_password(password_actual, usuario.hashed_password):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Contraseña actual incorrecta")
+
+    usuario.hashed_password = hash_password(password_nueva)
+    usuario.actualizado_en = ahora_lima()
+    await usuario.save()
+    return {"mensaje": "Contraseña actualizada correctamente"}

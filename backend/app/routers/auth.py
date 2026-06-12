@@ -1,7 +1,11 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 
 from app.core.security import obtener_usuario_actual
 from app.schemas.auth import (
+    ActualizarPerfilRequest,
+    CambiarPasswordRequest,
     LoginStaffRequest,
     PerfilResponse,
     RegistroStaffRequest,
@@ -49,13 +53,51 @@ async def login(body: LoginStaffRequest) -> TokenResponse:
 
 @router.get("/perfil", response_model=PerfilResponse)
 async def perfil(usuario: dict = Depends(obtener_usuario_actual)) -> PerfilResponse:
-    usuario_db = await auth_service.obtener_perfil(usuario["sub"])
+    u = await auth_service.obtener_perfil(usuario["sub"])
     return PerfilResponse(
-        id=usuario_db.id,
-        nombre_completo=usuario_db.nombre_completo,
-        telefono=usuario_db.telefono,
-        correo=usuario_db.correo,
-        rol=usuario_db.rol,
-        foto_perfil_url=usuario_db.foto_perfil_url,
-        acepta_whatsapp=usuario_db.acepta_whatsapp,
+        id=u.id,
+        nombre_completo=u.nombre_completo,
+        telefono=u.telefono,
+        correo=u.correo,
+        rol=u.rol,
+        foto_perfil_url=u.foto_perfil_url,
+        acepta_whatsapp=u.acepta_whatsapp,
+        fecha_creacion=u.fecha_creacion,
+        ultimo_acceso=u.ultimo_acceso,
+    )
+
+
+@router.patch("/perfil", response_model=PerfilResponse)
+async def actualizar_perfil(
+    body: ActualizarPerfilRequest,
+    usuario: dict = Depends(obtener_usuario_actual),
+) -> PerfilResponse:
+    u = await auth_service.actualizar_perfil(
+        user_id=UUID(usuario["sub"]),
+        nombre_completo=body.nombre_completo,
+        correo=body.correo,
+        telefono=body.telefono,
+    )
+    return PerfilResponse(
+        id=u.id,
+        nombre_completo=u.nombre_completo,
+        telefono=u.telefono,
+        correo=u.correo,
+        rol=u.rol,
+        foto_perfil_url=u.foto_perfil_url,
+        acepta_whatsapp=u.acepta_whatsapp,
+        fecha_creacion=u.fecha_creacion,
+        ultimo_acceso=u.ultimo_acceso,
+    )
+
+
+@router.post("/cambiar-password")
+async def cambiar_password(
+    body: CambiarPasswordRequest,
+    usuario: dict = Depends(obtener_usuario_actual),
+) -> dict:
+    return await auth_service.cambiar_password(
+        user_id=UUID(usuario["sub"]),
+        password_actual=body.password_actual,
+        password_nueva=body.password_nueva,
     )

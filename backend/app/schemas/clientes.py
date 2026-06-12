@@ -24,7 +24,21 @@ class ClienteResponse(BaseModel):
     fecha_nacimiento: date | None
     canal_captacion: str | None
     etiquetas: list[str]
+    notas_internas: str | None
     esta_bloqueada: bool
+    motivo_bloqueo: str | None
+    nombre_completo: str | None = None
+    correo: str | None = None
+    telefono: str | None = None
+
+
+class ActualizarClienteRequest(BaseModel):
+    fecha_nacimiento: date | None = None
+    canal_captacion: str | None = None
+    etiquetas: list[str] | None = None
+    notas_internas: str | None = None
+    nombre_completo: str | None = None
+    telefono: str | None = None
 
 
 class BloquearClienteRequest(BaseModel):
