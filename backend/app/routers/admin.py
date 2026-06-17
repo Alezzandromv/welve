@@ -35,7 +35,7 @@ async def listar_citas(
 @router.post("/citas", response_model=CitaResponse, status_code=201)
 async def crear_cita_admin(body: CrearCitaAdminRequest, usuario: dict = _admin) -> CitaResponse:
     cita = await citas_service.crear_para_admin(body)
-    return CitaResponse.model_validate(cita.model_dump())
+    return CitaResponse.model_validate(await citas_service.enriquecer_cita(cita))
 
 
 @router.get("/citas/{cita_id}/pagos", response_model=list[PagoResponse])

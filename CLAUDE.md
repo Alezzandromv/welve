@@ -104,6 +104,8 @@ VITE_API_URL=         # URL pública del backend, ej. https://*.app.github.dev
 
 En Codespaces, el CORS del backend ya acepta `*.app.github.dev` via regex; solo ajustar `VITE_API_URL` y `APP_URL` al tunnel activo.
 
+> **Dev proxy:** En desarrollo, Vite reenvía `/api/*` → `localhost:8000` (ver `vite.config.ts`), por lo que `VITE_API_URL` no es necesaria en dev. Solo se requiere para builds de producción.
+
 ### Credenciales de desarrollo (tras ejecutar `seed.py`)
 
 ```
@@ -121,9 +123,14 @@ Clientes: magic link via WhatsApp — sin contraseña
 - `main.py` — registra routers, inicializa Beanie, configura CORS
 - `core/` — config (Settings desde `.env`), security (JWT + `requerir_rol(*roles)`), database (init Beanie)
 - `models/` — documentos Beanie con UUID como PK
-- `schemas/` — Pydantic schemas separados de los modelos (request vs response); `usuario.py` contiene los schemas de perfil usados por `GET/PATCH /auth/perfil`
+- `schemas/` — Pydantic schemas separados de los modelos (request vs response)
+  - `schemas/usuario.py` — schemas del perfil propio: `UsuarioResponse`, `ActualizarPerfilRequest` (usados por `GET/PATCH /auth/perfil`)
+  - `schemas/usuarios.py` — schemas de gestión admin: `UsuarioAdminResponse`, `CrearUsuarioRequest`, `ActualizarUsuarioRequest`, `CambiarCorreoRequest`, `ResetearPasswordRequest`, `CambiarEstadoRequest`
+  - `schemas/clientes.py` — `ActualizarClienteRequest` tiene un `model_validator` que rechaza cualquier intento de cambiar `correo` o `password` (esos campos solo se modifican via `/api/v1/admin/usuarios/{id}/correo` o `/password`)
 - `routers/` — solo reciben request, llaman al service, devuelven response
-- `services/` — toda la lógica de negocio aquí (validaciones, reglas RN01–RN15); archivos: `auth_service`, `citas_service`, `clientes_service`, `fidelizacion_service`, `pagos_service`, `personal_service` (CRUD de personal + disponibilidad), `servicios_service`
+  - `routers/admin.py` — citas admin, pagos y personal (montado en `/api/v1/admin`)
+  - `routers/usuarios.py` — CRUD de usuarios admin (montado en `/api/v1/admin/usuarios`); archivo separado de `admin.py`
+- `services/` — toda la lógica de negocio aquí (validaciones, reglas RN01–RN15); archivos: `auth_service`, `citas_service`, `clientes_service`, `fidelizacion_service`, `pagos_service`, `personal_service` (CRUD de personal + disponibilidad), `servicios_service`, `usuarios_service` (gestión de usuarios admin)
 - `tasks/` — Celery app en `__init__.py` (incluye configuración del beat schedule); `no_show.py` corre cada 5min via beat; `recordatorios.py` envía WhatsApp 24h y 2h antes
 - `utils/` — `timezone.py` (helpers `ahora_lima()`, `a_lima()`), `whatsapp.py` (cliente Meta Cloud API)
 
@@ -139,8 +146,8 @@ Clientes: magic link via WhatsApp — sin contraseña
 - `store/useAuthStore.ts` — Zustand con `persist`; JWT en localStorage bajo clave `welve-auth`
 - `store/useDashboardStore.ts` — Zustand sin persist; carga en paralelo citas, pagos pendientes y personal activo para el dashboard admin
 - `services/api.ts` — instancia Axios con interceptor JWT (adjunta `Bearer` token y redirige a login en 401)
-- `services/{recurso}.service.ts` — llamadas Axios a la API (auth, citas, clientes, fidelizacion, pagos, personal, servicios)
-- `types/index.ts` — interfaces globales con prefijo `I` (`IUsuario`, `ICita`, `IServicio`, `Rol`, etc.); `types/auth.ts` para tipos del flujo de auth; resto en archivos de dominio: `types/citas.ts`, `types/clientes.ts`, `types/pagos.ts`, `types/personal.ts`, `types/servicios.ts`, `types/fidelizacion.ts`
+- `services/{recurso}.service.ts` — llamadas Axios a la API (auth, citas, clientes, fidelizacion, pagos, personal, servicios, usuarios)
+- `types/index.ts` — interfaces globales con prefijo `I` (`IUsuario`, `ICita`, `IServicio`, `Rol`, etc.); `types/auth.ts` para tipos del flujo de auth; resto en archivos de dominio: `types/citas.ts`, `types/clientes.ts`, `types/pagos.ts`, `types/personal.ts`, `types/servicios.ts`, `types/fidelizacion.ts`, `types/usuarios.ts`
 - Path alias `@/` → `./src/` (configurado en `vite.config.ts`)
 
 ### Flujo de autenticación
@@ -168,33 +175,48 @@ En los services el dict `usuario` del `Depends(obtener_usuario_actual)` tiene ex
 
 ## Sistema de Diseño
 
-Los tokens visuales están definidos como CSS custom properties en `frontend/src/index.css`. **Nunca usar valores de color arbitrarios** — siempre usar las variables del sistema.
+Los tokens visuales están definidos como CSS custom properties en `frontend/src/index.css`. **Nunca usar valores de color arbitrarios** — siempre usar las variables del sistema. Ver `DESIGN.md` y `PRODUCT.md` en la raíz para contexto de diseño detallado.
 
 ### Variables clave
 
 ```css
 /* Superficies */
---surface-bg           /* fondo general (Blue Chalk claro ~oklch(0.97)) */
---surface-sidebar      /* sidebar oscuro (Haiti ~oklch(0.12)) */
+--surface-bg            /* fondo general (Blue Chalk ~oklch(0.97)) */
+--surface-base          /* tarjetas y paneles */
+--surface-raised        /* modales, popovers */
+--surface-sidebar       /* sidebar oscuro (Haiti ~oklch(0.12)) */
+--surface-sidebar-hover / --surface-sidebar-active
 
 /* Acento primario */
---accent               /* Electric Violet — acciones primarias, estado activo */
---turbo                /* Amarillo — solo alertas de alta energía y recompensas */
+--accent                /* Electric Violet — acciones primarias, estado activo */
+--accent-glow / --accent-hover / --accent-active / --accent-subtle / --accent-foreground
+--turbo                 /* Amarillo — solo alertas de alta energía y recompensas */
+--turbo-subtle
 
-/* Texto */
+/* Texto en superficies claras */
 --ink-strong / --ink-base / --ink-muted / --ink-subtle
+
+/* Texto en sidebar */
 --sidebar-ink-strong / --sidebar-ink-base / --sidebar-ink-muted
 
 /* Bordes */
 --border-subtle / --border-base / --border-strong / --sidebar-border
 
+/* Sombras */
+--shadow-sm / --shadow-base / --shadow-lg / --shadow-modal
+
+/* Radios */
+--radius-sm (4px) / --radius-base (8px) / --radius-lg (12px)
+--radius-xl (16px) / --radius-2xl (24px) / --radius-full (9999px)
+
 /* Espaciado (escala 4px) */
 --space-1 (0.25rem) … --space-16 (4rem)
 
 /* Tipografía */
---text-xs … --text-3xl   /* escala de tamaños */
---font-regular … --font-bold  /* pesos 400–700 */
---tracking-tight / --leading-tight  /* métricas para display bold */
+--text-2xs (10px) / --text-xs … --text-3xl   /* escala de tamaños */
+--font-regular (400) … --font-bold (700)      /* pesos */
+--tracking-tight / --tracking-base / --tracking-wide
+--leading-tight / --leading-snug / --leading-normal / --leading-relaxed
 
 /* Estados de cita (pares sólido + fondo 15% opacidad) */
 --estado-pendiente / --estado-pendiente-bg
@@ -205,13 +227,22 @@ Los tokens visuales están definidos como CSS custom properties en `frontend/src
 --estado-cancelada-tardia / --estado-cancelada-tardia-bg
 --estado-no-show / --estado-no-show-bg
 
+/* Semánticos (estados UI, alertas) */
+--success / --success-light
+--error / --error-light
+--warning / --warning-light
+--info / --info-light
+
 /* Z-index */
---z-dropdown: 100  --z-sticky: 200  --z-modal: 400  --z-toast: 500
+--z-dropdown: 100  --z-sticky: 200  --z-modal-backdrop: 300
+--z-modal: 400  --z-toast: 500  --z-tooltip: 600
 ```
 
 Fuente: `Geist` (sans-serif). Métricas clave en display bold grande; tablas en `text-sm`; labels en `text-xs muted`.
 
-Layout: sidebar fijo `--sidebar-width: 240px`. El contenido no usa grillas uniformes — elementos importantes ocupan más espacio.
+Layout: sidebar fijo `--sidebar-width: 240px`; colapsado `--sidebar-collapsed: 56px`. El contenido no usa grillas uniformes — elementos importantes ocupan más espacio.
+
+Clases de utilidad globales definidas en `index.css`: `.shimmer` (skeleton de carga con animación) y `.hide-scrollbar` (oculta scrollbar manteniendo scroll funcional).
 
 ---
 
@@ -245,7 +276,8 @@ Welve no es un SaaS genérico — es la herramienta operativa de un salón premi
 Las relaciones se manejan con referencias UUID (no referencias nativas Beanie) para mantener consistencia con el diseño original.
 
 ```
-Usuario       id, telefono(único), nombre_completo, correo, rol, esta_activo, acepta_whatsapp
+Usuario       id, telefono(único), nombre_completo, correo, rol, esta_activo, acepta_whatsapp,
+              correo_verificado(bool), hashed_password(opt), foto_perfil_url(opt)
 Personal      id, usuario_id→Usuario, especialidad, color_agenda(hex), comision_porcentaje, tipo_contrato
 Disponibilidad id, personal_id→Personal, dia_semana(0=dom), hora_inicio, hora_fin, minutos_buffer(def 10)
 Cliente       id, usuario_id→Usuario, etiquetas[], notas_internas, esta_bloqueada, motivo_bloqueo
@@ -324,6 +356,14 @@ GET    /api/v1/admin/pagos/pendientes
 PATCH  /api/v1/admin/pagos/{id}/confirmar
 PATCH  /api/v1/admin/pagos/{id}/rechazar
 PATCH  /api/v1/admin/pagos/{id}/reembolsar
+POST   /api/v1/admin/usuarios                    # admin — crea usuario (+ Cliente si rol=cliente)
+GET    /api/v1/admin/usuarios                    # admin — lista con filtros ?rol=&esta_activo=
+GET    /api/v1/admin/usuarios/{id}               # admin
+PATCH  /api/v1/admin/usuarios/{id}               # admin — nombre, telefono, esta_activo
+PATCH  /api/v1/admin/usuarios/{id}/correo        # admin
+PATCH  /api/v1/admin/usuarios/{id}/password      # admin — resetear contraseña (204)
+PATCH  /api/v1/admin/usuarios/{id}/estado        # admin — activar/desactivar
+
 GET    /api/v1/admin/personal
 POST   /api/v1/admin/personal
 PATCH  /api/v1/admin/personal/{id}
@@ -393,5 +433,10 @@ chore: actualizar dependencias
 - Magic link: marcar como `usado=true` al verificar; nunca reutilizar tokens
 - Rol del trabajador: no exponer datos financieros ni citas de otras especialistas
 - Comisión (RN15): solo registrar al completar cita, no implementar pago
+- **Citas — respuestas enriquecidas:** toda mutación de `Cita` (crear, cancelar, cambiar estado, registrar llegada) debe retornar `CitaResponse.model_validate(await citas_service.enriquecer_cita(cita))` — nunca `cita.model_dump()` directamente. `enriquecer_cita()` resuelve `nombre_cliente`, `nombre_especialista` y `nombre_servicio` en tres queries paralelos.
+- **Usuario `rol=cliente`:** `usuarios_service.crear()` inserta el `Usuario` **y** crea automáticamente el documento `Cliente` vinculado. Nunca crear uno sin el otro.
+- **Batch queries Beanie:** usar `beanie.operators.In` para cargar colecciones de documentos por lista de IDs (evita N+1). Ver patrón en `citas_service.listar_todas_con_nombres`.
+- **Crear Personal:** `personal.service.ts:crearCompleto()` es un flujo de dos pasos — primero `POST /api/v1/admin/usuarios` (crea el `Usuario` con `rol=trabajador`), luego `POST /api/v1/admin/personal` con el `usuario_id` devuelto. El campo `correo_verificado` se resetea a `false` cada vez que se cambia el correo via `cambiar_correo()`.
+- **Editar credenciales de cliente:** `PATCH /api/v1/clientes/{id}` rechaza explícitamente campos `correo` y `password`; usar `PATCH /api/v1/admin/usuarios/{id}/correo` y `/password` en su lugar.
 - Frontend: usar siempre las CSS variables del sistema de diseño (`var(--accent)`, `var(--surface-sidebar)`, etc.) — no valores de color hardcodeados
 - `pages/LoginPage.tsx` (raíz) es un scaffold sin estilos del sistema — la página activa es `pages/auth/LoginPage.tsx`

@@ -3,12 +3,48 @@ from uuid import UUID
 from fastapi import HTTPException, status
 
 from app.core.security import hash_password
+from app.models.cliente import Cliente
 from app.models.usuario import Usuario
 from app.schemas.usuarios import (
     ActualizarUsuarioRequest,
     CambiarCorreoRequest,
+    CrearUsuarioRequest,
     ResetearPasswordRequest,
 )
+
+
+async def crear(body: CrearUsuarioRequest) -> Usuario:
+    if body.rol in ("admin", "trabajador"):
+        if not body.correo:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="El correo es requerido para admin y trabajador")
+        if not body.password or len(body.password) < 8:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="La contraseña es requerida (mínimo 8 caracteres)")
+    if body.rol == "cliente":
+        if not body.telefono:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="El teléfono es requerido para clientes")
+
+    if body.correo:
+        existente = await Usuario.find_one(Usuario.correo == str(body.correo))
+        if existente:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El correo ya está registrado")
+    if body.telefono:
+        existente = await Usuario.find_one(Usuario.telefono == body.telefono)
+        if existente:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El teléfono ya está registrado")
+
+    usuario = Usuario(
+        nombre_completo=body.nombre_completo,
+        correo=str(body.correo) if body.correo else None,
+        telefono=body.telefono or None,
+        hashed_password=hash_password(body.password) if body.password else None,
+        rol=body.rol,
+    )
+    await usuario.insert()
+
+    if body.rol == "cliente":
+        await Cliente(usuario_id=usuario.id).insert()
+
+    return usuario
 
 
 async def listar(rol: str | None = None, esta_activo: bool | None = None) -> list[Usuario]:

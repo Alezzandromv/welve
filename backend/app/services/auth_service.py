@@ -6,6 +6,7 @@ from fastapi import HTTPException, status
 from app.core.config import settings
 from app.core.security import crear_access_token, hash_password, verificar_password
 from app.models.auth import MagicLink
+from app.models.cliente import Cliente
 from app.models.usuario import Usuario
 from app.utils.timezone import ahora_lima
 from app.utils.whatsapp import enviar_mensaje
@@ -20,6 +21,7 @@ async def solicitar_magic_link(telefono: str) -> dict:
             rol="cliente",
         )
         await usuario.insert()
+        await Cliente(usuario_id=usuario.id).insert()
 
     if not usuario.esta_activo:
         raise HTTPException(

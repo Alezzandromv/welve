@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
@@ -31,3 +32,11 @@ class ResetearPasswordRequest(BaseModel):
 
 class CambiarEstadoRequest(BaseModel):
     esta_activo: bool
+
+
+class CrearUsuarioRequest(BaseModel):
+    nombre_completo: str = Field(min_length=2)
+    rol: Literal["admin", "trabajador", "cliente"]
+    correo: EmailStr | None = None
+    telefono: str | None = None
+    password: str | None = None

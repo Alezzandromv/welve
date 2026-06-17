@@ -33,4 +33,15 @@ export const usuariosService = {
     const { data } = await api.patch<IUsuarioAdmin>(`/api/v1/admin/usuarios/${id}/estado`, { esta_activo });
     return data;
   },
+
+  async crearUsuario(datos: {
+    nombre_completo: string;
+    rol: RolUsuario;
+    correo?: string;
+    telefono?: string;
+    password?: string;
+  }): Promise<IUsuarioAdmin> {
+    const { data } = await api.post<IUsuarioAdmin>('/api/v1/admin/usuarios', datos);
+    return data;
+  },
 };

@@ -7,6 +7,7 @@ from app.schemas.usuarios import (
     ActualizarUsuarioRequest,
     CambiarCorreoRequest,
     CambiarEstadoRequest,
+    CrearUsuarioRequest,
     ResetearPasswordRequest,
     UsuarioAdminResponse,
 )
@@ -14,6 +15,15 @@ from app.services import usuarios_service
 
 router = APIRouter()
 _admin = Depends(requerir_rol("admin"))
+
+
+@router.post("", response_model=UsuarioAdminResponse, status_code=201)
+async def crear_usuario(
+    body: CrearUsuarioRequest,
+    _: dict = _admin,
+) -> UsuarioAdminResponse:
+    u = await usuarios_service.crear(body)
+    return UsuarioAdminResponse.model_validate(u.model_dump())
 
 
 @router.get("", response_model=list[UsuarioAdminResponse])

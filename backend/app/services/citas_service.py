@@ -344,6 +344,7 @@ async def listar_todas_con_nombres(
     estado: str | None = None,
 ) -> list[dict]:
     """Igual que listar_todas pero enriquece con nombres para el dashboard admin."""
+    from beanie.operators import In
     from app.models.usuario import Usuario
 
     citas = await listar_todas(fecha, estado)
@@ -354,32 +355,33 @@ async def listar_todas_con_nombres(
     cliente_ids = list({c.cliente_id for c in citas})
     personal_ids = list({c.personal_id for c in citas})
 
-    # Ronda 2: clientes, personal y primer CitaServicio por cita en paralelo
-    (clientes_res, personal_res, cs_res) = await asyncio.gather(
-        asyncio.gather(*[Cliente.get(cid) for cid in cliente_ids]),
-        asyncio.gather(*[Personal.get(pid) for pid in personal_ids]),
-        asyncio.gather(*[CitaServicio.find_one(CitaServicio.cita_id == cid) for cid in cita_ids]),
+    clientes_res, personal_res, cs_res = await asyncio.gather(
+        Cliente.find(In(Cliente.id, cliente_ids)).to_list(),
+        Personal.find(In(Personal.id, personal_ids)).to_list(),
+        CitaServicio.find(In(CitaServicio.cita_id, cita_ids)).to_list(),
     )
 
-    clientes_map = {c.id: c for c in clientes_res if c}
-    personal_map = {p.id: p for p in personal_res if p}
+    clientes_map = {c.id: c for c in clientes_res}
+    personal_map = {p.id: p for p in personal_res}
 
     usuario_ids = list({
         *[c.usuario_id for c in clientes_map.values()],
         *[p.usuario_id for p in personal_map.values()],
     })
-    servicio_ids = list({cs.servicio_id for cs in cs_res if cs})
 
-    # Ronda 3: usuarios y servicios en paralelo
+    primer_cs_por_cita: dict[UUID, CitaServicio] = {}
+    for cs in cs_res:
+        primer_cs_por_cita.setdefault(cs.cita_id, cs)
+
+    servicio_ids = list({cs.servicio_id for cs in primer_cs_por_cita.values()})
+
     usuarios_res, servicios_res = await asyncio.gather(
-        asyncio.gather(*[Usuario.get(uid) for uid in usuario_ids]),
-        asyncio.gather(*[Servicio.get(sid) for sid in servicio_ids]),
+        Usuario.find(In(Usuario.id, usuario_ids)).to_list(),
+        Servicio.find(In(Servicio.id, servicio_ids)).to_list(),
     )
 
-    usuarios_map = {u.id: u for u in usuarios_res if u}
-    servicios_map = {s.id: s for s in servicios_res if s}
-
-    primer_cs_por_cita = {cid: cs for cid, cs in zip(cita_ids, cs_res) if cs}
+    usuarios_map = {u.id: u for u in usuarios_res}
+    servicios_map = {s.id: s for s in servicios_res}
 
     result = []
     for cita in citas:
@@ -400,3 +402,25 @@ async def listar_todas_con_nombres(
         result.append(d)
 
     return result
+
+async def enriquecer_cita(cita: Cita) -> dict:
+    from app.models.usuario import Usuario
+
+    d = cita.model_dump()
+
+    cliente, personal, cs = await asyncio.gather(
+        Cliente.get(cita.cliente_id),
+        Personal.get(cita.personal_id),
+        CitaServicio.find_one(CitaServicio.cita_id == cita.id),
+    )
+
+    u_cli = await Usuario.get(cliente.usuario_id) if cliente else None
+    d["nombre_cliente"] = u_cli.nombre_completo if u_cli else None
+
+    u_per = await Usuario.get(personal.usuario_id) if personal else None
+    d["nombre_especialista"] = u_per.nombre_completo if u_per else None
+
+    svc = await Servicio.get(cs.servicio_id) if cs else None
+    d["nombre_servicio"] = svc.nombre if svc else None
+
+    return d

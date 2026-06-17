@@ -54,17 +54,17 @@ export const personalService = {
   },
 
   async crearCompleto(datos: IPersonalCrearCompleto): Promise<IPersonal> {
-    const { data: tokenData } = await api.post<{ usuario_id: string }>(
-      "/api/v1/auth/registrar",
+    const { data: nuevoUsuario } = await api.post<{ id: string }>(
+      "/api/v1/admin/usuarios",
       {
         nombre_completo: datos.nombre_completo,
         correo: datos.correo,
-        contrasena: datos.contrasena,
+        password: datos.contrasena,
         rol: "trabajador",
       }
     );
     const { data } = await api.post<IPersonal>("/api/v1/admin/personal", {
-      usuario_id: tokenData.usuario_id,
+      usuario_id: nuevoUsuario.id,
       especialidad: datos.especialidad,
       color_agenda: datos.color_agenda,
       comision_porcentaje: datos.comision_porcentaje,

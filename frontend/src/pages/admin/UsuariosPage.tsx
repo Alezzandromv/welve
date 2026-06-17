@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { AxiosError } from 'axios';
 import {
   AlertCircle, Check, CheckCircle, ChevronDown, ChevronUp, Circle,
-  Mail, Pencil, Phone, Shield, User, X,
+  KeyRound, Mail, Pencil, Phone, Shield, User, UserPlus, X,
 } from 'lucide-react';
 import { usuariosService } from '@/services/usuarios.service';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -52,9 +52,38 @@ const schemaPassword = z.object({
   path: ['confirmar_password'],
 });
 
+const schemaCrear = z.object({
+  nombre_completo: z.string().min(2, 'Mínimo 2 caracteres'),
+  rol: z.enum(['admin', 'trabajador', 'cliente']),
+  correo:   z.string().optional(),
+  telefono: z.string().optional(),
+  password: z.string().optional(),
+}).superRefine((v, ctx) => {
+  if (v.rol !== 'cliente') {
+    if (!v.correo?.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['correo'],   message: 'El correo es requerido' });
+    } else if (!z.string().email().safeParse(v.correo).success) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['correo'],   message: 'Correo inválido' });
+    }
+    if (!v.password?.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['password'], message: 'La contraseña es requerida' });
+    } else if (v.password.length < 8) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['password'], message: 'Mínimo 8 caracteres' });
+    }
+  } else {
+    if (!v.telefono?.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['telefono'], message: 'El teléfono es requerido' });
+    }
+    if (v.correo?.trim() && !z.string().email().safeParse(v.correo).success) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['correo'],   message: 'Correo inválido' });
+    }
+  }
+});
+
 type FormDatos    = z.infer<typeof schemaDatos>;
 type FormCorreo   = z.infer<typeof schemaCorreo>;
 type FormPassword = z.infer<typeof schemaPassword>;
+type FormCrear    = z.infer<typeof schemaCrear>;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -468,6 +497,177 @@ function PanelUsuario({ usuario, esMismo, reducedMotion, onActualizado, onCerrar
   );
 }
 
+// ─── PanelCrearUsuario ────────────────────────────────────────────────────────
+
+interface PanelCrearUsuarioProps {
+  reducedMotion: boolean;
+  onCreado: (u: IUsuarioAdmin) => void;
+  onCerrar: () => void;
+  onToast: (tipo: ToastMsg['tipo'], texto: string) => void;
+}
+
+function PanelCrearUsuario({ reducedMotion, onCreado, onCerrar, onToast }: PanelCrearUsuarioProps) {
+  const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting } } = useForm<FormCrear>({
+    resolver: zodResolver(schemaCrear),
+    defaultValues: { rol: 'trabajador' },
+  });
+
+  const rol = watch('rol');
+
+  const onSubmit = async (values: FormCrear) => {
+    try {
+      const u = await usuariosService.crearUsuario({
+        nombre_completo: values.nombre_completo,
+        rol: values.rol,
+        correo: values.correo || undefined,
+        telefono: values.telefono || undefined,
+        password: values.password || undefined,
+      });
+      onCreado(u);
+      onToast('success', 'Usuario creado');
+      onCerrar();
+      reset();
+    } catch (err) {
+      onToast('error', extractError(err, 'Error al crear usuario'));
+    }
+  };
+
+  return createPortal(
+    <>
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        transition={{ duration: 0.15 }}
+        className="fixed inset-0 z-modal-backdrop"
+        style={{ background: 'oklch(0.12 0.038 288 / 0.5)' }}
+        onClick={onCerrar}
+      />
+      <motion.div
+        initial={{ x: reducedMotion ? 0 : '100%', opacity: reducedMotion ? 0 : 1 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: reducedMotion ? 0 : '100%', opacity: reducedMotion ? 0 : 1 }}
+        transition={{ duration: reducedMotion ? 0.15 : 0.3, ease: EASE }}
+        className="fixed inset-y-0 right-0 w-[440px] bg-surface-raised flex flex-col z-modal shadow-modal"
+      >
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-border-base shrink-0 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-accent-subtle flex items-center justify-center shrink-0">
+              <UserPlus size={16} className="text-accent" strokeWidth={1.5} />
+            </div>
+            <h2 className="text-base font-semibold text-ink-strong">Nuevo usuario</h2>
+          </div>
+          <button onClick={onCerrar}
+            className="w-8 h-8 rounded-lg border border-border-base flex items-center justify-center text-ink-muted hover:text-ink-strong cursor-pointer transition-colors shrink-0">
+            <X size={14} strokeWidth={1.5} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto flex flex-col gap-0">
+          <div className="px-6 py-5 flex flex-col gap-4">
+
+            {/* Nombre */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-ink-muted uppercase tracking-wide">Nombre completo</label>
+              <div className="relative">
+                <User size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle" strokeWidth={1.5} />
+                <input {...register('nombre_completo')} placeholder="Ej. Sofía Torres"
+                  className={`${inputCls(!!errors.nombre_completo)} pl-9`} />
+              </div>
+              {errors.nombre_completo && <p className="text-xs text-error">{errors.nombre_completo.message}</p>}
+            </div>
+
+            {/* Rol */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-ink-muted uppercase tracking-wide">Rol</label>
+              <div className="flex gap-2">
+                {(['admin', 'trabajador', 'cliente'] as const).map(r => {
+                  const cfg = ROL_CFG[r];
+                  return (
+                    <label key={r} className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                      rol === r ? `${cfg.bgCls} ${cfg.textCls} border-transparent` : 'border-border-base text-ink-muted hover:border-border-strong'
+                    }`}>
+                      <input type="radio" {...register('rol')} value={r} className="sr-only" />
+                      {cfg.label}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Correo */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-ink-muted uppercase tracking-wide">
+                Correo electrónico {rol !== 'cliente' && <span className="text-error normal-case font-normal ml-0.5">*</span>}
+              </label>
+              <div className="relative">
+                <Mail size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle" strokeWidth={1.5} />
+                <input {...register('correo')} type="email"
+                  placeholder={rol !== 'cliente' ? 'nombre@eunoia.pe' : 'opcional'}
+                  className={`${inputCls(!!errors.correo)} pl-9`} />
+              </div>
+              {errors.correo && <p className="text-xs text-error">{errors.correo.message}</p>}
+            </div>
+
+            {/* Teléfono */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-ink-muted uppercase tracking-wide">
+                Teléfono {rol === 'cliente' && <span className="text-error normal-case font-normal ml-0.5">*</span>}
+              </label>
+              <div className="relative">
+                <Phone size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle" strokeWidth={1.5} />
+                <input {...register('telefono')} placeholder="+51 999 000 000"
+                  className={`${inputCls(!!errors.telefono)} pl-9`} />
+              </div>
+              {errors.telefono && <p className="text-xs text-error">{errors.telefono.message}</p>}
+            </div>
+
+            {/* Contraseña (solo admin/trabajador) */}
+            <AnimatePresence mode="wait">
+              {rol !== 'cliente' ? (
+                <motion.div key="pwd" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.18 }}
+                  className="overflow-hidden flex flex-col gap-1.5"
+                >
+                  <label className="text-xs font-semibold text-ink-muted uppercase tracking-wide">
+                    Contraseña <span className="text-error normal-case font-normal">*</span>
+                  </label>
+                  <div className="relative">
+                    <KeyRound size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle" strokeWidth={1.5} />
+                    <input {...register('password')} type="password" placeholder="Mínimo 8 caracteres"
+                      className={`${inputCls(!!errors.password)} pl-9`} />
+                  </div>
+                  {errors.password && <p className="text-xs text-error">{errors.password.message}</p>}
+                </motion.div>
+              ) : (
+                <motion.p key="magic" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="text-xs text-ink-subtle bg-surface-bg rounded-lg px-3 py-2.5 border border-border-subtle leading-relaxed"
+                >
+                  Las clientas acceden por Magic Link vía WhatsApp — no se asigna contraseña.
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-border-base shrink-0 flex justify-end gap-2 mt-auto">
+            <button type="button" onClick={onCerrar}
+              className="py-2 px-4 rounded-lg border border-border-base text-sm font-medium text-ink-muted bg-white cursor-pointer hover:bg-surface-bg transition-colors">
+              Cancelar
+            </button>
+            <button type="submit" disabled={isSubmitting}
+              className="py-2 px-4 rounded-lg bg-accent text-accent-foreground border-none text-sm font-semibold cursor-pointer hover:bg-accent-hover transition-colors disabled:opacity-60 flex items-center gap-2">
+              {isSubmitting ? 'Creando…' : <><UserPlus size={13} strokeWidth={2} />Crear usuario</>}
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </>,
+    document.body,
+  );
+}
+
 // ─── UsuariosPage ──────────────────────────────────────────────────────────────
 
 export default function UsuariosPage() {
@@ -481,6 +681,7 @@ export default function UsuariosPage() {
   const [tabFiltro,       setTabFiltro]      = useState<TabFiltro>('todos');
   const [soloActivos,     setSoloActivos]    = useState(false);
   const [panelUsuario,    setPanelUsuario]   = useState<IUsuarioAdmin | null>(null);
+  const [crearAbierto,    setCrearAbierto]   = useState(false);
   const [toasts,          setToasts]         = useState<ToastMsg[]>([]);
   const [reducedMotion]   = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
@@ -520,6 +721,12 @@ export default function UsuariosPage() {
     if (panelUsuario?.id === u.id) setPanelUsuario(u);
   };
 
+  const handleCreado = (u: IUsuarioAdmin) => {
+    setUsuarios(prev => [u, ...prev]);
+    setCrearAbierto(false);
+    setPanelUsuario(u);
+  };
+
   const handleCambiarEstado = async (u: IUsuarioAdmin) => {
     const nuevoEstado = !u.esta_activo;
     // optimistic
@@ -551,6 +758,13 @@ export default function UsuariosPage() {
             <ToggleActivo activo={soloActivos} onChange={setSoloActivos} />
             <span className="text-sm font-medium text-ink-muted">Solo activos</span>
           </label>
+          <button
+            onClick={() => setCrearAbierto(true)}
+            className="flex items-center gap-1.5 py-2 px-3.5 rounded-lg bg-accent text-accent-foreground border-none text-sm font-semibold cursor-pointer hover:bg-accent-hover transition-colors"
+          >
+            <UserPlus size={14} strokeWidth={2} />
+            Nuevo usuario
+          </button>
         </div>
 
         {/* Error */}
@@ -656,9 +870,21 @@ export default function UsuariosPage() {
         </div>
       </motion.div>
 
-      {/* Panel lateral */}
+      {/* Panel creación */}
       <AnimatePresence>
-        {panelUsuario && (
+        {crearAbierto && (
+          <PanelCrearUsuario
+            reducedMotion={reducedMotion}
+            onCreado={handleCreado}
+            onCerrar={() => setCrearAbierto(false)}
+            onToast={agregarToast}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Panel edición */}
+      <AnimatePresence>
+        {panelUsuario && !crearAbierto && (
           <PanelUsuario
             key={panelUsuario.id}
             usuario={panelUsuario}

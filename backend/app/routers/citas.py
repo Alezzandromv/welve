@@ -22,7 +22,7 @@ async def crear_cita(
     usuario: dict = Depends(obtener_usuario_actual),
 ) -> CitaResponse:
     cita = await citas_service.crear(body, UUID(usuario["sub"]))
-    return CitaResponse.model_validate(cita.model_dump())
+    return CitaResponse.model_validate(await citas_service.enriquecer_cita(cita))
 
 
 @router.get("/mis-citas", response_model=list[CitaResponse])
@@ -38,7 +38,7 @@ async def cancelar_cita(
     usuario: dict = Depends(obtener_usuario_actual),
 ) -> CitaResponse:
     cita = await citas_service.cancelar(cita_id, UUID(usuario["sub"]), body.motivo_cancelacion)
-    return CitaResponse.model_validate(cita.model_dump())
+    return CitaResponse.model_validate(await citas_service.enriquecer_cita(cita))
 
 
 @router.patch("/{cita_id}/estado", response_model=CitaResponse)
@@ -48,7 +48,7 @@ async def cambiar_estado(
     usuario: dict = Depends(requerir_rol("admin", "trabajador")),
 ) -> CitaResponse:
     cita = await citas_service.cambiar_estado(cita_id, body, usuario)
-    return CitaResponse.model_validate(cita.model_dump())
+    return CitaResponse.model_validate(await citas_service.enriquecer_cita(cita))
 
 
 @router.patch("/{cita_id}/llegada", response_model=CitaResponse)
@@ -58,7 +58,7 @@ async def registrar_llegada(
     usuario: dict = Depends(requerir_rol("admin", "trabajador")),
 ) -> CitaResponse:
     cita = await citas_service.registrar_llegada(cita_id, body.hora_llegada_real, usuario)
-    return CitaResponse.model_validate(cita.model_dump())
+    return CitaResponse.model_validate(await citas_service.enriquecer_cita(cita))
 
 
 @router.get("/{cita_id}/servicios", response_model=list[CitaServicioResponse])
