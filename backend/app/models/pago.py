@@ -1,37 +1,44 @@
+import uuid
 from datetime import datetime
-from typing import Literal
-from uuid import UUID, uuid4
 
-from beanie import Document
-from pydantic import Field, field_validator
+import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.orm import Mapped, mapped_column
 
-from app.utils.timezone import a_lima
-
-TipoPago = Literal["deposito", "saldo", "total", "penalizacion", "reembolso"]
-MetodoPago = Literal["efectivo", "transferencia", "yape", "plin", "tarjeta"]
-EstadoPago = Literal["pendiente", "confirmado", "rechazado", "reembolsado"]
+from app.models.base import Base
+from app.models.enums import EstadoPago, MetodoPago, TipoPago
 
 
-class Pago(Document):
-    id: UUID = Field(default_factory=uuid4)
-    cita_id: UUID
-    cliente_id: UUID
-    tipo: TipoPago
-    metodo: MetodoPago
-    estado: EstadoPago = "pendiente"
-    monto: float
-    referencia_externa: str | None = None
-    comprobante_url: str | None = None
-    confirmado_por: UUID | None = None   # ref Usuario admin
-    fecha_confirmacion: datetime | None = None
-    nota_admin: str | None = None
+class Pago(Base):
+    __tablename__ = "pagos"
 
-    @field_validator("fecha_confirmacion", mode="before")
-    @classmethod
-    def _normalizar_tz(cls, v: object) -> object:
-        if isinstance(v, datetime) and v.tzinfo is None:
-            return a_lima(v)
-        return v
-
-    class Settings:
-        name = "pagos"
+    id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    cita_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True), sa.ForeignKey("citas.id"), nullable=False
+    )
+    cliente_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True), sa.ForeignKey("clientes.id"), nullable=False
+    )
+    tipo: Mapped[TipoPago] = mapped_column(
+        sa.Enum(TipoPago, name="tipo_pago", native_enum=False, validate_strings=True,
+                values_callable=lambda e: [x.value for x in e]),
+        nullable=False,
+    )
+    metodo: Mapped[MetodoPago] = mapped_column(
+        sa.Enum(MetodoPago, name="metodo_pago", native_enum=False, validate_strings=True,
+                values_callable=lambda e: [x.value for x in e]),
+        nullable=False,
+    )
+    estado: Mapped[EstadoPago] = mapped_column(
+        sa.Enum(EstadoPago, name="estado_pago", native_enum=False, validate_strings=True,
+                values_callable=lambda e: [x.value for x in e]),
+        default=EstadoPago.pendiente, nullable=False,
+    )
+    monto: Mapped[float] = mapped_column(sa.Numeric(10, 2, asdecimal=False), nullable=False)
+    referencia_externa: Mapped[str | None] = mapped_column(sa.String, nullable=True)
+    comprobante_url: Mapped[str | None] = mapped_column(sa.String, nullable=True)
+    confirmado_por: Mapped[uuid.UUID | None] = mapped_column(
+        PG_UUID(as_uuid=True), sa.ForeignKey("usuarios.id"), nullable=True
+    )
+    fecha_confirmacion: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True), nullable=True)
+    nota_admin: Mapped[str | None] = mapped_column(sa.Text, nullable=True)

@@ -14,9 +14,7 @@ const schema = z.object({
   nombre_completo: z.string().min(2, "Ingresa tu nombre completo"),
   correo: z.string().email("Ingresa un correo válido"),
   contrasena: z.string().min(8, "Mínimo 8 caracteres"),
-  rol: z.enum(["admin", "trabajador"], {
-    errorMap: () => ({ message: "Selecciona un rol" }),
-  }),
+  rol: z.enum(["admin", "trabajador"], { error: "Selecciona un rol" }),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -39,11 +37,8 @@ export default function RegistroPage() {
   const [mostrarContrasena, setMostrarContrasena] = useState(false);
   const [focused, setFocused] = useState<string | null>(null);
 
-  if (estaAutenticado()) {
-    navigate("/", { replace: true });
-    return null;
-  }
-
+  // Los hooks deben llamarse siempre en el mismo orden — el return condicional va
+  // después de todos los hooks, nunca antes (react-hooks/rules-of-hooks).
   const {
     register,
     handleSubmit,
@@ -54,6 +49,11 @@ export default function RegistroPage() {
   const regCorreo = register("correo");
   const regContrasena = register("contrasena");
   const regRol = register("rol");
+
+  if (estaAutenticado()) {
+    navigate("/", { replace: true });
+    return null;
+  }
 
   async function onSubmit(data: FormValues) {
     setErrorGeneral(null);
@@ -73,6 +73,8 @@ export default function RegistroPage() {
         rol: resultado.rol,
         foto_perfil_url: null,
         acepta_whatsapp: true,
+        fecha_creacion: null,
+        ultimo_acceso: null,
       };
       setAuth(resultado.access_token, usuarioParcial);
 

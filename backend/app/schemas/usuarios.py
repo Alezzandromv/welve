@@ -2,10 +2,12 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UsuarioAdminResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     nombre_completo: str
     correo: str | None

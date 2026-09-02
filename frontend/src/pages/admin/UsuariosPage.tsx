@@ -823,7 +823,7 @@ export default function UsuariosPage() {
                   <tr><td colSpan={7} className="py-14 text-center text-sm text-ink-subtle">Sin usuarios para mostrar</td></tr>
                 )
                 : usuariosFiltrados.map(u => {
-                  const esMismo = usuarioActual?.id === u.id || usuarioActual?.usuario_id === u.id;
+                  const esMismo = usuarioActual?.id === u.id;
                   const esHighlighted = highlightId === u.id;
                   return (
                     <motion.tr
@@ -888,7 +888,7 @@ export default function UsuariosPage() {
           <PanelUsuario
             key={panelUsuario.id}
             usuario={panelUsuario}
-            esMismo={usuarioActual?.id === panelUsuario.id || usuarioActual?.usuario_id === panelUsuario.id}
+            esMismo={usuarioActual?.id === panelUsuario.id}
             reducedMotion={reducedMotion}
             onActualizado={handleActualizado}
             onCerrar={() => { setPanelUsuario(null); navigate('/admin/usuarios', { replace: true }); }}

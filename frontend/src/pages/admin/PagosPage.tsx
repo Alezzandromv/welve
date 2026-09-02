@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Clock } from 'lucide-react';
 import type { IPago } from '@/types';
@@ -25,16 +25,16 @@ const ESTADO_CFG: Record<IPago['estado'], { label: string; colorCls: string; bgC
 };
 
 const PAGOS: IPagoRow[] = [
-  { id: 'p1',  citaId: 'c1', clienteId: 'u1', clienteNombre: 'Valentina Torres', servicioNombre: 'Corte y color',       tipo: 'deposito',    metodo: 'yape',         estado: 'pendiente',  monto: 60,  referenciaExterna: null, confirmadoPor: null, fechaConfirmacion: null },
-  { id: 'p2',  citaId: 'c2', clienteId: 'u2', clienteNombre: 'Camila Ríos',      servicioNombre: 'Manicure',            tipo: 'total',       metodo: 'efectivo',     estado: 'confirmado', monto: 45,  referenciaExterna: null, confirmadoPor: 'Admin', fechaConfirmacion: '2026-06-10T11:30' },
-  { id: 'p3',  citaId: 'c3', clienteId: 'u3', clienteNombre: 'Daniela Cruz',     servicioNombre: 'Tratamiento capilar', tipo: 'deposito',    metodo: 'transferencia',estado: 'pendiente',  monto: 40,  referenciaExterna: 'BCP-882314', confirmadoPor: null, fechaConfirmacion: null },
-  { id: 'p4',  citaId: 'c4', clienteId: 'u4', clienteNombre: 'Rosa Medina',      servicioNombre: 'Alisado keratina',    tipo: 'saldo',       metodo: 'yape',         estado: 'pendiente',  monto: 200, referenciaExterna: null, confirmadoPor: null, fechaConfirmacion: null },
-  { id: 'p5',  citaId: 'c5', clienteId: 'u5', clienteNombre: 'Patricia Díaz',    servicioNombre: 'Gel completo',        tipo: 'total',       metodo: 'tarjeta',      estado: 'confirmado', monto: 85,  referenciaExterna: null, confirmadoPor: 'Admin', fechaConfirmacion: '2026-06-10T09:15' },
-  { id: 'p6',  citaId: 'c6', clienteId: 'u6', clienteNombre: 'Lucía Paredes',    servicioNombre: 'Pedicure',            tipo: 'deposito',    metodo: 'plin',         estado: 'pendiente',  monto: 20,  referenciaExterna: null, confirmadoPor: null, fechaConfirmacion: null },
-  { id: 'p7',  citaId: 'c7', clienteId: 'u7', clienteNombre: 'Isabel Flores',    servicioNombre: 'Corte clásico',       tipo: 'penalizacion',metodo: 'efectivo',     estado: 'confirmado', monto: 30,  referenciaExterna: null, confirmadoPor: 'Admin', fechaConfirmacion: '2026-06-09T17:00' },
-  { id: 'p8',  citaId: 'c8', clienteId: 'u8', clienteNombre: 'Elena Mora',       servicioNombre: 'Manicure + pedicure', tipo: 'reembolso',   metodo: 'transferencia',estado: 'reembolsado',monto: 55,  referenciaExterna: null, confirmadoPor: 'Admin', fechaConfirmacion: '2026-06-08T14:20' },
-  { id: 'p9',  citaId: 'c9', clienteId: 'u9', clienteNombre: 'Mariana Vega',     servicioNombre: 'Facial rejuvenecedor',tipo: 'deposito',    metodo: 'yape',         estado: 'pendiente',  monto: 50,  referenciaExterna: 'YAPE-129847', confirmadoPor: null, fechaConfirmacion: null },
-  { id: 'p10', citaId:'c10', clienteId:'u10', clienteNombre: 'Carmen Santos',    servicioNombre: 'Color completo',      tipo: 'saldo',       metodo: 'efectivo',     estado: 'confirmado', monto: 120, referenciaExterna: null, confirmadoPor: 'Admin', fechaConfirmacion: '2026-06-10T10:45' },
+  { id: 'p1',  cita_id: 'c1', cliente_id: 'u1', clienteNombre: 'Valentina Torres', servicioNombre: 'Corte y color',       tipo: 'deposito',    metodo: 'yape',         estado: 'pendiente',  monto: 60,  referencia_externa: null, confirmado_por: null, fecha_confirmacion: null, comprobante_url: null, nota_admin: null },
+  { id: 'p2',  cita_id: 'c2', cliente_id: 'u2', clienteNombre: 'Camila Ríos',      servicioNombre: 'Manicure',            tipo: 'total',       metodo: 'efectivo',     estado: 'confirmado', monto: 45,  referencia_externa: null, confirmado_por: 'Admin', fecha_confirmacion: '2026-06-10T11:30', comprobante_url: null, nota_admin: null },
+  { id: 'p3',  cita_id: 'c3', cliente_id: 'u3', clienteNombre: 'Daniela Cruz',     servicioNombre: 'Tratamiento capilar', tipo: 'deposito',    metodo: 'transferencia',estado: 'pendiente',  monto: 40,  referencia_externa: 'BCP-882314', confirmado_por: null, fecha_confirmacion: null, comprobante_url: null, nota_admin: null },
+  { id: 'p4',  cita_id: 'c4', cliente_id: 'u4', clienteNombre: 'Rosa Medina',      servicioNombre: 'Alisado keratina',    tipo: 'saldo',       metodo: 'yape',         estado: 'pendiente',  monto: 200, referencia_externa: null, confirmado_por: null, fecha_confirmacion: null, comprobante_url: null, nota_admin: null },
+  { id: 'p5',  cita_id: 'c5', cliente_id: 'u5', clienteNombre: 'Patricia Díaz',    servicioNombre: 'Gel completo',        tipo: 'total',       metodo: 'tarjeta',      estado: 'confirmado', monto: 85,  referencia_externa: null, confirmado_por: 'Admin', fecha_confirmacion: '2026-06-10T09:15', comprobante_url: null, nota_admin: null },
+  { id: 'p6',  cita_id: 'c6', cliente_id: 'u6', clienteNombre: 'Lucía Paredes',    servicioNombre: 'Pedicure',            tipo: 'deposito',    metodo: 'plin',         estado: 'pendiente',  monto: 20,  referencia_externa: null, confirmado_por: null, fecha_confirmacion: null, comprobante_url: null, nota_admin: null },
+  { id: 'p7',  cita_id: 'c7', cliente_id: 'u7', clienteNombre: 'Isabel Flores',    servicioNombre: 'Corte clásico',       tipo: 'penalizacion',metodo: 'efectivo',     estado: 'confirmado', monto: 30,  referencia_externa: null, confirmado_por: 'Admin', fecha_confirmacion: '2026-06-09T17:00', comprobante_url: null, nota_admin: null },
+  { id: 'p8',  cita_id: 'c8', cliente_id: 'u8', clienteNombre: 'Elena Mora',       servicioNombre: 'Manicure + pedicure', tipo: 'reembolso',   metodo: 'transferencia',estado: 'reembolsado',monto: 55,  referencia_externa: null, confirmado_por: 'Admin', fecha_confirmacion: '2026-06-08T14:20', comprobante_url: null, nota_admin: null },
+  { id: 'p9',  cita_id: 'c9', cliente_id: 'u9', clienteNombre: 'Mariana Vega',     servicioNombre: 'Facial rejuvenecedor',tipo: 'deposito',    metodo: 'yape',         estado: 'pendiente',  monto: 50,  referencia_externa: 'YAPE-129847', confirmado_por: null, fecha_confirmacion: null, comprobante_url: null, nota_admin: null },
+  { id: 'p10', cita_id:'c10', cliente_id:'u10', clienteNombre: 'Carmen Santos',    servicioNombre: 'Color completo',      tipo: 'saldo',       metodo: 'efectivo',     estado: 'confirmado', monto: 120, referencia_externa: null, confirmado_por: 'Admin', fecha_confirmacion: '2026-06-10T10:45', comprobante_url: null, nota_admin: null },
 ];
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -43,13 +43,15 @@ const variantesFila  = { oculto: { opacity: 0, y: 6 }, visible: { opacity: 1, y:
 
 const STATS_CFG = [
   { key: 'pendiente', label: 'Por confirmar', valorFn: (p: IPagoRow[]) => `S/ ${p.filter(x => x.estado === 'pendiente').reduce((s, x) => s + x.monto, 0)}`, subFn: (p: IPagoRow[]) => `${p.filter(x => x.estado === 'pendiente').length} pagos`, colorCls: 'text-warning', bgCls: 'bg-warning-light', icon: Clock },
-  { key: 'confirmado', label: 'Cobrado hoy', valorFn: (p: IPagoRow[]) => `S/ ${p.filter(x => x.estado === 'confirmado' && x.fechaConfirmacion?.startsWith('2026-06-10')).reduce((s, x) => s + x.monto, 0)}`, subFn: (p: IPagoRow[]) => `${p.filter(x => x.estado === 'confirmado' && x.fechaConfirmacion?.startsWith('2026-06-10')).length} confirmados`, colorCls: 'text-success', bgCls: 'bg-success-light', icon: Check },
+  { key: 'confirmado', label: 'Cobrado hoy', valorFn: (p: IPagoRow[]) => `S/ ${p.filter(x => x.estado === 'confirmado' && x.fecha_confirmacion?.startsWith('2026-06-10')).reduce((s, x) => s + x.monto, 0)}`, subFn: (p: IPagoRow[]) => `${p.filter(x => x.estado === 'confirmado' && x.fecha_confirmacion?.startsWith('2026-06-10')).length} confirmados`, colorCls: 'text-success', bgCls: 'bg-success-light', icon: Check },
 ];
 
 export default function PagosPage() {
   const [filtro, setFiltro] = useState<EstadoFiltro>('todos');
   const [hoverId, setHoverId] = useState<string | null>(null);
-  const reducedMotion = useRef(window.matchMedia('(prefers-reduced-motion: reduce)').matches).current;
+  // Leer refs durante el render está prohibido (react-hooks/refs) — un estado con
+  // inicializador perezoso da el mismo "calculado una sola vez" sin ese problema.
+  const [reducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   const visibles = PAGOS.filter((p) => filtro === 'todos' || p.estado === filtro);
 
@@ -132,8 +134,8 @@ export default function PagosPage() {
               >
                 <div>
                   <div className="text-sm font-medium text-ink-strong">{p.clienteNombre}</div>
-                  {p.referenciaExterna && (
-                    <div className="text-2xs text-ink-subtle mt-px">{p.referenciaExterna}</div>
+                  {p.referencia_externa && (
+                    <div className="text-2xs text-ink-subtle mt-px">{p.referencia_externa}</div>
                   )}
                 </div>
                 <span className="text-sm text-ink-base">{p.servicioNombre}</span>

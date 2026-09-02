@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, Link, MapPin, Phone, Shield, Users } from 'lucide-react';
 
@@ -57,7 +57,9 @@ function Campo({ label, valor }: { label: string; valor: string }) {
 }
 
 export default function ConfiguracionPage() {
-  const reducedMotion = useRef(window.matchMedia('(prefers-reduced-motion: reduce)').matches).current;
+  // Leer refs durante el render está prohibido (react-hooks/refs) — un estado con
+  // inicializador perezoso da el mismo "calculado una sola vez" sin ese problema.
+  const [reducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   return (
     <motion.div

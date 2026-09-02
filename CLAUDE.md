@@ -12,7 +12,7 @@ Sistema web fullstack para gestión de citas de **Eunoia Beauty Salon** (Lima, P
 
 | Capa | Tecnología |
 |------|-----------|
-| Backend | FastAPI (Python 3.11+), Beanie/Motor, MongoDB Atlas |
+| Backend | FastAPI (Python 3.11+), SQLAlchemy 2.0 async (asyncpg) + Alembic, Supabase Postgres |
 | Queue | Redis + Celery |
 | Auth | Clientes: Magic Link vía WhatsApp (UUID, 1h, un solo uso) → JWT. Staff: email + contraseña → JWT |
 | Notificaciones | WhatsApp Business API (Meta Cloud API) |
@@ -20,7 +20,7 @@ Sistema web fullstack para gestión de citas de **Eunoia Beauty Salon** (Lima, P
 | HTTP client | Axios con interceptores JWT |
 | Forms | React Hook Form + Zod |
 | UI | Framer Motion, lucide-react (shadcn/ui planeado pero no instalado aún) |
-| Dev env | GitHub Codespaces, Docker Compose (Redis local; MongoDB es Atlas externo) |
+| Dev env | GitHub Codespaces, Docker Compose (Redis local; Postgres es Supabase externo, vía connection pooler) |
 
 ---
 
@@ -51,6 +51,15 @@ cd backend && pytest
 
 # Lint
 cd backend && ruff check app/
+
+# Migraciones (Alembic) — generar tras cambiar un modelo en app/models/
+cd backend && alembic revision --autogenerate -m "descripción del cambio"
+
+# Aplicar migraciones pendientes contra Supabase
+cd backend && alembic upgrade head
+
+# Revertir la última migración
+cd backend && alembic downgrade -1
 ```
 
 ### Frontend
@@ -85,8 +94,7 @@ cp backend/.env.example backend/.env
 ### `.env` del backend
 
 ```env
-MONGODB_URL=          # mongodb+srv://...
-DATABASE_NAME=welve
+DATABASE_URL=         # postgresql+asyncpg://postgres.<project_ref>:<PASSWORD>@aws-0-<region>.pooler.supabase.com:6543/postgres
 SECRET_KEY=           # openssl rand -hex 32
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 REDIS_URL=redis://localhost:6379
@@ -95,6 +103,8 @@ WHATSAPP_PHONE_ID=    # ID del número de WhatsApp Business
 APP_URL=              # URL pública del frontend (usada en el magic link enviado por WhatsApp)
 ENVIRONMENT=development
 ```
+
+> **Supabase — conexión vía pooler:** el proyecto de Supabase resuelve por defecto solo IPv6 en la conexión directa (`db.<project_ref>.supabase.co:5432`), lo que falla en entornos sin salida IPv6 como Codespaces (`Network is unreachable`). Usar siempre el **connection pooler** (Dashboard → Project Settings → Database → Connection Pooling), puerto `6543` en modo transacción. Es obligatorio pasar `connect_args={"statement_cache_size": 0}` al crear el engine de asyncpg cuando se conecta vía el pooler (PgBouncer no soporta prepared statements persistentes) — ya configurado en `core/database.py`, `tasks/db.py` y `alembic/env.py`.
 
 ### `.env` del frontend
 
@@ -120,9 +130,9 @@ Clientes: magic link via WhatsApp — sin contraseña
 
 ### Backend (`backend/app/`)
 
-- `main.py` — registra routers, inicializa Beanie, configura CORS
-- `core/` — config (Settings desde `.env`), security (JWT + `requerir_rol(*roles)`), database (init Beanie)
-- `models/` — documentos Beanie con UUID como PK
+- `main.py` — registra routers, verifica conexión a Postgres en el lifespan, configura CORS
+- `core/` — config (Settings desde `.env`, `database_url`), security (JWT + `requerir_rol(*roles)`), database (engine async de SQLAlchemy, `get_session()` como dependencia FastAPI — una sesión por request, commit/rollback automático)
+- `models/` — modelos SQLAlchemy 2.0 declarativos (`Mapped`/`mapped_column`) con UUID como PK; `models/base.py` (`DeclarativeBase`), `models/enums.py` (enums Python compartidos, mapeados a `VARCHAR` + `CHECK` vía `sa.Enum(..., native_enum=False)`, no ENUM nativo de Postgres — más simple de evolucionar con Alembic)
 - `schemas/` — Pydantic schemas separados de los modelos (request vs response)
   - `schemas/usuario.py` — schemas del perfil propio: `UsuarioResponse`, `ActualizarPerfilRequest` (usados por `GET/PATCH /auth/perfil`)
   - `schemas/usuarios.py` — schemas de gestión admin: `UsuarioAdminResponse`, `CrearUsuarioRequest`, `ActualizarUsuarioRequest`, `CambiarCorreoRequest`, `ResetearPasswordRequest`, `CambiarEstadoRequest`
@@ -130,9 +140,10 @@ Clientes: magic link via WhatsApp — sin contraseña
 - `routers/` — solo reciben request, llaman al service, devuelven response
   - `routers/admin.py` — citas admin, pagos y personal (montado en `/api/v1/admin`)
   - `routers/usuarios.py` — CRUD de usuarios admin (montado en `/api/v1/admin/usuarios`); archivo separado de `admin.py`
-- `services/` — toda la lógica de negocio aquí (validaciones, reglas RN01–RN15); archivos: `auth_service`, `citas_service`, `clientes_service`, `fidelizacion_service`, `pagos_service`, `personal_service` (CRUD de personal + disponibilidad), `servicios_service`, `usuarios_service` (gestión de usuarios admin)
-- `tasks/` — Celery app en `__init__.py` (incluye configuración del beat schedule); `no_show.py` corre cada 5min via beat; `recordatorios.py` envía WhatsApp 24h y 2h antes
-- `utils/` — `timezone.py` (helpers `ahora_lima()`, `a_lima()`), `whatsapp.py` (cliente Meta Cloud API)
+- `services/` — toda la lógica de negocio aquí (validaciones, reglas RN01–RN15); todas las funciones reciben `session: AsyncSession` como primer parámetro; archivos: `auth_service`, `citas_service`, `clientes_service`, `fidelizacion_service`, `pagos_service`, `personal_service` (CRUD de personal + disponibilidad), `servicios_service`, `usuarios_service` (gestión de usuarios admin)
+- `tasks/` — Celery app en `__init__.py` (incluye configuración del beat schedule); `db.py` expone un sessionmaker async perezoso (creado tras el fork de los workers, no a import-time); `no_show.py` corre cada 5min via beat; `recordatorios.py` envía WhatsApp 24h y 2h antes
+- `utils/` — `timezone.py` (helpers `ahora_lima()`, `a_lima()`), `whatsapp.py` (cliente Meta Cloud API), `horarios.py` (`parse_hhmm`/`hhmm` — conversión `time` nativo ↔ string "HH:MM" en el borde service↔schema para `DisponibilidadPersonal`)
+- `alembic/` — migraciones de esquema; `env.py` toma `DATABASE_URL` de `core.config.settings` (nunca hardcodeada en `alembic.ini`) y usa `target_metadata = Base.metadata` para autogenerate
 
 ### Frontend (`frontend/src/`)
 
@@ -175,7 +186,7 @@ En los services el dict `usuario` del `Depends(obtener_usuario_actual)` tiene ex
 
 ## Sistema de Diseño
 
-Los tokens visuales están definidos como CSS custom properties en `frontend/src/index.css`. **Nunca usar valores de color arbitrarios** — siempre usar las variables del sistema. Ver `DESIGN.md` y `PRODUCT.md` en la raíz para contexto de diseño detallado.
+Los tokens visuales están definidos como CSS custom properties en `frontend/src/index.css`. **Nunca usar valores de color arbitrarios** — siempre usar las variables del sistema. Ver [`docs/DESIGN.md`](./docs/DESIGN.md) y [`docs/PRODUCT.md`](./docs/PRODUCT.md) para contexto de diseño detallado.
 
 ### Variables clave
 
@@ -248,32 +259,17 @@ Clases de utilidad globales definidas en `index.css`: `.shimmer` (skeleton de ca
 
 ## Filosofía de Diseño
 
-Welve no es un SaaS genérico — es la herramienta operativa de un salón premium. Referencia de feeling: la precisión de Linear, la calidez de una boutique, la confianza de un dashboard financiero moderno.
-
-**Contexto físico por rol:**
-- **Admin** — escritorio en el back-office; densidad informativa bienvenida, las métricas deben impactar de un vistazo
-- **Trabajador** — tablet entre tratamientos; vista limpia y de consulta rápida, sin ruido financiero
-- **Cliente** — móvil desde casa; experiencia premium y fluida, sin fricción de contraseñas
-
-**Anti-referencias** (lo que Welve explícitamente no es):
-- Fresha / Booksy: marketplaces coloridos y busy
-- Calendly genérico: scheduling sin identidad
-- SaaS-cream: fondo beige / border-radius exagerado / gradiente lila generado por IA
-- Tres cards iguales en fila — nunca en Welve
-
-**Principios aplicados:**
-1. Los números grandes mandan — KPIs en display bold, legibles de un vistazo
-2. Layout asimétrico con propósito — la grilla sirve al contenido, no al revés
-3. Movimiento que informa — animaciones de Framer Motion existen para mostrar estado, no decorar
-4. Violet con intención — `--accent` solo para acciones primarias y estado activo; `--turbo` solo para alertas y recompensas
-
-**Accesibilidad:** WCAG 2.1 AA — contraste mínimo 4.5:1 para cuerpo, 3:1 para texto grande y UI. Soporte `prefers-reduced-motion`.
+Movida a [`docs/PRODUCT.md`](./docs/PRODUCT.md) (perfiles de usuario, brand personality,
+anti-referencias, principios de diseño, accesibilidad a nivel de producto) y
+[`docs/DESIGN.md`](./docs/DESIGN.md) (el razonamiento detrás de los tokens de la tabla de
+arriba). Esta sección solo evita la duplicación — la tabla de variables CSS de este archivo
+sigue siendo la referencia técnica rápida para escribir código.
 
 ---
 
 ## Modelos de Datos
 
-Las relaciones se manejan con referencias UUID (no referencias nativas Beanie) para mantener consistencia con el diseño original.
+Las relaciones son foreign keys nativas de Postgres (UUID → UUID), no simples referencias manuales — a diferencia de la versión anterior sobre MongoDB, aquí la integridad referencial la garantiza la base de datos.
 
 ```
 Usuario       id, telefono(único), nombre_completo, correo, rol, esta_activo, acepta_whatsapp,
@@ -433,10 +429,25 @@ chore: actualizar dependencias
 - Magic link: marcar como `usado=true` al verificar; nunca reutilizar tokens
 - Rol del trabajador: no exponer datos financieros ni citas de otras especialistas
 - Comisión (RN15): solo registrar al completar cita, no implementar pago
-- **Citas — respuestas enriquecidas:** toda mutación de `Cita` (crear, cancelar, cambiar estado, registrar llegada) debe retornar `CitaResponse.model_validate(await citas_service.enriquecer_cita(cita))` — nunca `cita.model_dump()` directamente. `enriquecer_cita()` resuelve `nombre_cliente`, `nombre_especialista` y `nombre_servicio` en tres queries paralelos.
+- **Citas — respuestas enriquecidas:** toda mutación de `Cita` (crear, cancelar, cambiar estado, registrar llegada) debe retornar `CitaResponse.model_validate(await citas_service.enriquecer_cita(session, cita))` — nunca pasar el objeto ORM directo cuando falta enriquecer. `enriquecer_cita()` resuelve `nombre_cliente`, `nombre_especialista` y `nombre_servicio` en tres queries secuenciales (una `AsyncSession` no admite ejecutarlas en paralelo).
 - **Usuario `rol=cliente`:** `usuarios_service.crear()` inserta el `Usuario` **y** crea automáticamente el documento `Cliente` vinculado. Nunca crear uno sin el otro.
-- **Batch queries Beanie:** usar `beanie.operators.In` para cargar colecciones de documentos por lista de IDs (evita N+1). Ver patrón en `citas_service.listar_todas_con_nombres`.
+- **Batch queries SQLAlchemy:** usar `Modelo.columna.in_(lista_de_ids)` para cargar filas por lista de IDs en una sola query (evita N+1). Ver patrón en `citas_service.listar_todas_con_nombres`. **Una `AsyncSession` no admite ejecutar statements concurrentemente** (a diferencia de Motor/Beanie) — nunca usar `asyncio.gather` sobre varios `session.execute(...)` de la misma sesión; ejecutar siempre secuencialmente.
 - **Crear Personal:** `personal.service.ts:crearCompleto()` es un flujo de dos pasos — primero `POST /api/v1/admin/usuarios` (crea el `Usuario` con `rol=trabajador`), luego `POST /api/v1/admin/personal` con el `usuario_id` devuelto. El campo `correo_verificado` se resetea a `false` cada vez que se cambia el correo via `cambiar_correo()`.
 - **Editar credenciales de cliente:** `PATCH /api/v1/clientes/{id}` rechaza explícitamente campos `correo` y `password`; usar `PATCH /api/v1/admin/usuarios/{id}/correo` y `/password` en su lugar.
 - Frontend: usar siempre las CSS variables del sistema de diseño (`var(--accent)`, `var(--surface-sidebar)`, etc.) — no valores de color hardcodeados
 - `pages/LoginPage.tsx` (raíz) es un scaffold sin estilos del sistema — la página activa es `pages/auth/LoginPage.tsx`
+
+---
+
+## Más contexto (`docs/`)
+
+Este archivo cubre lo operativo (comandos, arquitectura de código, convenciones). Para el resto:
+
+- [`docs/README.md`](./docs/README.md) — índice de toda la documentación
+- [`docs/PRODUCT.md`](./docs/PRODUCT.md) — misión, visión, perfiles de usuario, brand y accesibilidad de producto
+- [`docs/DESIGN.md`](./docs/DESIGN.md) — el razonamiento detrás del sistema de diseño
+- [`docs/CASOS_DE_USO.md`](./docs/CASOS_DE_USO.md) y [`docs/REGLAS_DE_NEGOCIO.md`](./docs/REGLAS_DE_NEGOCIO.md) — detalle funcional completo, incluyendo módulos planeados
+- [`docs/ROLES_Y_PERMISOS.md`](./docs/ROLES_Y_PERMISOS.md) — matriz de permisos por rol (reemplaza la descripción de roles que antes vivía dispersa)
+- [`docs/FASES.md`](./docs/FASES.md) — roadmap: qué está hecho y qué es futuro
+- [`docs/MODULO_ASESORIA_IA.md`](./docs/MODULO_ASESORIA_IA.md) y [`docs/MODULO_FIDELIZACION_AVANZADA.md`](./docs/MODULO_FIDELIZACION_AVANZADA.md) — especificación de los dos módulos nuevos planeados (no implementados aún)
+- [`docs/DEPENDENCIAS.md`](./docs/DEPENDENCIAS.md) — estado y verificación de dependencias

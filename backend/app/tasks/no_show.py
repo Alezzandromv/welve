@@ -1,58 +1,32 @@
 import asyncio
+from datetime import timedelta
 
-import motor.motor_asyncio
-from beanie import init_beanie
+from sqlalchemy import update
 
-from app.core.config import settings
+from app.models.cita import Cita
+from app.models.enums import EstadoCita
 from app.tasks import celery_app
+from app.tasks.db import get_task_sessionmaker
+from app.utils.timezone import ahora_lima
 
 
 async def _verificar_no_show_async() -> None:
-    from datetime import timedelta
+    umbral = ahora_lima() - timedelta(minutes=15)
 
-    from app.models import (
-        Categoria,
-        Cita,
-        CitaServicio,
-        Cliente,
-        Descuento,
-        DescuentoUso,
-        DisponibilidadPersonal,
-        FichaSalud,
-        MagicLink,
-        Pago,
-        Personal,
-        Reto,
-        Servicio,
-        Usuario,
-    )
-    from app.utils.timezone import ahora_lima
-
-    client = motor.motor_asyncio.AsyncIOMotorClient(settings.mongodb_url)
-    await init_beanie(
-        database=client[settings.database_name],
-        document_models=[
-            Usuario, Personal, DisponibilidadPersonal, Cliente, FichaSalud,
-            Categoria, Servicio, Cita, CitaServicio, Pago,
-            Descuento, Reto, DescuentoUso, MagicLink,
-        ],
-    )
-
-    ahora = ahora_lima()
-    umbral = ahora - timedelta(minutes=15)
-
-    # RN05: citas confirmadas que pasaron 15min sin hora_llegada_real
-    citas = await Cita.find(
-        Cita.estado == "confirmada",
-        Cita.programada_en <= umbral,
-    ).to_list()
-
-    for cita in citas:
-        if cita.hora_llegada_real is not None:
-            continue
-        cita.estado = "no_show"
-        cita.penalizacion_aplicada = True
-        await cita.save()
+    # RN05: citas confirmadas que pasaron 15min sin hora_llegada_real — colapsado a un
+    # solo UPDATE (antes: fetch + loop + save por cada Cita).
+    Session = get_task_sessionmaker()
+    async with Session() as session:
+        await session.execute(
+            update(Cita)
+            .where(
+                Cita.estado == EstadoCita.confirmada,
+                Cita.programada_en <= umbral,
+                Cita.hora_llegada_real.is_(None),
+            )
+            .values(estado=EstadoCita.no_show, penalizacion_aplicada=True)
+        )
+        await session.commit()
 
 
 @celery_app.task(name="app.tasks.no_show.verificar_no_show")

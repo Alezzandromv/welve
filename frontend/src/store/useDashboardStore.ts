@@ -38,7 +38,7 @@ export const useDashboardStore = create<DashboardState>((set) => ({
         personalActivo: personalData.filter((p) => p.esta_activo),
         cargando: false,
       });
-    } catch (error) {
+    } catch {
       set({ error: 'No se pudieron cargar los datos del dashboard.', cargando: false });
     }
   },

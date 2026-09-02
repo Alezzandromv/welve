@@ -41,7 +41,7 @@ def decodificar_token(token: str) -> dict:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido o expirado",
-        )
+        ) from None
 
 
 async def obtener_usuario_actual(

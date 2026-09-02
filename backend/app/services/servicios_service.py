@@ -3,6 +3,8 @@ from uuid import UUID
 from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.cita import Cita
 from app.models.personal import DisponibilidadPersonal, Personal
@@ -25,32 +27,35 @@ _DIA_PYTHON_A_MODELO = {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 0}
 _ESTADOS_BLOQUEADOS: set[str] = {"cancelada", "cancelada_tardia", "no_show"}
 
 
-async def listar(categoria_id: UUID | None = None, incluir_inactivos: bool = False) -> list[Servicio]:
-    filtros = []
+async def listar(session: AsyncSession, categoria_id: UUID | None = None, incluir_inactivos: bool = False) -> list[Servicio]:
+    stmt = select(Servicio)
     if categoria_id:
-        filtros.append(Servicio.categoria_id == categoria_id)
+        stmt = stmt.where(Servicio.categoria_id == categoria_id)
     if not incluir_inactivos:
-        filtros.append(Servicio.esta_activo == True)
-    return await Servicio.find(*filtros).to_list()
+        stmt = stmt.where(Servicio.esta_activo)
+    return list((await session.execute(stmt)).scalars().all())
 
 
-async def listar_categorias() -> list[Categoria]:
-    return (
-        await Categoria.find(Categoria.esta_activo == True)
-        .sort("+orden_visualizacion")
-        .to_list()
+async def listar_categorias(session: AsyncSession) -> list[Categoria]:
+    stmt = (
+        select(Categoria)
+        .where(Categoria.esta_activo)
+        .order_by(Categoria.orden_visualizacion.asc())
     )
+    return list((await session.execute(stmt)).scalars().all())
 
 
-async def calcular_disponibilidad(servicio_id: UUID, fecha: date) -> list[DisponibilidadResponse]:
-    servicio = await Servicio.get(servicio_id)
+async def calcular_disponibilidad(session: AsyncSession, servicio_id: UUID, fecha: date) -> list[DisponibilidadResponse]:
+    servicio = await session.get(Servicio, servicio_id)
     if not servicio:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Servicio no encontrado")
 
     duracion = timedelta(minutes=servicio.duracion_minutos)
     dia_modelo = _DIA_PYTHON_A_MODELO[fecha.weekday()]
 
-    personal_activo = await Personal.find(Personal.esta_activo == True).to_list()
+    personal_activo = list(
+        (await session.execute(select(Personal).where(Personal.esta_activo))).scalars().all()
+    )
     if not personal_activo:
         return []
 
@@ -59,36 +64,36 @@ async def calcular_disponibilidad(servicio_id: UUID, fecha: date) -> list[Dispon
     resultados: list[DisponibilidadResponse] = []
 
     for personal in personal_activo:
-        disponibilidades = await DisponibilidadPersonal.find(
+        stmt = select(DisponibilidadPersonal).where(
             DisponibilidadPersonal.personal_id == personal.id,
             DisponibilidadPersonal.dia_semana == dia_modelo,
-            DisponibilidadPersonal.esta_activo == True,
-        ).to_list()
+            DisponibilidadPersonal.esta_activo,
+        )
+        disponibilidades = list((await session.execute(stmt)).scalars().all())
 
         if not disponibilidades:
             continue
 
         buffer = timedelta(minutes=disponibilidades[0].minutos_buffer)
 
-        citas_dia = await Cita.find(
+        stmt_citas = select(Cita).where(
             Cita.personal_id == personal.id,
             Cita.programada_en >= inicio_dia,
             Cita.programada_en < fin_dia,
-        ).to_list()
+        )
+        citas_dia = list((await session.execute(stmt_citas)).scalars().all())
         citas_activas = [c for c in citas_dia if c.estado not in _ESTADOS_BLOQUEADOS]
 
         horarios: list[HorarioDisponible] = []
         for disp in disponibilidades:
-            h_ini, m_ini = (int(x) for x in disp.hora_inicio.split(":")[:2])
-            h_fin, m_fin = (int(x) for x in disp.hora_fin.split(":")[:2])
             bloque_inicio = datetime(
                 fecha.year, fecha.month, fecha.day,
-                h_ini, m_ini,
+                disp.hora_inicio.hour, disp.hora_inicio.minute,
                 tzinfo=LIMA_TZ,
             )
             bloque_fin = datetime(
                 fecha.year, fecha.month, fecha.day,
-                h_fin, m_fin,
+                disp.hora_fin.hour, disp.hora_fin.minute,
                 tzinfo=LIMA_TZ,
             )
 
@@ -112,16 +117,17 @@ async def calcular_disponibilidad(servicio_id: UUID, fecha: date) -> list[Dispon
 
 # ── Admin ─────────────────────────────────────────────────────────────────────
 
-async def actualizar_categoria(categoria_id: UUID, body: ActualizarCategoriaRequest) -> Categoria:
-    categoria = await Categoria.get(categoria_id)
+async def actualizar_categoria(session: AsyncSession, categoria_id: UUID, body: ActualizarCategoriaRequest) -> Categoria:
+    categoria = await session.get(Categoria, categoria_id)
     if not categoria:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoría no encontrada")
 
     if body.esta_activo is False:
-        servicios_activos = await Servicio.find(
+        stmt = select(func.count()).select_from(Servicio).where(
             Servicio.categoria_id == categoria_id,
-            Servicio.esta_activo == True,
-        ).count()
+            Servicio.esta_activo,
+        )
+        servicios_activos = (await session.execute(stmt)).scalar_one()
         if servicios_activos > 0:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -129,7 +135,7 @@ async def actualizar_categoria(categoria_id: UUID, body: ActualizarCategoriaRequ
             )
 
     if body.nombre and body.nombre != categoria.nombre:
-        existente = await Categoria.find_one(Categoria.nombre == body.nombre)
+        existente = (await session.execute(select(Categoria).where(Categoria.nombre == body.nombre))).scalar_one_or_none()
         if existente:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -139,34 +145,36 @@ async def actualizar_categoria(categoria_id: UUID, body: ActualizarCategoriaRequ
     datos = body.model_dump(exclude_none=True)
     for campo, valor in datos.items():
         setattr(categoria, campo, valor)
-    await categoria.save()
+    await session.flush()
     return categoria
 
 
-async def crear_categoria(body: CrearCategoriaRequest) -> Categoria:
-    existente = await Categoria.find_one(Categoria.nombre == body.nombre)
+async def crear_categoria(session: AsyncSession, body: CrearCategoriaRequest) -> Categoria:
+    existente = (await session.execute(select(Categoria).where(Categoria.nombre == body.nombre))).scalar_one_or_none()
     if existente:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Ya existe una categoría con ese nombre",
         )
     categoria = Categoria(**body.model_dump())
-    await categoria.insert()
+    session.add(categoria)
+    await session.flush()
     return categoria
 
 
-async def crear_servicio(body: CrearServicioRequest) -> Servicio:
-    categoria = await Categoria.get(body.categoria_id)
+async def crear_servicio(session: AsyncSession, body: CrearServicioRequest) -> Servicio:
+    categoria = await session.get(Categoria, body.categoria_id)
     if not categoria or not categoria.esta_activo:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoría no encontrada o inactiva")
 
     servicio = Servicio(**body.model_dump())
-    await servicio.insert()
+    session.add(servicio)
+    await session.flush()
     return servicio
 
 
-async def actualizar_servicio(servicio_id: UUID, body: ActualizarServicioRequest) -> Servicio:
-    servicio = await Servicio.get(servicio_id)
+async def actualizar_servicio(session: AsyncSession, servicio_id: UUID, body: ActualizarServicioRequest) -> Servicio:
+    servicio = await session.get(Servicio, servicio_id)
     if not servicio:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Servicio no encontrado")
 
@@ -174,5 +182,5 @@ async def actualizar_servicio(servicio_id: UUID, body: ActualizarServicioRequest
     for campo, valor in datos.items():
         setattr(servicio, campo, valor)
 
-    await servicio.save()
+    await session.flush()
     return servicio

@@ -1,0 +1,23 @@
+[tool.ruff]
+# El estilo ya establecido en el proyecto favorece one-liners densos en routers/services
+# (máximo real observado: 143 caracteres) — 150 acomoda eso sin forzar un reformateo masivo
+# que no aporta nada funcional.
+line-length = 150
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "SIM", "UP"]
+
+[tool.ruff.lint.flake8-bugbear]
+# `Depends(...)`/`Query(...)`/etc. en defaults de argumento son el patrón idiomático de
+# FastAPI para declarar dependencias — no el antipatrón de "mutable default" que B008 detecta
+# en general. Sin este ajuste, ruff marca como error cada uno de los endpoints del proyecto.
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Body",
+    "fastapi.Header",
+    "fastapi.Cookie",
+    "fastapi.Form",
+    "fastapi.File",
+]

@@ -41,9 +41,9 @@ const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const schemaServicio = z.object({
   nombre:                        z.string().min(2, 'Mínimo 2 caracteres'),
   categoria_id:                  z.string().min(1, 'Selecciona una categoría'),
-  duracion_minutos:              z.number({ invalid_type_error: 'Ingresa un número' }).min(5, 'Mínimo 5 min').max(240, 'Máximo 240 min'),
-  precio:                        z.number({ invalid_type_error: 'Ingresa un número' }).positive('El precio debe ser mayor a 0'),
-  monto_deposito:                z.number({ invalid_type_error: 'Ingresa un número' }).min(0, 'No puede ser negativo'),
+  duracion_minutos:              z.number({ error: 'Ingresa un número' }).min(5, 'Mínimo 5 min').max(240, 'Máximo 240 min'),
+  precio:                        z.number({ error: 'Ingresa un número' }).positive('El precio debe ser mayor a 0'),
+  monto_deposito:                z.number({ error: 'Ingresa un número' }).min(0, 'No puede ser negativo'),
   requiere_ficha_salud:          z.boolean(),
   horas_cancelacion_sin_penalidad: z.number().int().min(1).max(24),
   esta_activo:                   z.boolean(),

@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CrearDescuentoRequest(BaseModel):
@@ -19,6 +19,8 @@ class CrearDescuentoRequest(BaseModel):
 
 
 class DescuentoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     nombre: str
     descripcion: str | None
@@ -49,6 +51,8 @@ class CrearRetoRequest(BaseModel):
 
 
 class RetoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     nombre: str
     descripcion_visible: str
@@ -61,6 +65,8 @@ class RetoResponse(BaseModel):
 
 
 class DescuentoUsoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     descuento_id: UUID
     cliente_id: UUID

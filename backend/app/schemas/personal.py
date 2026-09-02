@@ -1,7 +1,8 @@
-from datetime import date, time as _Time
+from datetime import date
+from datetime import time as _Time
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class CrearPersonalRequest(BaseModel):
@@ -35,6 +36,8 @@ class ActualizarPersonalRequest(BaseModel):
 
 
 class PersonalResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     usuario_id: UUID
     especialidad: str
@@ -70,6 +73,8 @@ class CrearDisponibilidadRequest(BaseModel):
 
 
 class DisponibilidadPersonalResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     personal_id: UUID
     dia_semana: int

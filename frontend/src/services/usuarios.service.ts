@@ -14,7 +14,7 @@ export const usuariosService = {
 
   async actualizarUsuario(
     id: string,
-    datos: { nombre_completo?: string; telefono?: string; esta_activo?: boolean },
+    datos: { nombre_completo?: string; telefono?: string | null; esta_activo?: boolean },
   ): Promise<IUsuarioAdmin> {
     const { data } = await api.patch<IUsuarioAdmin>(`/api/v1/admin/usuarios/${id}`, datos);
     return data;

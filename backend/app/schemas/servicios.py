@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CrearCategoriaRequest(BaseModel):
@@ -13,6 +13,8 @@ class CrearCategoriaRequest(BaseModel):
 
 
 class CategoriaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     nombre: str
     descripcion: str | None
@@ -54,6 +56,8 @@ class ActualizarServicioRequest(BaseModel):
 
 
 class ServicioResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     categoria_id: UUID
     nombre: str

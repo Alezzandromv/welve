@@ -1084,10 +1084,11 @@ export default function Dashboard() {
   const usuario  = useAuthStore(s => s.usuario);
   const { data, loading, error, refetch } = useDashboardData();
 
-  const reduced = useRef(
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  ).current;
+  // Leer refs durante el render está prohibido (react-hooks/refs) — un estado con
+  // inicializador perezoso da el mismo "calculado una sola vez" sin ese problema.
+  const [reduced] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
 
   const hoy       = fechaLima();
   const mesActual = new Date()

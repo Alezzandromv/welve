@@ -1,73 +1,32 @@
-# React + TypeScript + Vite
+# Welve — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite. Ver `../CLAUDE.md` (raíz del repo) para el detalle completo de
+arquitectura, convenciones y comandos — este archivo es solo un mapa rápido de `src/`.
 
-Currently, two official plugins are available:
+## Comandos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev          # servidor de desarrollo (proxy /api → localhost:8000)
+npm run build        # build de producción (incluye type check)
+npx tsc --noEmit      # solo type check
+npm run lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Estructura de `src/`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `pages/auth/` — login y registro de staff (magic link para clientes vive en `pages/`)
+- `pages/admin/` — rutas anidadas bajo `AdminLayout`
+- `pages/worker/` — vista de agenda para trabajador (y admin)
+- `pages/client/` — reservar y ver citas, solo rol cliente
+- `components/` — componentes compartidos (`ProtectedRoute`, calendario, etc.)
+- `store/` — Zustand (`useAuthStore` con persist, `useDashboardStore` sin persist)
+- `services/` — llamadas Axios a la API, un archivo por recurso
+- `types/` — interfaces con prefijo `I`, un archivo por dominio
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Alias `@/` → `./src/` (configurado en `vite.config.ts`).
+
+## Sistema de diseño
+
+Variables CSS en `src/index.css` — nunca usar valores de color arbitrarios. Ver
+`../docs/DESIGN.md` para el razonamiento detrás de los tokens.

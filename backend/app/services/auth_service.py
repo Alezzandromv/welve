@@ -2,26 +2,37 @@ from datetime import timedelta
 from uuid import UUID
 
 from fastapi import HTTPException, status
+from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.security import crear_access_token, hash_password, verificar_password
 from app.models.auth import MagicLink
 from app.models.cliente import Cliente
+from app.models.enums import RolUsuario
 from app.models.usuario import Usuario
 from app.utils.timezone import ahora_lima
 from app.utils.whatsapp import enviar_mensaje
 
 
-async def solicitar_magic_link(telefono: str) -> dict:
-    usuario = await Usuario.find_one(Usuario.telefono == telefono)
+async def solicitar_magic_link(session: AsyncSession, telefono: str) -> dict:
+    usuario = (await session.execute(select(Usuario).where(Usuario.telefono == telefono))).scalar_one_or_none()
     if not usuario:
         usuario = Usuario(
             telefono=telefono,
             nombre_completo=telefono,
-            rol="cliente",
+            rol=RolUsuario.cliente,
         )
-        await usuario.insert()
-        await Cliente(usuario_id=usuario.id).insert()
+        session.add(usuario)
+        try:
+            await session.flush()
+            session.add(Cliente(usuario_id=usuario.id))
+            await session.flush()
+        except IntegrityError:
+            # Carrera: otro request registró el mismo teléfono primero.
+            await session.rollback()
+            usuario = (await session.execute(select(Usuario).where(Usuario.telefono == telefono))).scalar_one()
 
     if not usuario.esta_activo:
         raise HTTPException(
@@ -34,7 +45,8 @@ async def solicitar_magic_link(telefono: str) -> dict:
         usuario_id=usuario.id,
         expira_en=ahora + timedelta(hours=1),
     )
-    await link.insert()
+    session.add(link)
+    await session.flush()
 
     url = f"{settings.app_url}/auth?token={link.token}"
     if usuario.acepta_whatsapp:
@@ -47,16 +59,16 @@ async def solicitar_magic_link(telefono: str) -> dict:
     return {"mensaje": "Enlace enviado por WhatsApp"}
 
 
-async def verificar_magic_link(token_str: str) -> dict:
+async def verificar_magic_link(session: AsyncSession, token_str: str) -> dict:
     try:
         token_uuid = UUID(token_str)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Token inválido",
-        )
+        ) from None
 
-    link = await MagicLink.find_one(MagicLink.token == token_uuid)
+    link = (await session.execute(select(MagicLink).where(MagicLink.token == token_uuid))).scalar_one_or_none()
     if not link:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -75,27 +87,37 @@ async def verificar_magic_link(token_str: str) -> dict:
             detail="Token expirado",
         )
 
-    # Marcar como usado — nunca reutilizar
-    link.usado = True
-    await link.save()
+    # UPDATE atómico condicionado a usado=false — evita reuso concurrente del mismo token
+    # (equivalente relacional del antiguo patrón read-then-write).
+    resultado = await session.execute(
+        update(MagicLink)
+        .where(MagicLink.id == link.id, MagicLink.usado.is_(False))
+        .values(usado=True)
+        .returning(MagicLink.usuario_id)
+    )
+    fila = resultado.first()
+    if fila is None:
+        raise HTTPException(status_code=status.HTTP_410_GONE, detail="Token ya utilizado")
+    usuario_id = fila.usuario_id
 
-    usuario = await Usuario.get(link.usuario_id)
+    usuario = await session.get(Usuario, usuario_id)
     if not usuario:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Usuario no encontrado",
         )
 
-    token = crear_access_token(usuario.id, usuario.rol, usuario.nombre_completo)
+    token = crear_access_token(usuario.id, usuario.rol.value, usuario.nombre_completo)
     return {
         "access_token": token,
         "token_type": "bearer",
-        "rol": usuario.rol,
+        "rol": usuario.rol.value,
         "nombre": usuario.nombre_completo,
     }
 
 
 async def registrar_staff(
+    session: AsyncSession,
     nombre_completo: str,
     correo: str,
     contrasena: str,
@@ -107,7 +129,7 @@ async def registrar_staff(
             detail="Solo se puede registrar personal con rol admin o trabajador",
         )
 
-    existente = await Usuario.find_one(Usuario.correo == correo)
+    existente = (await session.execute(select(Usuario).where(Usuario.correo == correo))).scalar_one_or_none()
     if existente:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -118,22 +140,23 @@ async def registrar_staff(
         nombre_completo=nombre_completo,
         correo=correo,
         hashed_password=hash_password(contrasena),
-        rol=rol,
+        rol=RolUsuario(rol),
     )
-    await usuario.insert()
+    session.add(usuario)
+    await session.flush()
 
-    token = crear_access_token(usuario.id, usuario.rol, usuario.nombre_completo)
+    token = crear_access_token(usuario.id, usuario.rol.value, usuario.nombre_completo)
     return {
         "access_token": token,
         "token_type": "bearer",
-        "rol": usuario.rol,
+        "rol": usuario.rol.value,
         "nombre_completo": usuario.nombre_completo,
         "usuario_id": str(usuario.id),
     }
 
 
-async def login_staff(correo: str, contrasena: str) -> dict:
-    usuario = await Usuario.find_one(Usuario.correo == correo)
+async def login_staff(session: AsyncSession, correo: str, contrasena: str) -> dict:
+    usuario = (await session.execute(select(Usuario).where(Usuario.correo == correo))).scalar_one_or_none()
 
     if not usuario or usuario.hashed_password is None:
         raise HTTPException(
@@ -153,18 +176,18 @@ async def login_staff(correo: str, contrasena: str) -> dict:
             detail="Cuenta inactiva",
         )
 
-    token = crear_access_token(usuario.id, usuario.rol, usuario.nombre_completo)
+    token = crear_access_token(usuario.id, usuario.rol.value, usuario.nombre_completo)
     return {
         "access_token": token,
         "token_type": "bearer",
-        "rol": usuario.rol,
+        "rol": usuario.rol.value,
         "nombre_completo": usuario.nombre_completo,
         "usuario_id": str(usuario.id),
     }
 
 
-async def obtener_perfil(user_id: str) -> Usuario:
-    usuario = await Usuario.get(UUID(user_id))
+async def obtener_perfil(session: AsyncSession, user_id: str) -> Usuario:
+    usuario = await session.get(Usuario, UUID(user_id))
     if not usuario:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -173,8 +196,10 @@ async def obtener_perfil(user_id: str) -> Usuario:
     return usuario
 
 
-async def actualizar_perfil(user_id: UUID, nombre_completo: str | None, correo: str | None, telefono: str | None) -> Usuario:
-    usuario = await Usuario.get(user_id)
+async def actualizar_perfil(
+    session: AsyncSession, user_id: UUID, nombre_completo: str | None, correo: str | None, telefono: str | None
+) -> Usuario:
+    usuario = await session.get(Usuario, user_id)
     if not usuario:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
 
@@ -182,7 +207,7 @@ async def actualizar_perfil(user_id: UUID, nombre_completo: str | None, correo: 
         usuario.nombre_completo = nombre_completo.strip()
 
     if correo is not None:
-        existente = await Usuario.find_one(Usuario.correo == correo)
+        existente = (await session.execute(select(Usuario).where(Usuario.correo == correo))).scalar_one_or_none()
         if existente and existente.id != user_id:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El correo ya está registrado por otro usuario")
         usuario.correo = correo
@@ -190,18 +215,18 @@ async def actualizar_perfil(user_id: UUID, nombre_completo: str | None, correo: 
     if telefono is not None:
         telefono_val = telefono.strip() or None
         if telefono_val:
-            existente = await Usuario.find_one(Usuario.telefono == telefono_val)
+            existente = (await session.execute(select(Usuario).where(Usuario.telefono == telefono_val))).scalar_one_or_none()
             if existente and existente.id != user_id:
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El teléfono ya está registrado por otro usuario")
         usuario.telefono = telefono_val
 
     usuario.actualizado_en = ahora_lima()
-    await usuario.save()
+    await session.flush()
     return usuario
 
 
-async def cambiar_password(user_id: UUID, password_actual: str, password_nueva: str) -> dict:
-    usuario = await Usuario.get(user_id)
+async def cambiar_password(session: AsyncSession, user_id: UUID, password_actual: str, password_nueva: str) -> dict:
+    usuario = await session.get(Usuario, user_id)
     if not usuario:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
 
@@ -216,5 +241,5 @@ async def cambiar_password(user_id: UUID, password_actual: str, password_nueva: 
 
     usuario.hashed_password = hash_password(password_nueva)
     usuario.actualizado_en = ahora_lima()
-    await usuario.save()
+    await session.flush()
     return {"mensaje": "Contraseña actualizada correctamente"}

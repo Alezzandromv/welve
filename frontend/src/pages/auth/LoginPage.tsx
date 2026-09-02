@@ -100,16 +100,18 @@ export default function LoginPage() {
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
   const [mostrarContrasena, setMostrarContrasena] = useState(false);
 
-  if (estaAutenticado()) {
-    navigate("/", { replace: true });
-    return null;
-  }
-
+  // Los hooks deben llamarse siempre en el mismo orden — el return condicional va
+  // después de todos los hooks, nunca antes (react-hooks/rules-of-hooks).
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+  if (estaAutenticado()) {
+    navigate("/", { replace: true });
+    return null;
+  }
 
   async function onSubmit(data: FormValues) {
     setErrorGeneral(null);
@@ -126,6 +128,8 @@ export default function LoginPage() {
         rol: resultado.rol,
         foto_perfil_url: null,
         acepta_whatsapp: true,
+        fecha_creacion: null,
+        ultimo_acceso: null,
       };
       setAuth(resultado.access_token, usuarioParcial);
       if (resultado.rol === "admin") navigate("/admin");

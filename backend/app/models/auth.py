@@ -1,26 +1,25 @@
+import uuid
 from datetime import datetime
-from uuid import UUID, uuid4
 
-from beanie import Document
-from pydantic import Field, field_validator
+import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.orm import Mapped, mapped_column
 
-from app.utils.timezone import a_lima, ahora_lima
+from app.models.base import Base
+from app.utils.timezone import ahora_lima
 
 
-class MagicLink(Document):
-    id: UUID = Field(default_factory=uuid4)
-    usuario_id: UUID
-    token: UUID = Field(default_factory=uuid4)
-    expira_en: datetime  # fijado por auth_service: ahora_lima() + timedelta(hours=1)
-    usado: bool = False
-    fecha_creacion: datetime = Field(default_factory=ahora_lima)
+class MagicLink(Base):
+    __tablename__ = "magic_links"
+    __table_args__ = (
+        sa.Index("ux_magic_links_token", "token", unique=True),
+    )
 
-    @field_validator("expira_en", "fecha_creacion", mode="before")
-    @classmethod
-    def _normalizar_tz(cls, v: object) -> object:
-        if isinstance(v, datetime) and v.tzinfo is None:
-            return a_lima(v)
-        return v
-
-    class Settings:
-        name = "magic_links"
+    id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    usuario_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True), sa.ForeignKey("usuarios.id"), nullable=False
+    )
+    token: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), default=uuid.uuid4, nullable=False)
+    expira_en: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=False)
+    usado: Mapped[bool] = mapped_column(sa.Boolean, default=False, nullable=False)
+    fecha_creacion: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), default=ahora_lima, nullable=False)

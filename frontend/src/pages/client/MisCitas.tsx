@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, LogOut, Plus, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -103,7 +103,9 @@ function CitaCard({ cita, onCancelar }: { cita: ICitaCliente; onCancelar?: () =>
 }
 
 export default function ClienteCitas() {
-  const reducedMotion = useRef(window.matchMedia('(prefers-reduced-motion: reduce)').matches).current;
+  // Leer refs durante el render está prohibido (react-hooks/refs) — un estado con
+  // inicializador perezoso da el mismo "calculado una sola vez" sin ese problema.
+  const [reducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const nombre = useAuthStore((s) => s.usuario?.nombre_completo);
   const cerrarSesion = useAuthStore((s) => s.cerrarSesion);
   const navigate = useNavigate();

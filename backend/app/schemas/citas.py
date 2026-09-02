@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class CrearCitaRequest(BaseModel):
@@ -34,6 +34,8 @@ class RegistrarLlegadaRequest(BaseModel):
 
 
 class CitaServicioResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     servicio_id: UUID
     precio_unitario: float
@@ -41,6 +43,8 @@ class CitaServicioResponse(BaseModel):
 
 
 class CitaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     cliente_id: UUID
     personal_id: UUID

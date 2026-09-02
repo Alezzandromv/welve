@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, Clock, LogOut, Tag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -379,7 +379,9 @@ function PasoExito({ onVolver }: { onVolver: () => void }) {
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function ClienteReservar() {
-  const reducedMotion = useRef(window.matchMedia('(prefers-reduced-motion: reduce)').matches).current;
+  // Leer refs durante el render está prohibido (react-hooks/refs) — un estado con
+  // inicializador perezoso da el mismo "calculado una sola vez" sin ese problema.
+  const [reducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const cerrarSesion = useAuthStore((s) => s.cerrarSesion);
   const navigate = useNavigate();
 

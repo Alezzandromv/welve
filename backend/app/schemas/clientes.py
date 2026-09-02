@@ -1,7 +1,7 @@
-from datetime import date, datetime
+from datetime import date
 from uuid import UUID
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
 
 class FichaSaludRequest(BaseModel):
@@ -11,6 +11,8 @@ class FichaSaludRequest(BaseModel):
 
 
 class FichaSaludResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     tipo_restriccion: str
     descripcion: str
@@ -19,6 +21,8 @@ class FichaSaludResponse(BaseModel):
 
 
 class ClienteResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     usuario_id: UUID
     fecha_nacimiento: date | None

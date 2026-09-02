@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CrearPagoRequest(BaseModel):
@@ -18,6 +18,8 @@ class ConfirmarPagoRequest(BaseModel):
 
 
 class PagoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     cita_id: UUID
     cliente_id: UUID

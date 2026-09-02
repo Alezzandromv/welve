@@ -1,63 +1,38 @@
 import asyncio
+from uuid import UUID
 
-import motor.motor_asyncio
-from beanie import init_beanie
-
-from app.core.config import settings
+from app.models.cita import Cita
+from app.models.cliente import Cliente
+from app.models.usuario import Usuario
 from app.tasks import celery_app
+from app.tasks.db import get_task_sessionmaker
+from app.utils.whatsapp import enviar_mensaje
 
 
 async def _enviar_recordatorio(cita_id: str, horas: int) -> None:
-    from app.models import (
-        Categoria,
-        Cita,
-        CitaServicio,
-        Cliente,
-        Descuento,
-        DescuentoUso,
-        DisponibilidadPersonal,
-        FichaSalud,
-        MagicLink,
-        Pago,
-        Personal,
-        Reto,
-        Servicio,
-        Usuario,
-    )
-    from app.utils.whatsapp import enviar_mensaje
-    from uuid import UUID
+    Session = get_task_sessionmaker()
+    async with Session() as session:
+        cita = await session.get(Cita, UUID(cita_id))
+        if not cita or cita.estado not in ("pendiente", "confirmada"):
+            return
 
-    client = motor.motor_asyncio.AsyncIOMotorClient(settings.mongodb_url)
-    await init_beanie(
-        database=client[settings.database_name],
-        document_models=[
-            Usuario, Personal, DisponibilidadPersonal, Cliente, FichaSalud,
-            Categoria, Servicio, Cita, CitaServicio, Pago,
-            Descuento, Reto, DescuentoUso, MagicLink,
-        ],
-    )
+        cliente = await session.get(Cliente, cita.cliente_id)
+        if not cliente:
+            return
 
-    cita = await Cita.get(UUID(cita_id))
-    if not cita or cita.estado not in ("pendiente", "confirmada"):
-        return
+        usuario = await session.get(Usuario, cliente.usuario_id)
+        if not usuario or not usuario.acepta_whatsapp or not usuario.telefono:
+            return
 
-    cliente = await Cliente.get(cita.cliente_id)
-    if not cliente:
-        return
-
-    usuario = await Usuario.get(cliente.usuario_id)
-    if not usuario or not usuario.acepta_whatsapp or not usuario.telefono:
-        return
-
-    hora_str = cita.programada_en.strftime("%H:%M")
-    fecha_str = cita.programada_en.strftime("%d/%m/%Y")
-    mensaje = (
-        f"Hola {usuario.nombre_completo.split()[0]}! 🌸 "
-        f"Te recordamos tu cita en Eunoia Beauty Salon "
-        f"el {fecha_str} a las {hora_str}. "
-        f"¿Necesitas cancelar o reagendar? Contáctanos con anticipación."
-    )
-    await enviar_mensaje(usuario.telefono, mensaje)
+        hora_str = cita.programada_en.strftime("%H:%M")
+        fecha_str = cita.programada_en.strftime("%d/%m/%Y")
+        mensaje = (
+            f"Hola {usuario.nombre_completo.split()[0]}! 🌸 "
+            f"Te recordamos tu cita en Eunoia Beauty Salon "
+            f"el {fecha_str} a las {hora_str}. "
+            f"¿Necesitas cancelar o reagendar? Contáctanos con anticipación."
+        )
+        await enviar_mensaje(usuario.telefono, mensaje)
 
 
 def _run_async(coro) -> None:

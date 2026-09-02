@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, LogOut, Plus } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -54,7 +54,9 @@ function esHoy(d: Date) {
 
 export default function TrabajadorAgenda() {
   const [fecha, setFecha] = useState(new Date());
-  const reducedMotion = useRef(window.matchMedia('(prefers-reduced-motion: reduce)').matches).current;
+  // Leer refs durante el render está prohibido (react-hooks/refs) — un estado con
+  // inicializador perezoso da el mismo "calculado una sola vez" sin ese problema.
+  const [reducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const nombre = useAuthStore((s) => s.usuario?.nombre_completo);
   const cerrarSesion = useAuthStore((s) => s.cerrarSesion);
 

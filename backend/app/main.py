@@ -4,14 +4,24 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.core.database import init_db
-from app.routers import admin, auth, citas, clientes, fidelizacion, servicios, trabajador, usuarios
+from app.core.database import engine, verificar_conexion
+from app.routers import (
+    admin,
+    auth,
+    citas,
+    clientes,
+    fidelizacion,
+    servicios,
+    trabajador,
+    usuarios,
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
+    await verificar_conexion()
     yield
+    await engine.dispose()
 
 
 app = FastAPI(
