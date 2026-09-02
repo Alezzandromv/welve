@@ -53,33 +53,71 @@ que invocan al sistema, sin iniciativa de negocio propia).
 - **Casos de uso que inicia**: CU-A01–CU-A08, más todos los de Trabajador sobre cualquier
   especialista.
 
+### Diagrama de contexto (actores × sistema)
+
+Notación **C4 Model — Nivel 1 (System Context Diagram)**, el estándar profesional actual para
+representar actores humanos y sistemas externos alrededor de un sistema (equivalente formal al
+diagrama de actores de UML, con la ventaja de distinguir explícitamente actor humano
+(`Person`) de sistema externo (`System_Ext`) y de mostrar el límite del sistema (`System`) sin
+ambigüedad:
+
 ```mermaid
-flowchart TB
-    subgraph Primarios["Actores primarios (humanos)"]
-        Cliente["🧑 Cliente"]
-        Trabajador["🧑‍🔧 Trabajador / Especialista"]
-        Admin["🧑‍💼 Administrador"]
-    end
+C4Context
+    title Diagrama de Contexto — Welve (Eunoia Beauty Salon)
 
-    subgraph Secundarios["Actores secundarios (sistemas)"]
-        WhatsApp["📱 WhatsApp Business API<br/>(Meta Cloud API)"]
-        Gemini["🤖 Motor de IA<br/>(Gemini) — planeado"]
-        Culqi["💳 Pasarela de Pago<br/>(Culqi) — planeado"]
-        Beat["⏱️ Programador de Tareas<br/>(Celery Beat)"]
-    end
+    Person(cliente, "Cliente", "Reserva y recibe servicios de belleza")
+    Person(trabajador, "Trabajador / Especialista", "Ejecuta los servicios en el salón")
+    Person(admin, "Administrador", "Gestiona operación, finanzas y configuración")
 
-    Trabajador -. "generaliza" .-> Admin
+    System(welve, "Sistema Welve", "Gestión de citas, pagos, clientas y fidelización")
 
-    Cliente -->|recibe enlace de acceso| WhatsApp
-    Cliente -->|sube foto para análisis| Gemini
-    Cliente -->|paga catálogo exclusivo| Culqi
-    Trabajador -->|inicia análisis en vivo| Gemini
-    Beat -->|marca no-show, recalcula niveles| Sistema[("Sistema Welve")]
-    Admin -->|configura límites y catálogo| Gemini
-    Admin -->|configura niveles y productos| Culqi
+    System_Ext(whatsapp, "WhatsApp Business API", "Meta Cloud API — auth y notificaciones")
+    System_Ext(gemini, "Motor de IA (Gemini)", "Planeado — análisis de estilo")
+    System_Ext(culqi, "Pasarela de Pago (Culqi)", "Planeado — checkout y webhooks")
+    SystemQueue(beat, "Programador de Tareas", "Celery Beat — no-show y recálculo de niveles")
 
-    classDef planeado stroke-dasharray: 5 5
-    class Gemini,Culqi planeado
+    Rel(cliente, welve, "Reserva/cancela citas, canjea descuentos, sube foto")
+    Rel(trabajador, welve, "Gestiona su agenda, atiende clientas")
+    Rel(admin, welve, "Configura y administra el negocio")
+
+    Rel(welve, whatsapp, "Envía magic link y recordatorios", "HTTPS REST")
+    Rel(welve, gemini, "Envía foto efímera + catálogo", "HTTPS REST")
+    Rel(welve, culqi, "Crea cargo de checkout", "HTTPS REST")
+    Rel(culqi, welve, "Confirma resultado del pago", "HTTPS Webhook")
+    Rel(beat, welve, "Dispara tareas periódicas", "Redis")
+
+    UpdateElementStyle(gemini, $bgColor="grey", $borderColor="grey")
+    UpdateElementStyle(culqi, $bgColor="grey", $borderColor="grey")
+```
+
+### Diagrama de generalización de actores
+
+UML formal: `Actor` es un clasificador, y la relación de herencia entre actores se representa
+con una flecha de generalización (triángulo hueco) — el Administrador hereda todas las
+capacidades del Trabajador y añade las propias:
+
+```mermaid
+classDiagram
+    class Trabajador {
+        <<actor>>
+        +verAgendaPropia()
+        +avanzarEstadoCita()
+        +atenderFichaCritica()
+    }
+    class Administrador {
+        <<actor>>
+        +gestionarPersonal()
+        +gestionarPagos()
+        +configurarFidelizacion()
+    }
+    class Cliente {
+        <<actor>>
+        +reservarCita()
+        +cancelarCita()
+        +canjearDescuento()
+    }
+
+    Trabajador <|-- Administrador : generaliza
 ```
 
 ## Actores secundarios

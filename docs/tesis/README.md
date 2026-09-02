@@ -20,8 +20,8 @@ formato.
 
 | Documento | Contenido |
 |---|---|
-| [`01_ACTORES_DE_NEGOCIO.md`](./01_ACTORES_DE_NEGOCIO.md) | Actores primarios y secundarios, responsabilidades, diagrama de jerarquía de actores |
-| [`02_CASOS_DE_USO_UML.md`](./02_CASOS_DE_USO_UML.md) | Diagramas de casos de uso (UML) por actor/módulo + especificación detallada de cada caso |
+| [`01_ACTORES_DE_NEGOCIO.md`](./01_ACTORES_DE_NEGOCIO.md) | Actores primarios y secundarios, responsabilidades, diagrama de contexto (C4) y generalización de actores (UML) |
+| [`02_CASOS_DE_USO_UML.md`](./02_CASOS_DE_USO_UML.md) | Diagramas de casos de uso (UML formal: actor `«actor»`, caso de uso como elipse) por actor + especificación detallada de los 22 casos de uso |
 | [`03_ARQUITECTURA_DEL_SISTEMA.md`](./03_ARQUITECTURA_DEL_SISTEMA.md) | Arquitectura en capas, vista lógica, stack tecnológico, decisiones arquitectónicas |
 | [`04_DIAGRAMA_DE_CLASES.md`](./04_DIAGRAMA_DE_CLASES.md) | Modelo de dominio completo (implementado + planeado) en notación de clases UML |
 | [`05_MODELO_ENTIDAD_RELACION.md`](./05_MODELO_ENTIDAD_RELACION.md) | Esquema físico de base de datos (todas las tablas, PK/FK, cardinalidades) |
@@ -30,6 +30,7 @@ formato.
 | [`08_DIAGRAMAS_DE_ESTADO.md`](./08_DIAGRAMAS_DE_ESTADO.md) | Ciclo de vida de las entidades con estado (Cita, Pedido, Nivel de fidelización) |
 | [`09_DIAGRAMA_DE_COMPONENTES.md`](./09_DIAGRAMA_DE_COMPONENTES.md) | Componentes de software (routers/services/models, frontend) y sus dependencias |
 | [`10_DIAGRAMA_DE_DESPLIEGUE.md`](./10_DIAGRAMA_DE_DESPLIEGUE.md) | Nodos físicos/lógicos de infraestructura y protocolos de comunicación entre ellos |
+| [`11_REQUERIMIENTOS_FUNCIONALES.md`](./11_REQUERIMIENTOS_FUNCIONALES.md) | Especificación de los 77 requerimientos funcionales (RF-001–RF-077), uno por módulo, con su propio diagrama de casos de uso |
 
 ## Convenciones usadas en todo este directorio
 

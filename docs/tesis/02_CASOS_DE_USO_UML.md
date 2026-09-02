@@ -1,44 +1,55 @@
 # Casos de Uso (UML)
 
 Mermaid no tiene un tipo de diagrama nativo para "caso de uso" UML (actores + óvalos); se
-aproxima con `flowchart`: los actores como nodos rectangulares y los casos de uso como nodos
-circulares/estadio dentro de un `subgraph` que representa el límite del sistema — es la
-convención estándar para representar diagramas de casos de uso en Mermaid.
+aproxima con `flowchart` siguiendo la notación formal UML tal como la define el estándar cuando
+la herramienta no soporta el pictograma de "muñeco de palitos": el actor se representa como un
+rectángulo con el estereotipo **«actor»** (notación de clasificador, válida en el metamodelo
+UML — el muñeco de palitos es solo el ícono por defecto, no la única representación permitida),
+y cada caso de uso como una **elipse** (forma `stadium` de Mermaid, la aproximación visual más
+cercana a un óvalo dentro de sus formas nativas), todo dentro de un `subgraph` que representa el
+límite del sistema («system boundary»).
 
 Cada caso de uso conserva el ID de `docs/CASOS_DE_USO.md` para que ambos documentos queden
-sincronizados. La relación `<<extends>>`/`<<includes>>` de UML se marca con flecha punteada.
+sincronizados. Las relaciones «extends»/«includes» de UML se marcan con flecha punteada y su
+estereotipo correspondiente, tal como exige la notación formal.
+
+**Total de casos de uso especificados: 22** — 8 de Cliente (`CU-C01`–`CU-C08`), 6 de Trabajador
+(`CU-T01`–`CU-T06`), 8 de Administrador (`CU-A01`–`CU-A08`). 12 ya implementados, 10 planeados
+(marcados con borde punteado en los diagramas y con `«planeado»` en el texto).
 
 ## Diagrama de casos de uso — Cliente
 
 ```mermaid
 flowchart LR
-    Cliente(["🧑 Cliente"])
+    Cliente["«actor»<br/>Cliente"]
 
-    subgraph Welve["Sistema Welve"]
-        CUC01(("CU-C01<br/>Reservar cita"))
-        CUC02(("CU-C02<br/>Cancelar a tiempo"))
-        CUC03(("CU-C03<br/>Cancelar tardío"))
-        CUC04(("CU-C04<br/>Canjear descuento"))
-        CUC05(("CU-C05<br/>Completar reto<br/>(automático)"))
-        CUC06(("CU-C06<br/>Consulta IA<br/>(planeado)"))
-        CUC07(("CU-C07<br/>Comprar catálogo<br/>exclusivo (planeado)"))
-        CUC08(("CU-C08<br/>Favorito de estilo<br/>(planeado)"))
+    subgraph SistemaC["Sistema Welve"]
+        CUC01(["CU-C01<br/>Reservar cita"])
+        CUC02(["CU-C02<br/>Cancelar a tiempo"])
+        CUC03(["CU-C03<br/>Cancelar tardío"])
+        CUC04(["CU-C04<br/>Canjear descuento"])
+        CUC05(["CU-C05<br/>Completar reto<br/>«automático»"])
+        CUC06(["CU-C06<br/>Consulta IA<br/>«planeado»"])
+        CUC07(["CU-C07<br/>Comprar catálogo<br/>exclusivo «planeado»"])
+        CUC08(["CU-C08<br/>Favorito de estilo<br/>«planeado»"])
     end
 
-    Cliente --> CUC01
-    Cliente --> CUC02
-    Cliente --> CUC03
-    Cliente --> CUC04
-    Cliente --> CUC06
-    Cliente --> CUC07
-    Cliente --> CUC08
+    Cliente --- CUC01
+    Cliente --- CUC02
+    Cliente --- CUC03
+    Cliente --- CUC04
+    Cliente --- CUC06
+    Cliente --- CUC07
+    Cliente --- CUC08
 
-    CUC02 -. "extends" .-> CUC01
-    CUC03 -. "extends" .-> CUC01
-    CUC06 -. "includes" .-> CUC01
-    CUC07 -. "includes" .-> CUC04
+    CUC02 -. "«extends»" .-> CUC01
+    CUC03 -. "«extends»" .-> CUC01
+    CUC06 -. "«includes»" .-> CUC01
+    CUC07 -. "«includes»" .-> CUC04
 
+    classDef actor fill:#fff,stroke:#333,stroke-width:1px
     classDef planeado stroke-dasharray: 5 5
+    class Cliente actor
     class CUC06,CUC07,CUC08 planeado
 ```
 
@@ -46,27 +57,29 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    Trabajador(["🧑‍🔧 Trabajador"])
+    Trabajador["«actor»<br/>Trabajador / Especialista"]
 
-    subgraph Welve2["Sistema Welve"]
-        CUT01(("CU-T01<br/>Ver agenda del día"))
-        CUT02(("CU-T02<br/>Registrar llegada /<br/>avanzar estado"))
-        CUT03(("CU-T03<br/>Atender alerta de<br/>ficha crítica"))
-        CUT04(("CU-T04<br/>Consulta IA en vivo<br/>(planeado)"))
-        CUT05(("CU-T05<br/>Ver historial de<br/>estilos (planeado)"))
-        CUT06(("CU-T06<br/>Feedback de estilo<br/>(planeado)"))
+    subgraph SistemaT["Sistema Welve"]
+        CUT01(["CU-T01<br/>Ver agenda del día"])
+        CUT02(["CU-T02<br/>Registrar llegada /<br/>avanzar estado"])
+        CUT03(["CU-T03<br/>Atender alerta de<br/>ficha crítica"])
+        CUT04(["CU-T04<br/>Consulta IA en vivo<br/>«planeado»"])
+        CUT05(["CU-T05<br/>Ver historial de<br/>estilos «planeado»"])
+        CUT06(["CU-T06<br/>Feedback de estilo<br/>«planeado»"])
     end
 
-    Trabajador --> CUT01
-    Trabajador --> CUT02
-    Trabajador --> CUT04
-    Trabajador --> CUT05
-    Trabajador --> CUT06
+    Trabajador --- CUT01
+    Trabajador --- CUT02
+    Trabajador --- CUT04
+    Trabajador --- CUT05
+    Trabajador --- CUT06
 
-    CUT03 -. "extends" .-> CUT02
-    CUT06 -. "extends" .-> CUT02
+    CUT03 -. "«extends»" .-> CUT02
+    CUT06 -. "«extends»" .-> CUT02
 
+    classDef actor fill:#fff,stroke:#333,stroke-width:1px
     classDef planeado stroke-dasharray: 5 5
+    class Trabajador actor
     class CUT04,CUT05,CUT06 planeado
 ```
 
@@ -74,30 +87,33 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    Admin(["🧑‍💼 Administrador"])
+    Admin["«actor»<br/>Administrador"]
 
-    subgraph Welve3["Sistema Welve"]
-        CUA01(("CU-A01<br/>Gestionar personal"))
-        CUA02(("CU-A02<br/>Confirmar/rechazar/<br/>reembolsar pago"))
-        CUA03(("CU-A03<br/>Configurar descuento<br/>o reto"))
-        CUA04(("CU-A04<br/>Configurar niveles y<br/>catálogo (planeado)"))
-        CUA05(("CU-A05<br/>Gestionar catálogo<br/>de estilos (planeado)"))
-        CUA06(("CU-A06<br/>Ver dashboard<br/>operativo"))
-        CUA07(("CU-A07<br/>Gestionar pedidos<br/>del catálogo (planeado)"))
-        CUA08(("CU-A08<br/>Revisar métricas de<br/>confianza (planeado)"))
+    subgraph SistemaA["Sistema Welve"]
+        CUA01(["CU-A01<br/>Gestionar personal"])
+        CUA02(["CU-A02<br/>Confirmar/rechazar/<br/>reembolsar pago"])
+        CUA03(["CU-A03<br/>Configurar descuento<br/>o reto"])
+        CUA04(["CU-A04<br/>Configurar niveles y<br/>catálogo «planeado»"])
+        CUA05(["CU-A05<br/>Gestionar catálogo<br/>de estilos «planeado»"])
+        CUA06(["CU-A06<br/>Ver dashboard<br/>operativo"])
+        CUA07(["CU-A07<br/>Gestionar pedidos<br/>del catálogo «planeado»"])
+        CUA08(["CU-A08<br/>Revisar métricas de<br/>confianza «planeado»"])
     end
 
-    Admin --> CUA01
-    Admin --> CUA02
-    Admin --> CUA03
-    Admin --> CUA04
-    Admin --> CUA05
-    Admin --> CUA06
-    Admin --> CUA07
-    Admin --> CUA08
+    Admin --- CUA01
+    Admin --- CUA02
+    Admin --- CUA03
+    Admin --- CUA04
+    Admin --- CUA05
+    Admin --- CUA06
+    Admin --- CUA07
+    Admin --- CUA08
 
-    CUA07 -. "extends" .-> CUA04
-    CUA08 -. "extends" .-> CUA05
+    CUA07 -. "«extends»" .-> CUA04
+    CUA08 -. "«extends»" .-> CUA05
+
+    classDef actor fill:#fff,stroke:#333,stroke-width:1px
+    class Admin actor
 
     classDef planeado stroke-dasharray: 5 5
     class CUA04,CUA05,CUA07,CUA08 planeado
