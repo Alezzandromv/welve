@@ -49,13 +49,13 @@ flowchart LR
 
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
-| RF-001 | Solicitar acceso por magic link | Entrada: teléfono. Proceso: busca o crea `Usuario`+`Cliente`, genera `MagicLink` (TTL 1h), envía enlace por WhatsApp si `acepta_whatsapp=true`. Salida: confirmación de envío. | Cliente | Alta | — | — |
-| RF-002 | Verificar magic link | Entrada: token UUID. Proceso: valida no usado/no expirado, `UPDATE` atómico `usado=true`, emite JWT. Salida: `access_token`, rol, nombre. | Cliente | Alta | — | — |
-| RF-003 | Registrar personal (staff) | Entrada: nombre, correo, contraseña, rol (`admin`\|`trabajador`). Proceso: valida correo único, hashea contraseña, crea `Usuario`. Salida: JWT. | Admin/Trabajador (auto-registro) | Media | — | — |
-| RF-004 | Iniciar sesión staff | Entrada: correo, contraseña. Proceso: valida credenciales y `esta_activo`. Salida: JWT. | Trabajador, Admin | Alta | — | — |
-| RF-005 | Consultar perfil propio | Entrada: JWT. Salida: datos del `Usuario` autenticado. | Cliente, Trabajador, Admin | Media | — | — |
-| RF-006 | Actualizar perfil propio | Entrada: nombre/correo/teléfono (parciales). Proceso: valida unicidad de correo/teléfono. Salida: perfil actualizado. | Cliente, Trabajador, Admin | Media | — | — |
-| RF-007 | Cambiar contraseña | Entrada: contraseña actual + nueva (≥8 caracteres). Proceso: valida actual, hashea nueva. Salida: confirmación. | Trabajador, Admin | Baja | — | — |
+| RF-001 | Solicitar acceso por magic link | Entrada: teléfono. Proceso: busca o crea `Usuario`+`Cliente`, genera `MagicLink` (TTL 1h), envía enlace por WhatsApp si `acepta_whatsapp=true`. Salida: confirmación de envío. | Cliente | Alta | CU-C09 | — |
+| RF-002 | Verificar magic link | Entrada: token UUID. Proceso: valida no usado/no expirado, `UPDATE` atómico `usado=true`, emite JWT. Salida: `access_token`, rol, nombre. | Cliente | Alta | CU-C09 | — |
+| RF-003 | Registrar personal (staff) | Entrada: nombre, correo, contraseña, rol (`admin`\|`trabajador`). Proceso: valida correo único, hashea contraseña, crea `Usuario`. Salida: JWT. | Admin/Trabajador (auto-registro) | Media | CU-T07 | — |
+| RF-004 | Iniciar sesión staff | Entrada: correo, contraseña. Proceso: valida credenciales y `esta_activo`. Salida: JWT. | Trabajador, Admin | Alta | CU-T07 | — |
+| RF-005 | Consultar perfil propio | Entrada: JWT. Salida: datos del `Usuario` autenticado. | Cliente, Trabajador, Admin | Media | CU-C10, CU-T08 | — |
+| RF-006 | Actualizar perfil propio | Entrada: nombre/correo/teléfono (parciales). Proceso: valida unicidad de correo/teléfono. Salida: perfil actualizado. | Cliente, Trabajador, Admin | Media | CU-C10, CU-T08 | — |
+| RF-007 | Cambiar contraseña | Entrada: contraseña actual + nueva (≥8 caracteres). Proceso: valida actual, hashea nueva. Salida: confirmación. | Trabajador, Admin | Baja | CU-T08 | — |
 
 ---
 
@@ -150,7 +150,7 @@ flowchart LR
 | RF-021 | Listar todas las citas | Entrada: filtros opcionales (fecha, estado). Salida: citas enriquecidas con nombres de cliente/especialista/servicio. | Admin | Alta | CU-A06 | — |
 | RF-022 | Crear cita para un cliente | Igual que RF-015 pero iniciado por el admin en nombre de un cliente, sin restricción de anticipación mínima. | Admin | Media | CU-A01 | RN13 |
 | RF-023 | Consultar pagos de una cita | Salida: historial de `Pago` asociados a la cita. | Admin | Media | CU-A02 | — |
-| RF-024 | Verificar no-show automático | Proceso batch (cada 5 min): marca `no_show` las citas `confirmada` con 15+ min de retraso sin llegada registrada. | Sistema (Celery Beat) | Alta | — | RN05 |
+| RF-024 | Verificar no-show automático | Proceso batch (cada 5 min): marca `no_show` las citas `confirmada` con 15+ min de retraso sin llegada registrada. | Sistema (Celery Beat) | Alta | CU-T09 | RN05 |
 
 ---
 
@@ -265,14 +265,14 @@ flowchart LR
 
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
-| RF-037 | Listar clientes | Salida: clientes con etiquetas, estado de bloqueo. | Admin | Media | CU-A01 | — |
-| RF-038 | Consultar cliente | Salida: perfil completo de un `Cliente`. | Admin | Media | — | — |
-| RF-039 | Editar cliente | Entrada: etiquetas, notas internas (nunca `correo`/`password`, rechazados explícitamente). Salida: `Cliente` actualizado. | Admin | Media | — | — |
-| RF-040 | Consultar historial de citas | Salida: lista de `Cita` pasadas del cliente. | Admin | Media | — | — |
+| RF-037 | Listar clientes | Salida: clientes con etiquetas, estado de bloqueo. | Admin | Media | CU-A09 | — |
+| RF-038 | Consultar cliente | Salida: perfil completo de un `Cliente`. | Admin | Media | CU-A09 | — |
+| RF-039 | Editar cliente | Entrada: etiquetas, notas internas (nunca `correo`/`password`, rechazados explícitamente). Salida: `Cliente` actualizado. | Admin | Media | CU-A09 | — |
+| RF-040 | Consultar historial de citas | Salida: lista de `Cita` pasadas del cliente. | Admin | Media | CU-A09 | — |
 | RF-041 | Listar fichas de salud | Salida: `FichaSalud` del cliente, con severidad. | Admin | Alta | CU-T03 | RN08, RN09 |
 | RF-042 | Registrar ficha de salud | Entrada: tipo de restricción, descripción, severidad. Salida: `FichaSalud` creada. | Admin | Alta | CU-T03 | RN08, RN09 |
-| RF-043 | Bloquear cliente | Entrada: motivo. Salida: `esta_bloqueada=true`, `fecha_bloqueo` registrada. | Admin | Media | — | RN11 |
-| RF-044 | Desbloquear cliente | Salida: `esta_bloqueada=false`. | Admin | Baja | — | RN11 |
+| RF-043 | Bloquear cliente | Entrada: motivo. Salida: `esta_bloqueada=true`, `fecha_bloqueo` registrada. | Admin | Media | CU-A09 | RN11 |
+| RF-044 | Desbloquear cliente | Salida: `esta_bloqueada=false`. | Admin | Baja | CU-A09 | RN11 |
 
 ---
 
@@ -307,12 +307,12 @@ flowchart LR
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
 | RF-045 | Crear usuario | Entrada: nombre, rol, correo/teléfono según rol. Proceso: si `rol=cliente`, crea también el `Cliente` vinculado automáticamente. Salida: `Usuario` creado. | Admin | Alta | CU-A01 | — |
-| RF-046 | Listar usuarios | Entrada: filtros `rol`, `esta_activo`. Salida: lista de usuarios. | Admin | Media | — | — |
-| RF-047 | Consultar usuario | Salida: detalle de un `Usuario`. | Admin | Baja | — | — |
-| RF-048 | Editar usuario | Entrada: nombre, teléfono, `esta_activo`. Salida: `Usuario` actualizado. | Admin | Media | — | — |
-| RF-049 | Cambiar correo | Entrada: nuevo correo. Proceso: resetea `correo_verificado=false`. Salida: correo actualizado. | Admin | Baja | — | — |
-| RF-050 | Resetear contraseña | Entrada: nueva contraseña. Salida: 204 (sin contenido). | Admin | Media | — | — |
-| RF-051 | Cambiar estado de usuario | Salida: `esta_activo` alternado. | Admin | Media | — | — |
+| RF-046 | Listar usuarios | Entrada: filtros `rol`, `esta_activo`. Salida: lista de usuarios. | Admin | Media | CU-A10 | — |
+| RF-047 | Consultar usuario | Salida: detalle de un `Usuario`. | Admin | Baja | CU-A10 | — |
+| RF-048 | Editar usuario | Entrada: nombre, teléfono, `esta_activo`. Salida: `Usuario` actualizado. | Admin | Media | CU-A10 | — |
+| RF-049 | Cambiar correo | Entrada: nuevo correo. Proceso: resetea `correo_verificado=false`. Salida: correo actualizado. | Admin | Baja | CU-A10 | — |
+| RF-050 | Resetear contraseña | Entrada: nueva contraseña. Salida: 204 (sin contenido). | Admin | Media | CU-A10 | — |
+| RF-051 | Cambiar estado de usuario | Salida: `esta_activo` alternado. | Admin | Media | CU-A10 | — |
 
 ---
 
@@ -415,7 +415,7 @@ flowchart LR
 | RF-064 | Registrar feedback de estilo | Entrada: coincidió sí/no + nota. Salida: `SeleccionEstilo.feedback_coincidio` actualizado. | Trabajador | Baja | CU-T06 | — |
 | RF-065 | Marcar estilo como favorito | Entrada: estilo elegido sin cámara. Salida: `SeleccionEstilo` con `origen=favorito`. | Cliente | Baja | CU-C08 | — |
 | RF-066 | Gestionar catálogo de estilos | CRUD completo de `EstiloCatalogo` (alta, edición, baja lógica). | Admin | Media | CU-A05 | RN16–RN19 |
-| RF-067 | Configurar módulo de IA | Entrada: activar/desactivar, límite diario de consultas. Salida: configuración persistida. | Admin | Media | — | RN18 |
+| RF-067 | Configurar módulo de IA | Entrada: activar/desactivar, límite diario de consultas. Salida: configuración persistida. | Admin | Media | CU-A11 | RN18 |
 | RF-068 | Consultar métricas de uso de IA | Salida: consultas totales, estilos más elegidos, % de feedback positivo — nunca fotos. | Admin | Baja | CU-A08 | — |
 
 ---
@@ -463,15 +463,15 @@ flowchart LR
 
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
-| RF-069 | Consultar niveles de fidelización | Salida: `NivelFidelizacion` activos con sus beneficios visibles. | Cualquier rol autenticado | Media | — | — |
+| RF-069 | Consultar niveles de fidelización | Salida: `NivelFidelizacion` activos con sus beneficios visibles. | Cualquier rol autenticado | Media | CU-C11 | — |
 | RF-070 | Gestionar niveles de fidelización | CRUD completo: nombre, orden, tipo/valor de umbral, beneficios. | Admin | Alta | CU-A04 | RN20 |
-| RF-071 | Consultar mi nivel y progreso | Salida: nivel actual del cliente + qué falta para el siguiente. | Cliente | Media | — | RN20 |
+| RF-071 | Consultar mi nivel y progreso | Salida: nivel actual del cliente + qué falta para el siguiente. | Cliente | Media | CU-C11 | RN20 |
 | RF-072 | Consultar catálogo exclusivo | Salida: `ProductoCatalogoExclusivo`, con los de nivel superior marcados `bloqueado`. | Cliente | Media | CU-C07 | RN22 |
 | RF-073 | Gestionar catálogo exclusivo | CRUD completo de productos (nombre, precio, imagen, nivel mínimo, stock). | Admin | Alta | CU-A04 | — |
 | RF-074 | Comprar producto del catálogo | Entrada: producto elegido. Proceso: valida nivel, crea `PedidoCatalogo` pendiente, inicia checkout Culqi. Salida: token de pago. | Cliente | Alta | CU-C07 | RN22 |
 | RF-075 | Confirmar pago vía webhook | Entrada: evento firmado de Culqi. Proceso: verifica firma, actualiza estado de forma idempotente. Salida: `PedidoCatalogo` en `pagado`/`cancelado`. | Sistema (Culqi) | Alta | CU-C07 | RN23, RN24 |
 | RF-076 | Gestionar pedidos del catálogo | Entrada: filtros estado/cliente/producto. Proceso: marcar `entregado`. Salida: pedidos actualizados. | Admin | Media | CU-A07 | RN23 |
-| RF-077 | Recalcular niveles de fidelización | Proceso batch periódico: recalcula el nivel de cada cliente contra los umbrales activos. | Sistema (Celery Beat) | Alta | — | RN20, RN21 |
+| RF-077 | Recalcular niveles de fidelización | Proceso batch periódico: recalcula el nivel de cada cliente contra los umbrales activos. | Sistema (Celery Beat) | Alta | CU-A12 | RN20, RN21 |
 
 ---
 

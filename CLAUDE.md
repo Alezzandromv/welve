@@ -46,8 +46,12 @@ cd backend && celery -A app.tasks beat --loglevel=info
 # Poblar la base de datos con datos de demostración (limpia y repuebla)
 cd backend && python seed.py
 
-# Ejecutar tests (directorio tests/ aún vacío — por escribir)
+# Ejecutar tests
 cd backend && pytest
+
+# Ejecutar un solo archivo o test
+cd backend && pytest tests/test_citas.py
+cd backend && pytest tests/test_citas.py::test_nombre_del_test
 
 # Lint
 cd backend && ruff check app/
@@ -90,6 +94,15 @@ docker compose up -d redis
 # Variables de entorno — copiar y completar antes de iniciar
 cp backend/.env.example backend/.env
 ```
+
+### Atajo: levantar todo con un comando
+
+```bash
+./dev.sh          # Redis + backend en background (logs en logs/backend.log), frontend en foreground
+./dev.sh stop     # detiene backend y Redis (el frontend se corta con Ctrl+C)
+```
+
+Es un wrapper sobre los comandos de arriba, no un mecanismo distinto — útil en Codespaces porque deja el frontend en foreground (para el auto-forward de puertos) sin tener que abrir tres terminales.
 
 ### `.env` del backend
 
@@ -144,6 +157,7 @@ Clientes: magic link via WhatsApp — sin contraseña
 - `tasks/` — Celery app en `__init__.py` (incluye configuración del beat schedule); `db.py` expone un sessionmaker async perezoso (creado tras el fork de los workers, no a import-time); `no_show.py` corre cada 5min via beat; `recordatorios.py` envía WhatsApp 24h y 2h antes
 - `utils/` — `timezone.py` (helpers `ahora_lima()`, `a_lima()`), `whatsapp.py` (cliente Meta Cloud API), `horarios.py` (`parse_hhmm`/`hhmm` — conversión `time` nativo ↔ string "HH:MM" en el borde service↔schema para `DisponibilidadPersonal`)
 - `alembic/` — migraciones de esquema; `env.py` toma `DATABASE_URL` de `core.config.settings` (nunca hardcodeada en `alembic.ini`) y usa `target_metadata = Base.metadata` para autogenerate
+- `tests/` — corren contra la **misma base de Supabase** de `DATABASE_URL` (no hay una BD de test separada): `conftest.py` abre una conexión, arranca una transacción externa y le une una `AsyncSession` vía savepoints (`join_transaction_mode="create_savepoint"`); todo lo que haga el test (incluidos los `commit()` internos de `get_session`, sobreescrito por la fixture `client`) se revierte con `rollback()` al final, así que nunca ensucia lo sembrado por `seed.py`. El engine de test usa `NullPool` a propósito: `pytest-asyncio` en modo `strict` (`pytest.ini`) crea un event loop nuevo por test, y un pool con conexiones recicladas cruzaría loops ya cerrados.
 
 ### Frontend (`frontend/src/`)
 
@@ -405,6 +419,7 @@ Swagger UI disponible en `http://localhost:8000/docs` cuando el backend está co
 - Lógica de negocio solo en `services/` — routers solo enrutan
 - Errores con `HTTPException` + código HTTP descriptivo
 - Proteger endpoints con `Depends(requerir_rol("admin"))` o `Depends(obtener_usuario_actual)` de `core/security.py`
+- `ruff` (`backend/pyproject.toml`) permite `line-length = 150` deliberadamente — el estilo del proyecto favorece one-liners densos en routers/services; no reformatear a 79/88 columnas
 
 ### TypeScript
 - Nunca `any`; `PascalCase` componentes/tipos; `camelCase` vars/funciones

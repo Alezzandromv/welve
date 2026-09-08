@@ -13,9 +13,18 @@ Cada caso de uso conserva el ID de `docs/CASOS_DE_USO.md` para que ambos documen
 sincronizados. Las relaciones «extends»/«includes» de UML se marcan con flecha punteada y su
 estereotipo correspondiente, tal como exige la notación formal.
 
-**Total de casos de uso especificados: 22** — 8 de Cliente (`CU-C01`–`CU-C08`), 6 de Trabajador
-(`CU-T01`–`CU-T06`), 8 de Administrador (`CU-A01`–`CU-A08`). 12 ya implementados, 10 planeados
+**Total de casos de uso especificados: 32** — 11 de Cliente (`CU-C01`–`CU-C11`), 9 de Trabajador
+(`CU-T01`–`CU-T09`), 12 de Administrador (`CU-A01`–`CU-A12`). 19 ya implementados, 13 planeados
 (marcados con borde punteado en los diagramas y con `«planeado»` en el texto).
+
+> Los 10 casos de uso agregados en la última revisión (`CU-C09`–`CU-C11`, `CU-T07`–`CU-T09`,
+> `CU-A09`–`CU-A12`) cierran la brecha detectada al auditar `11_REQUERIMIENTOS_FUNCIONALES.md`
+> contra los 22 casos originales: había RF ya implementados (autenticación, gestión de
+> clientes, administración de cuentas de usuario, no-show automático) y RF planeados
+> (configuración del módulo de IA, recálculo de niveles, consulta de mi nivel de fidelización)
+> sin un caso de uso que los agrupara. Ningún caso de uso existente cambió de número — se
+> añadieron al final del rango de cada actor para no romper referencias cruzadas en el resto de
+> `docs/`.
 
 ## Diagrama de casos de uso — Cliente
 
@@ -32,6 +41,9 @@ flowchart LR
         CUC06(["CU-C06<br/>Consulta IA<br/>«planeado»"])
         CUC07(["CU-C07<br/>Comprar catálogo<br/>exclusivo «planeado»"])
         CUC08(["CU-C08<br/>Favorito de estilo<br/>«planeado»"])
+        CUC09(["CU-C09<br/>Solicitar y verificar<br/>acceso"])
+        CUC10(["CU-C10<br/>Gestionar mi perfil"])
+        CUC11(["CU-C11<br/>Consultar mi nivel de<br/>fidelización «planeado»"])
     end
 
     Cliente --- CUC01
@@ -41,16 +53,21 @@ flowchart LR
     Cliente --- CUC06
     Cliente --- CUC07
     Cliente --- CUC08
+    Cliente --- CUC09
+    Cliente --- CUC10
+    Cliente --- CUC11
 
     CUC02 -. "«extends»" .-> CUC01
     CUC03 -. "«extends»" .-> CUC01
     CUC06 -. "«includes»" .-> CUC01
     CUC07 -. "«includes»" .-> CUC04
+    CUC09 -. "«precede»" .-> CUC01
+    CUC11 -. "«extends»" .-> CUC07
 
     classDef actor fill:#fff,stroke:#333,stroke-width:1px
     classDef planeado stroke-dasharray: 5 5
     class Cliente actor
-    class CUC06,CUC07,CUC08 planeado
+    class CUC06,CUC07,CUC08,CUC11 planeado
 ```
 
 ## Diagrama de casos de uso — Trabajador / Especialista
@@ -66,6 +83,9 @@ flowchart LR
         CUT04(["CU-T04<br/>Consulta IA en vivo<br/>«planeado»"])
         CUT05(["CU-T05<br/>Ver historial de<br/>estilos «planeado»"])
         CUT06(["CU-T06<br/>Feedback de estilo<br/>«planeado»"])
+        CUT07(["CU-T07<br/>Autenticarse<br/>como personal"])
+        CUT08(["CU-T08<br/>Gestionar mi cuenta"])
+        CUT09(["CU-T09<br/>Marcar no-show<br/>«automático»"])
     end
 
     Trabajador --- CUT01
@@ -73,9 +93,13 @@ flowchart LR
     Trabajador --- CUT04
     Trabajador --- CUT05
     Trabajador --- CUT06
+    Trabajador --- CUT07
+    Trabajador --- CUT08
 
     CUT03 -. "«extends»" .-> CUT02
     CUT06 -. "«extends»" .-> CUT02
+    CUT09 -. "«extends»" .-> CUT02
+    CUT07 -. "«precede»" .-> CUT01
 
     classDef actor fill:#fff,stroke:#333,stroke-width:1px
     classDef planeado stroke-dasharray: 5 5
@@ -98,6 +122,10 @@ flowchart LR
         CUA06(["CU-A06<br/>Ver dashboard<br/>operativo"])
         CUA07(["CU-A07<br/>Gestionar pedidos<br/>del catálogo «planeado»"])
         CUA08(["CU-A08<br/>Revisar métricas de<br/>confianza «planeado»"])
+        CUA09(["CU-A09<br/>Gestionar clientes"])
+        CUA10(["CU-A10<br/>Administrar cuentas<br/>de usuario"])
+        CUA11(["CU-A11<br/>Configurar módulo<br/>de IA «planeado»"])
+        CUA12(["CU-A12<br/>Recalcular niveles<br/>«automático, planeado»"])
     end
 
     Admin --- CUA01
@@ -108,15 +136,20 @@ flowchart LR
     Admin --- CUA06
     Admin --- CUA07
     Admin --- CUA08
+    Admin --- CUA09
+    Admin --- CUA10
+    Admin --- CUA11
 
     CUA07 -. "«extends»" .-> CUA04
     CUA08 -. "«extends»" .-> CUA05
+    CUA11 -. "«extends»" .-> CUA05
+    CUA12 -. "«extends»" .-> CUA04
 
     classDef actor fill:#fff,stroke:#333,stroke-width:1px
     class Admin actor
 
     classDef planeado stroke-dasharray: 5 5
-    class CUA04,CUA05,CUA07,CUA08 planeado
+    class CUA04,CUA05,CUA07,CUA08,CUA11,CUA12 planeado
 ```
 
 ---
@@ -239,6 +272,44 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   de origen para la especialista.
 - **RN**: ninguna nueva.
 
+#### CU-C09 — Solicitar y verificar acceso por magic link
+
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: alta. **Precede a**: CU-C01 (toda
+  acción del cliente requiere sesión iniciada).
+- **Precondición**: ninguna (es el punto de entrada del cliente al sistema).
+- **Flujo normal**: 1. El cliente ingresa su teléfono. 2. El sistema busca o crea el `Usuario` y
+  el `Cliente` asociado, genera un `MagicLink` (token UUID, TTL 1h) y lo envía por WhatsApp si
+  `acepta_whatsapp=true`. 3. El cliente abre el enlace recibido. 4. El sistema valida que el
+  token no esté usado ni expirado, lo marca `usado=true` de forma atómica, y emite un JWT.
+- **Flujos alternativos**: token ya usado o expirado → error, el cliente debe solicitar un
+  nuevo enlace (vuelve al paso 1). `acepta_whatsapp=false` → el enlace no se envía por ese
+  canal (limitación conocida, sin canal alternativo implementado).
+- **Postcondición**: sesión de cliente iniciada (JWT emitido); el `MagicLink` queda inutilizado
+  para siempre.
+- **RN**: ninguna con ID propio — el TTL de 1 hora y el uso único son el mecanismo central de
+  seguridad de este caso de uso.
+
+#### CU-C10 — Consultar y actualizar mi perfil
+
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media.
+- **Precondición**: sesión iniciada.
+- **Flujo normal**: 1. El cliente abre su perfil. 2. El sistema muestra nombre, teléfono y
+  correo actuales. 3. El cliente edita los campos que desee. 4. El sistema valida unicidad de
+  correo/teléfono antes de guardar.
+- **Flujos alternativos**: correo o teléfono ya usado por otra cuenta → 409.
+- **Postcondición**: `Usuario` actualizado.
+- **RN**: ninguna específica.
+
+#### CU-C11 — Consultar mi nivel de fidelización y progreso *(planeado)*
+
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Extiende**: CU-C07 (contexto
+  de decisión de compra en el catálogo exclusivo).
+- **Precondición**: módulo de fidelización avanzada habilitado.
+- **Flujo normal**: 1. El cliente abre la sección de fidelización. 2. El sistema muestra el
+  `NivelFidelizacion` actual y qué le falta (visitas o gasto) para alcanzar el siguiente nivel.
+- **Postcondición**: ninguna — caso de uso de solo consulta.
+- **RN**: RN20.
+
 ### Trabajador / Especialista
 
 #### CU-T01 — Ver agenda del día
@@ -297,6 +368,41 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **Postcondición**: no afecta al cliente; alimenta la métrica de confianza del catálogo
   (CU-A08).
 - **RN**: ninguna nueva.
+
+#### CU-T07 — Autenticarse como personal
+
+- **Actor**: Trabajador o Admin. **Tipo**: primario. **Prioridad**: alta. **Precede a**: CU-T01.
+- **Precondición**: cuenta de staff ya creada (por auto-registro o por CU-A10).
+- **Flujo normal**: 1. El staff ingresa correo y contraseña. 2. El sistema valida credenciales
+  y que `esta_activo=true`. 3. Emite un JWT. Alternativamente, si es el primer acceso de un rol
+  `admin`/`trabajador` sin cuenta previa, se registra con nombre, correo y contraseña antes del
+  paso 1.
+- **Flujos alternativos**: credenciales inválidas → 401. Usuario desactivado → 403.
+- **Postcondición**: sesión de staff iniciada.
+- **RN**: ninguna con ID propio.
+
+#### CU-T08 — Gestionar mi cuenta
+
+- **Actor**: Trabajador o Admin. **Tipo**: primario. **Prioridad**: baja.
+- **Precondición**: sesión de staff iniciada.
+- **Flujo normal**: 1. Consulta o edita nombre/correo/teléfono de su perfil. 2. Opcionalmente
+  cambia su contraseña, indicando la actual y una nueva de al menos 8 caracteres.
+- **Flujos alternativos**: contraseña actual incorrecta → 401. Correo ya usado → 409.
+- **Postcondición**: `Usuario` (y su hash de contraseña, si aplica) actualizado.
+- **RN**: ninguna específica.
+
+#### CU-T09 — Marcar inasistencia automáticamente (no-show) *(automático)*
+
+- **Actor**: Trabajador (dueño de la cita, pasivo); Programador de Tareas — Celery Beat
+  (dispara el caso de uso). **Tipo**: secundario, disparado internamente. **Prioridad**: alta.
+  **Extiende**: CU-T02.
+- **Precondición**: una `Cita` está en `confirmada`, con `programada_en + 15min < now()` y sin
+  `hora_llegada_real` registrada.
+- **Flujo normal**: 1. Cada 5 minutos, el beat ejecuta el job de verificación. 2. Por cada cita
+  que cumple la condición, la marca `no_show`, aplica la pérdida del depósito y
+  `penalizacion_aplicada=true`.
+- **Postcondición**: `Cita.estado = no_show`. Las citas en `pendiente` nunca se ven afectadas.
+- **RN**: RN05 (junto con RN03, que cubre el marcado manual de no-show por el staff).
 
 ### Administrador
 
@@ -361,3 +467,51 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **Flujo normal**: el admin ve, por estilo, el porcentaje de feedback positivo, para decidir si
   ajustar o retirar el estilo del catálogo.
 - **RN**: ninguna nueva.
+
+#### CU-A09 — Gestionar clientes
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media.
+- **Precondición**: sesión de admin iniciada.
+- **Flujo normal**: 1. Lista clientes con sus etiquetas y estado de bloqueo. 2. Consulta el
+  detalle de una clienta, incluyendo su historial de citas. 3. Edita etiquetas o notas internas
+  (nunca `correo`/`password`, rechazados explícitamente por el schema — ver CU-A10). 4. Si
+  corresponde, bloquea a la clienta indicando un motivo, o revierte un bloqueo previo.
+- **Flujos alternativos**: intento de editar `correo` o `password` vía este flujo → 422 (usar
+  CU-A10). Cliente ya bloqueada intentando reservar → ver RN11 en CU-C01.
+- **Postcondición**: `Cliente` actualizado; si aplica, `esta_bloqueada` y `motivo_bloqueo`
+  (o su reverso) persistidos.
+- **RN**: RN11.
+
+#### CU-A10 — Administrar cuentas de usuario del staff
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media.
+- **Precondición**: sesión de admin iniciada.
+- **Flujo normal**: 1. Lista o consulta usuarios, filtrando por rol y estado. 2. Edita nombre o
+  teléfono. 3. Cambia el correo de una cuenta (resetea `correo_verificado=false`). 4. Resetea la
+  contraseña de una cuenta sin conocer la actual. 5. Activa o desactiva la cuenta.
+- **Postcondición**: `Usuario` actualizado en el campo correspondiente.
+- **RN**: ninguna con ID propio — es la única vía autorizada para tocar credenciales de
+  cualquier usuario que no sea el propio (ver CU-T08 para autogestión).
+
+#### CU-A11 — Configurar el módulo de asesoría de IA *(planeado)*
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media. **Extiende**: CU-A05.
+- **Precondición**: módulo de IA implementado y disponible para configuración.
+- **Flujo normal**: 1. El admin activa o desactiva el módulo. 2. Define el límite diario de
+  consultas de IA por cliente.
+- **Postcondición**: configuración persistida, efectiva en la siguiente consulta de CU-C06/CU-T04.
+- **RN**: RN18.
+
+#### CU-A12 — Recalcular niveles de fidelización automáticamente *(planeado, automático)*
+
+- **Actor**: Programador de Tareas — Celery Beat (dispara el caso de uso); Admin (beneficiario
+  indirecto, vía CU-A04). **Tipo**: secundario, disparado internamente. **Prioridad**: alta.
+  **Extiende**: CU-A04.
+- **Precondición**: existen `NivelFidelizacion` activos y clientes con historial de visitas o
+  gasto.
+- **Flujo normal**: 1. En un intervalo configurable, el beat evalúa el historial de cada
+  cliente contra los umbrales activos, en orden descendente. 2. Asigna a cada cliente el nivel
+  más alto que cumple.
+- **Postcondición**: `cliente.nivel_actual` actualizado; una baja de nivel no revoca pedidos ya
+  realizados (RN21).
+- **RN**: RN20, RN21.

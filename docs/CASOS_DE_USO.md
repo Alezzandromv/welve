@@ -121,6 +121,36 @@ Ver flujo completo en `docs/MODULO_FIDELIZACION_AVANZADA.md`.
   distinguir el origen.
 - **RN**: ninguna nueva — reutiliza el mismo catálogo de RN16–RN19 sin pasar por el análisis.
 
+### CU-C09 — Solicitar y verificar acceso por magic link
+
+- **Actor**: Cliente.
+- **Precondición**: ninguna — es el punto de entrada del cliente al sistema.
+- **Flujo principal**: el cliente ingresa su teléfono (`POST /auth/solicitar-acceso`); el
+  backend busca o crea el `Usuario`+`Cliente`, genera un `MagicLink` (UUID, TTL 1h) y lo envía
+  por WhatsApp si `acepta_whatsapp=true`. Al abrir el enlace, `GET /auth/verificar?token=xxx`
+  valida que no esté usado ni expirado, lo marca `usado=true` atómicamente, y devuelve un JWT.
+- **Flujos alternativos**: token usado o expirado → error, el cliente debe solicitar uno nuevo.
+- **Postcondición**: sesión de cliente iniciada; el token queda inutilizado para siempre.
+- **RN**: ninguna con ID propio.
+
+### CU-C10 — Consultar y actualizar mi perfil
+
+- **Actor**: Cliente.
+- **Precondición**: sesión iniciada.
+- **Flujo principal**: `GET/PATCH /auth/perfil` — el cliente consulta o edita nombre, teléfono
+  y correo, con validación de unicidad antes de guardar.
+- **Postcondición**: `Usuario` actualizado.
+- **RN**: ninguna específica.
+
+### CU-C11 — Consultar mi nivel de fidelización y progreso **(planeado)**
+
+- **Actor**: Cliente.
+- **Precondición**: módulo de fidelización avanzada habilitado.
+- **Flujo principal**: el cliente ve su `NivelFidelizacion` actual y qué le falta (visitas o
+  gasto) para alcanzar el siguiente.
+- **Postcondición**: ninguna — caso de uso de solo consulta.
+- **RN**: RN20.
+
 ---
 
 ## Trabajador / Especialista
@@ -183,6 +213,37 @@ Ver flujo completo en `docs/MODULO_FIDELIZACION_AVANZADA.md`.
 - **Postcondición**: el feedback no afecta al cliente ni a su historial — alimenta una métrica
   interna de confianza del catálogo, visible solo para el admin (CU-A05).
 - **RN**: ninguna nueva — funcionalidad de calidad de datos del catálogo, no de negocio.
+
+### CU-T07 — Autenticarse como personal
+
+- **Actor**: Trabajador o Admin.
+- **Precondición**: cuenta de staff ya creada (auto-registro o CU-A10).
+- **Flujo principal**: `POST /auth/login` con correo + contraseña; el backend valida
+  credenciales y `esta_activo`, devuelve un JWT. El primer acceso de un rol nuevo pasa antes por
+  `POST /auth/registrar`.
+- **Flujos alternativos**: credenciales inválidas → 401. Cuenta desactivada → 403.
+- **Postcondición**: sesión de staff iniciada.
+- **RN**: ninguna con ID propio.
+
+### CU-T08 — Gestionar mi cuenta
+
+- **Actor**: Trabajador o Admin.
+- **Precondición**: sesión de staff iniciada.
+- **Flujo principal**: consulta o edita su perfil (`GET/PATCH /auth/perfil`) y, opcionalmente,
+  cambia su contraseña (`POST /auth/cambiar-password`) indicando la actual.
+- **Flujos alternativos**: contraseña actual incorrecta → 401.
+- **Postcondición**: `Usuario` (y su hash de contraseña, si aplica) actualizado.
+- **RN**: ninguna específica.
+
+### CU-T09 — Marcar inasistencia automáticamente (no-show)
+
+- **Actor**: Trabajador (pasivo); Celery Beat (dispara el caso de uso).
+- **Precondición**: `Cita` en `confirmada`, con `programada_en + 15min < now()` y sin
+  `hora_llegada_real`.
+- **Flujo principal**: cada 5 minutos el beat verifica esta condición sobre todas las citas
+  vigentes y marca `no_show` las que la cumplen, aplicando la pérdida del depósito.
+- **Postcondición**: `Cita.estado = no_show`. Las citas `pendiente` nunca se ven afectadas.
+- **RN**: RN05 (el marcado manual equivalente lo cubre RN03 dentro de CU-T02).
 
 ---
 
@@ -269,3 +330,40 @@ Ver `docs/MODULO_FIDELIZACION_AVANZADA.md`.
   feedback de la especialista fue positivo — permite retirar o ajustar estilos que
   sistemáticamente generan expectativas que no se logran en el servicio real.
 - **RN**: ninguna nueva.
+
+### CU-A09 — Gestionar clientes
+
+- **Actor**: Admin.
+- **Flujo principal**: lista clientes con etiquetas y estado de bloqueo, consulta el detalle de
+  una clienta con su historial de citas, edita etiquetas/notas internas (nunca `correo`/
+  `password` — ver CU-A10), y bloquea/desbloquea con motivo cuando corresponde.
+- **Flujos alternativos**: intento de editar `correo`/`password` por este flujo → 422.
+- **Postcondición**: `Cliente` actualizado; si aplica, `esta_bloqueada`/`motivo_bloqueo`.
+- **RN**: RN11.
+
+### CU-A10 — Administrar cuentas de usuario del staff
+
+- **Actor**: Admin.
+- **Flujo principal**: lista/consulta usuarios por rol y estado, edita nombre/teléfono, cambia
+  el correo (resetea `correo_verificado=false`), resetea contraseña sin conocer la actual, y
+  activa/desactiva la cuenta.
+- **Postcondición**: `Usuario` actualizado en el campo correspondiente.
+- **RN**: ninguna con ID propio — única vía autorizada para tocar credenciales ajenas.
+
+### CU-A11 — Configurar el módulo de asesoría de IA **(planeado)**
+
+- **Actor**: Admin.
+- **Flujo principal**: activa/desactiva el módulo de IA y define el límite diario de consultas
+  por cliente.
+- **Postcondición**: configuración persistida, efectiva desde la siguiente consulta (CU-C06/
+  CU-T04).
+- **RN**: RN18.
+
+### CU-A12 — Recalcular niveles de fidelización automáticamente **(planeado)**
+
+- **Actor**: Celery Beat (dispara); Admin (beneficiario indirecto vía CU-A04).
+- **Flujo principal**: en un intervalo configurable, evalúa el historial de cada cliente contra
+  los umbrales activos (en orden descendente) y le asigna el nivel más alto que cumple.
+- **Postcondición**: `cliente.nivel_actual` actualizado; una baja de nivel no revoca pedidos ya
+  realizados.
+- **RN**: RN20, RN21.

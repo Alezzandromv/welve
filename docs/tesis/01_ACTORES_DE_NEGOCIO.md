@@ -19,7 +19,7 @@ que invocan al sistema, sin iniciativa de negocio propia).
 - **Contexto de uso**: móvil, generalmente fuera del salón (desde casa, en movimiento). Sesión
   iniciada sin contraseña (magic link por WhatsApp) — ver `docs/PRODUCT.md`.
 - **Frecuencia**: alta (es, en volumen, el actor con más transacciones del sistema).
-- **Casos de uso que inicia**: CU-C01–CU-C08 (ver `02_CASOS_DE_USO_UML.md`).
+- **Casos de uso que inicia**: CU-C01–CU-C11 (ver `02_CASOS_DE_USO_UML.md`).
 
 ### Trabajador / Especialista
 
@@ -34,7 +34,7 @@ que invocan al sistema, sin iniciativa de negocio propia).
 - **Restricción de diseño explícita**: nunca ve datos financieros del salón ni citas de otras
   especialistas — es un actor deliberadamente acotado, no una versión "reducida" del
   administrador.
-- **Casos de uso que inicia**: CU-T01–CU-T06.
+- **Casos de uso que inicia**: CU-T01–CU-T09.
 
 ### Administrador
 
@@ -50,7 +50,7 @@ que invocan al sistema, sin iniciativa de negocio propia).
   ejecutar todo lo que un Trabajador puede (operar cualquier cita, no solo las propias), más las
   secciones exclusivas de gestión. En UML esto se modela como una relación de generalización
   (flecha de herencia) desde `Trabajador` hacia `Administrador`.
-- **Casos de uso que inicia**: CU-A01–CU-A08, más todos los de Trabajador sobre cualquier
+- **Casos de uso que inicia**: CU-A01–CU-A12, más todos los de Trabajador sobre cualquier
   especialista.
 
 ### Diagrama de contexto (actores × sistema)
