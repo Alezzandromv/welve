@@ -2,7 +2,10 @@
 
 Formato por caso: **Actor**, **Precondición**, **Flujo principal**, **Flujos alternativos /
 error**, **Postcondición**, **RN involucradas**. Los casos marcados **(planeado)** pertenecen a
-módulos documentados pero no implementados — ver `docs/FASES.md`.
+módulos documentados pero no implementados — ver `docs/FASES.md`. Dentro de cada actor, los
+casos de uso **implementados** van primero (numeración baja) y los **planeados** al final
+(numeración alta) — así se lee el catálogo de un vistazo sin mezclar lo construido con lo
+futuro.
 
 Para el detalle de los **requerimientos funcionales (RF)** que implementa cada caso de uso, ver
 `docs/tesis/11_REQUERIMIENTOS_FUNCIONALES.md` (RF por módulo) y
@@ -13,6 +16,13 @@ caso de uso) — si dos casos de uso invocan el mismo endpoint (p. ej. CU-C02/CU
 misma cita, o CU-T02/CU-T03 sobre el mismo cambio de estado), el requerimiento se documenta una
 sola vez en su caso de uso de origen y el otro lo referencia en prosa, nunca como una segunda
 entrada formal.
+
+Un proceso automático sin ningún punto de decisión humana (p. ej. el recálculo periódico de
+niveles de fidelización) no se modela como caso de uso propio — se documenta directamente como
+regla de negocio (ver `docs/REGLAS_DE_NEGOCIO.md`, RN20/RN21). El no-show automático (CU-T09) sí
+se mantiene como caso de uso pese a dispararlo Celery Beat, porque tiene una consecuencia visible
+y accionable por el trabajador (pierde el depósito, cambia su agenda) — la automatización de
+Celery Beat no es, por sí sola, motivo para excluir un caso de uso del catálogo.
 
 ---
 
@@ -83,54 +93,6 @@ entrada formal.
   /fidelizacion/mis-descuentos` sin haber hecho ninguna acción explícita.
 - **RN**: RN15.
 
-### CU-C06 — Consulta de asesoría de estilo con IA **(planeado)**
-
-Ver flujo completo y modelo de datos en `docs/MODULO_ASESORIA_IA.md`.
-
-- **Actor**: Cliente.
-- **Precondición**: módulo de IA habilitado por el admin; cliente acepta el consentimiento de
-  procesamiento de imagen; no superó el límite diario de consultas (RN18).
-- **Flujo principal**: cliente abre la cámara desde `Reservar` o `MisCitas`, captura una foto,
-  la app la envía al backend de forma efímera. El backend la analiza contra el catálogo de
-  estilos curado (`EstiloCatalogo`) usando la API de Gemini y devuelve sugerencias rankeadas
-  del catálogo existente (no genera imágenes nuevas). El cliente elige uno o más estilos y los
-  envía a su especialista asignada en su próxima cita.
-- **Flujos alternativos**: sin consentimiento → la cámara no se activa. Límite diario alcanzado
-  → mensaje indicando cuándo se resetea (RN18). Sin cita futura para enviar la selección → se
-  guarda la consulta pero se bloquea el botón "enviar a mi estilista" hasta que exista una.
-- **Postcondición**: `ConsultaIA` y `SeleccionEstilo` (si eligió y envió) persistidos —
-  **nunca** la foto original (RN17).
-- **RN**: RN16, RN17, RN18, RN19.
-
-### CU-C07 — Comprar en el catálogo exclusivo **(planeado)**
-
-Ver flujo completo en `docs/MODULO_FIDELIZACION_AVANZADA.md`.
-
-- **Actor**: Cliente con nivel de fidelización suficiente.
-- **Precondición**: `cliente.nivel_actual >= producto.nivel_minimo`.
-- **Flujo principal**: cliente ve el catálogo exclusivo (los productos fuera de su nivel
-  aparecen bloqueados con un teaser de qué nivel los desbloquea), elige un producto, paga vía
-  pasarela (Culqi). El backend crea `PedidoCatalogo` en `pendiente`, redirige al checkout, y al
-  recibir el webhook de confirmación actualiza el estado de forma idempotente.
-- **Flujos alternativos**: nivel insuficiente → 403 a nivel de API aunque la UI ya lo oculte
-  (RN22, defensa en profundidad). Pago rechazado → `PedidoCatalogo.estado = cancelado`, sin
-  efecto en el nivel del cliente (RN24).
-- **Postcondición**: `PedidoCatalogo` en `pagado`, visible en el historial del cliente y en el
-  panel de pedidos del admin.
-- **RN**: RN20, RN21, RN22, RN23, RN24.
-
-### CU-C08 — Marcar un estilo como favorito sin usar la cámara **(planeado)**
-
-- **Actor**: Cliente.
-- **Precondición**: módulo de IA habilitado; catálogo de estilos con al menos un ítem activo.
-- **Flujo principal**: el cliente explora el catálogo de estilos directamente (`GET
-  /ia/catalogo`) sin activar la cámara — útil cuando ya sabe qué quiere y solo necesita
-  mostrárselo a su especialista — y marca uno o más como favoritos.
-- **Postcondición**: favorito registrado, visible en el mismo lugar donde se ven las
-  `SeleccionEstilo` generadas por consulta de IA, para que la especialista no tenga que
-  distinguir el origen.
-- **RN**: ninguna nueva — reutiliza el mismo catálogo de RN16–RN19 sin pasar por el análisis.
-
 ### CU-C09 — Solicitar y verificar acceso por magic link
 
 - **Actor**: Cliente.
@@ -152,7 +114,38 @@ Ver flujo completo en `docs/MODULO_FIDELIZACION_AVANZADA.md`.
 - **Postcondición**: `Usuario` actualizado.
 - **RN**: ninguna específica.
 
-### CU-C11 — Consultar mi nivel de fidelización y progreso **(planeado)**
+### CU-C11 — Consultar asesoría de estilo con IA **(planeado)**
+
+Ver flujo completo y modelo de datos en `docs/MODULO_ASESORIA_IA.md`.
+
+- **Actor**: Cliente.
+- **Precondición**: módulo de IA habilitado por el admin; cliente acepta el consentimiento de
+  procesamiento de imagen; no superó el límite diario de consultas (RN18).
+- **Flujo principal**: cliente abre la cámara desde `Reservar` o `MisCitas`, captura una foto,
+  la app la envía al backend de forma efímera. El backend la analiza contra el catálogo de
+  estilos curado (`EstiloCatalogo`) usando la API de Gemini y devuelve sugerencias rankeadas
+  del catálogo existente (no genera imágenes nuevas). El cliente elige uno o más estilos y los
+  envía a su especialista asignada en su próxima cita.
+- **Flujos alternativos**: sin consentimiento → la cámara no se activa. Límite diario alcanzado
+  → mensaje indicando cuándo se resetea (RN18). Sin cita futura para enviar la selección → se
+  guarda la consulta pero se bloquea el botón "enviar a mi estilista" hasta que exista una.
+- **Postcondición**: `ConsultaIA` y `SeleccionEstilo` (si eligió y envió) persistidos —
+  **nunca** la foto original (RN17).
+- **RN**: RN16, RN17, RN18, RN19.
+
+### CU-C12 — Marcar un estilo como favorito sin usar la cámara **(planeado)**
+
+- **Actor**: Cliente.
+- **Precondición**: módulo de IA habilitado; catálogo de estilos con al menos un ítem activo.
+- **Flujo principal**: el cliente explora el catálogo de estilos directamente (`GET
+  /ia/catalogo`) sin activar la cámara — útil cuando ya sabe qué quiere y solo necesita
+  mostrárselo a su especialista — y marca uno o más como favoritos.
+- **Postcondición**: favorito registrado, visible en el mismo lugar donde se ven las
+  `SeleccionEstilo` generadas por consulta de IA, para que la especialista no tenga que
+  distinguir el origen.
+- **RN**: ninguna nueva — reutiliza el mismo catálogo de RN16–RN19 sin pasar por el análisis.
+
+### CU-C13 — Consultar mi nivel de fidelización y progreso **(planeado)**
 
 - **Actor**: Cliente.
 - **Precondición**: módulo de fidelización avanzada habilitado.
@@ -160,6 +153,23 @@ Ver flujo completo en `docs/MODULO_FIDELIZACION_AVANZADA.md`.
   gasto) para alcanzar el siguiente.
 - **Postcondición**: ninguna — caso de uso de solo consulta.
 - **RN**: RN20.
+
+### CU-C14 — Comprar en el catálogo exclusivo **(planeado)**
+
+Ver flujo completo en `docs/MODULO_FIDELIZACION_AVANZADA.md`.
+
+- **Actor**: Cliente con nivel de fidelización suficiente.
+- **Precondición**: `cliente.nivel_actual >= producto.nivel_minimo`.
+- **Flujo principal**: cliente ve el catálogo exclusivo (los productos fuera de su nivel
+  aparecen bloqueados con un teaser de qué nivel los desbloquea), elige un producto, paga vía
+  pasarela (Culqi). El backend crea `PedidoCatalogo` en `pendiente`, redirige al checkout, y al
+  recibir el webhook de confirmación actualiza el estado de forma idempotente.
+- **Flujos alternativos**: nivel insuficiente → 403 a nivel de API aunque la UI ya lo oculte
+  (RN22, defensa en profundidad). Pago rechazado → `PedidoCatalogo.estado = cancelado`, sin
+  efecto en el nivel del cliente (RN24).
+- **Postcondición**: `PedidoCatalogo` en `pagado`, visible en el historial del cliente y en el
+  panel de pedidos del admin.
+- **RN**: RN20, RN21, RN22, RN23, RN24.
 
 ---
 
@@ -195,35 +205,6 @@ Ver flujo completo en `docs/MODULO_FIDELIZACION_AVANZADA.md`.
 - **Postcondición**: la cita avanza a `en_curso` solo después de que la alerta fue vista.
 - **RN**: RN09.
 
-### CU-T04 — Iniciar una consulta de IA en vivo durante la cita **(planeado)**
-
-- **Actor**: Trabajador.
-- **Flujo principal**: igual mecánica que CU-C06 pero iniciada por la especialista durante la
-  atención presencial (p. ej. la clienta no lo hizo antes de llegar). El resultado queda ligado
-  a `personal_id` además de a la cita.
-- **RN**: RN16, RN17, RN18, RN19.
-
-### CU-T05 — Consultar el historial de estilos de una clienta recurrente **(planeado)**
-
-- **Actor**: Trabajador.
-- **Precondición**: la clienta tiene consultas de IA previas ligadas a citas anteriores con
-  cualquier especialista del salón.
-- **Flujo principal**: al abrir el detalle de una cita agendada, la especialista ve el
-  historial de `SeleccionEstilo` de esa clienta (sin necesidad de volver a analizar una foto) —
-  agiliza la preparación del servicio sin depender de la memoria de quién la atendió antes.
-- **RN**: RN19.
-
-### CU-T06 — Dar feedback sobre el resultado de un estilo **(planeado)**
-
-- **Actor**: Trabajador.
-- **Precondición**: la cita tiene una `SeleccionEstilo` asociada y acaba de pasar a
-  `completada`.
-- **Flujo principal**: la especialista marca si el resultado logrado coincidió con el estilo
-  elegido (sí/no + nota corta opcional).
-- **Postcondición**: el feedback no afecta al cliente ni a su historial — alimenta una métrica
-  interna de confianza del catálogo, visible solo para el admin (CU-A05).
-- **RN**: ninguna nueva — funcionalidad de calidad de datos del catálogo, no de negocio.
-
 ### CU-T07 — Autenticarse como personal
 
 - **Actor**: Trabajador o Admin.
@@ -255,6 +236,35 @@ Ver flujo completo en `docs/MODULO_FIDELIZACION_AVANZADA.md`.
 - **Postcondición**: `Cita.estado = no_show`. Las citas `pendiente` nunca se ven afectadas.
 - **RN**: RN05 (el marcado manual equivalente lo cubre RN03 dentro de CU-T02).
 
+### CU-T10 — Consultar asesoría de estilo durante la atención **(planeado)**
+
+- **Actor**: Trabajador.
+- **Flujo principal**: igual mecánica que CU-C11 pero iniciada por la especialista durante la
+  atención presencial (p. ej. la clienta no lo hizo antes de llegar). El resultado queda ligado
+  a `personal_id` además de a la cita.
+- **RN**: RN16, RN17, RN18, RN19.
+
+### CU-T11 — Consultar historial de estilos de cliente **(planeado)**
+
+- **Actor**: Trabajador.
+- **Precondición**: la clienta tiene consultas de IA previas ligadas a citas anteriores con
+  cualquier especialista del salón.
+- **Flujo principal**: al abrir el detalle de una cita agendada, la especialista ve el
+  historial de `SeleccionEstilo` de esa clienta (sin necesidad de volver a analizar una foto) —
+  agiliza la preparación del servicio sin depender de la memoria de quién la atendió antes.
+- **RN**: RN19.
+
+### CU-T12 — Registrar feedback de estilo **(planeado)**
+
+- **Actor**: Trabajador.
+- **Precondición**: la cita tiene una `SeleccionEstilo` asociada y acaba de pasar a
+  `completada`.
+- **Flujo principal**: la especialista marca si el resultado logrado coincidió con el estilo
+  elegido (sí/no + nota corta opcional).
+- **Postcondición**: el feedback no afecta al cliente ni a su historial — alimenta una métrica
+  interna de confianza del catálogo, visible solo para el admin (CU-A11).
+- **RN**: ninguna nueva — funcionalidad de calidad de datos del catálogo, no de negocio.
+
 ---
 
 ## Admin
@@ -262,9 +272,11 @@ Ver flujo completo en `docs/MODULO_FIDELIZACION_AVANZADA.md`.
 ### CU-A01 — Gestionar personal y su disponibilidad
 
 - **Actor**: Admin.
-- **Flujo principal**: crea el `Usuario` (rol `trabajador`) y luego el `Personal` asociado
-  (flujo de dos pasos, ver `CLAUDE.md`), define especialidad, comisión, tipo de contrato, y su
-  disponibilidad semanal (día, hora inicio/fin, buffer).
+- **Incluye**: CU-A10 (paso de creación de la cuenta).
+- **Flujo principal**: crea la cuenta `Usuario` (rol `trabajador`, reutilizando el mismo flujo
+  de CU-A10) y luego el `Personal` asociado (flujo de dos pasos, ver `CLAUDE.md`), define
+  especialidad, comisión, tipo de contrato, y su disponibilidad semanal (día, hora inicio/fin,
+  buffer).
 - **RN**: RN13 (el buffer configurado aquí es el que se valida en cada reserva).
 
 ### CU-A02 — Confirmar, rechazar o reembolsar un pago
@@ -287,27 +299,6 @@ Ver flujo completo en `docs/MODULO_FIDELIZACION_AVANZADA.md`.
   `docs/FASES.md` para el plan de completar el CRUD como parte del módulo de fidelización
   avanzada).
 
-### CU-A04 — Configurar niveles de fidelización y catálogo exclusivo **(planeado)**
-
-Ver `docs/MODULO_FIDELIZACION_AVANZADA.md`.
-
-- **Actor**: Admin.
-- **Flujo principal**: define niveles (`NivelFidelizacion`) con su umbral (visitas totales,
-  gasto acumulado, o visitas en ventana) y sus beneficios; carga productos del catálogo
-  exclusivo con su `nivel_minimo`; consulta pedidos y su estado de pago.
-- **RN**: RN20, RN21, RN22, RN23, RN24.
-
-### CU-A05 — Gestionar el catálogo de estilos para la IA **(planeado)**
-
-Ver `docs/MODULO_ASESORIA_IA.md`.
-
-- **Actor**: Admin (o especialista con permiso delegado).
-- **Flujo principal**: carga estilos de referencia (`EstiloCatalogo`) una sola vez, con su
-  imagen y atributos (forma de rostro, tipo/largo de cabello, tags) que la IA usa para rankear
-  sugerencias — el catálogo es la única fuente de imágenes del módulo, evitando generar/
-  almacenar una imagen nueva por cada consulta de cliente.
-- **RN**: RN16–RN19.
-
 ### CU-A06 — Ver el dashboard operativo
 
 - **Actor**: Admin.
@@ -316,30 +307,8 @@ Ver `docs/MODULO_ASESORIA_IA.md`.
   display bold, siguiendo los Design Principles de `docs/PRODUCT.md`.
 - **(planeado)** El dashboard suma dos widgets nuevos una vez implementadas las Fases 3 y 4:
   distribución de clientes por nivel de fidelización + ingresos del catálogo exclusivo del mes
-  (RN20–RN24), y uso del módulo de IA (consultas totales, top 5 estilos elegidos, sin ningún
-  dato de imagen — RN16–RN19).
-
-### CU-A07 — Gestionar pedidos del catálogo exclusivo **(planeado)**
-
-Ver `docs/MODULO_FIDELIZACION_AVANZADA.md`.
-
-- **Actor**: Admin.
-- **Precondición**: existe al menos un `PedidoCatalogo` en estado `pagado`.
-- **Flujo principal**: el admin filtra pedidos por estado/cliente/producto, abre el detalle de
-  uno y, tras entregar el producto físicamente, lo marca como `entregado`.
-- **Flujos alternativos**: intentar marcar como entregado un pedido que no está `pagado` → 422
-  (no se puede entregar algo que no se cobró).
-- **Postcondición**: `PedidoCatalogo.estado = entregado`, visible en el historial del cliente.
-- **RN**: RN23 (el pedido llegó a `pagado` de forma idempotente antes de poder entregarse).
-
-### CU-A08 — Revisar métricas de confianza del catálogo de estilos **(planeado)**
-
-- **Actor**: Admin.
-- **Precondición**: al menos una especialista dejó feedback post-servicio (CU-T06).
-- **Flujo principal**: el admin ve, por estilo del catálogo, qué proporción de veces el
-  feedback de la especialista fue positivo — permite retirar o ajustar estilos que
-  sistemáticamente generan expectativas que no se logran en el servicio real.
-- **RN**: ninguna nueva.
+  (RN20–RN24, detalle propio en CU-A16), y uso del módulo de IA (consultas totales, top 5
+  estilos elegidos, sin ningún dato de imagen — RN16–RN19).
 
 ### CU-A09 — Gestionar clientes
 
@@ -360,26 +329,74 @@ Ver `docs/MODULO_FIDELIZACION_AVANZADA.md`.
 ### CU-A10 — Administrar cuentas de usuario del staff
 
 - **Actor**: Admin.
-- **Flujo principal**: lista/consulta usuarios por rol y estado, edita nombre/teléfono, cambia
-  el correo (resetea `correo_verificado=false`), resetea contraseña sin conocer la actual, y
-  activa/desactiva la cuenta.
-- **Postcondición**: `Usuario` actualizado en el campo correspondiente.
-- **RN**: ninguna con ID propio — única vía autorizada para tocar credenciales ajenas.
+- **Incluido en**: CU-A01 (al dar de alta un trabajador).
+- **Flujo principal**: crea una cuenta `Usuario` de cualquier rol (si `rol=cliente`, crea
+  también el `Cliente` vinculado automáticamente), lista/consulta usuarios por rol y estado,
+  edita nombre/teléfono, cambia el correo (resetea `correo_verificado=false`), resetea
+  contraseña sin conocer la actual, y activa/desactiva la cuenta.
+- **Postcondición**: `Usuario` creado o actualizado en el campo correspondiente.
+- **RN**: ninguna con ID propio — única vía autorizada para crear o tocar credenciales ajenas.
 
-### CU-A11 — Configurar el módulo de asesoría de IA **(planeado)**
+### CU-A11 — Gestionar catálogo de estilos **(planeado)**
+
+Ver `docs/MODULO_ASESORIA_IA.md`.
+
+- **Actor**: Admin (o especialista con permiso delegado).
+- **Flujo principal**: carga estilos de referencia (`EstiloCatalogo`) una sola vez, con su
+  imagen y atributos (forma de rostro, tipo/largo de cabello, tags) que la IA usa para rankear
+  sugerencias — el catálogo es la única fuente de imágenes del módulo, evitando generar/
+  almacenar una imagen nueva por cada consulta de cliente.
+- **RN**: RN16–RN19.
+
+### CU-A12 — Revisar métricas de confianza del catálogo de estilos **(planeado)**
+
+- **Actor**: Admin.
+- **Precondición**: al menos una especialista dejó feedback post-servicio (CU-T12).
+- **Flujo principal**: el admin ve, por estilo del catálogo, qué proporción de veces el
+  feedback de la especialista fue positivo — permite retirar o ajustar estilos que
+  sistemáticamente generan expectativas que no se logran en el servicio real.
+- **RN**: ninguna nueva.
+
+### CU-A13 — Configurar módulo de asesoría IA **(planeado)**
 
 - **Actor**: Admin.
 - **Flujo principal**: activa/desactiva el módulo de IA y define el límite diario de consultas
   por cliente.
-- **Postcondición**: configuración persistida, efectiva desde la siguiente consulta (CU-C06/
-  CU-T04).
+- **Postcondición**: configuración persistida, efectiva desde la siguiente consulta (CU-C11/
+  CU-T10).
 - **RN**: RN18.
 
-### CU-A12 — Recalcular niveles de fidelización automáticamente **(planeado)**
+### CU-A14 — Gestionar niveles y catálogo exclusivo **(planeado)**
 
-- **Actor**: Celery Beat (dispara); Admin (beneficiario indirecto vía CU-A04).
-- **Flujo principal**: en un intervalo configurable, evalúa el historial de cada cliente contra
-  los umbrales activos (en orden descendente) y le asigna el nivel más alto que cumple.
-- **Postcondición**: `cliente.nivel_actual` actualizado; una baja de nivel no revoca pedidos ya
-  realizados.
-- **RN**: RN20, RN21.
+Ver `docs/MODULO_FIDELIZACION_AVANZADA.md`.
+
+- **Actor**: Admin.
+- **Flujo principal**: define niveles (`NivelFidelizacion`) con su umbral (visitas totales,
+  gasto acumulado, o visitas en ventana) y sus beneficios; carga productos del catálogo
+  exclusivo con su `nivel_minimo`; consulta pedidos y su estado de pago.
+- **RN**: RN20, RN21, RN22, RN23, RN24.
+
+### CU-A15 — Gestionar pedidos del catálogo exclusivo **(planeado)**
+
+Ver `docs/MODULO_FIDELIZACION_AVANZADA.md`.
+
+- **Actor**: Admin.
+- **Precondición**: existe al menos un `PedidoCatalogo` en estado `pagado`.
+- **Flujo principal**: el admin filtra pedidos por estado/cliente/producto, abre el detalle de
+  uno y, tras entregar el producto físicamente, lo marca como `entregado`.
+- **Flujos alternativos**: intentar marcar como entregado un pedido que no está `pagado` → 422
+  (no se puede entregar algo que no se cobró).
+- **Postcondición**: `PedidoCatalogo.estado = entregado`, visible en el historial del cliente.
+- **RN**: RN23 (el pedido llegó a `pagado` de forma idempotente antes de poder entregarse).
+
+### CU-A16 — Consultar métricas de fidelización **(planeado)**
+
+- **Actor**: Admin.
+- **Precondición**: módulo de fidelización avanzada habilitado; al menos un cliente con nivel
+  asignado.
+- **Flujo principal**: el admin consulta, desde el dashboard operativo (CU-A06), la
+  distribución de clientes por nivel de fidelización y los ingresos del catálogo exclusivo del
+  mes — agregados de solo lectura, sin ninguna acción de escritura propia.
+- **Postcondición**: ninguna — caso de uso de solo consulta.
+- **RN**: ninguna nueva — lee el resultado de RN20/RN21 (recálculo de niveles, proceso
+  automático sin caso de uso propio) y de las compras registradas por CU-C14.

@@ -13,18 +13,30 @@ Cada caso de uso conserva el ID de `docs/CASOS_DE_USO.md` para que ambos documen
 sincronizados. Las relaciones «extends»/«includes» de UML se marcan con flecha punteada y su
 estereotipo correspondiente, tal como exige la notación formal.
 
-**Total de casos de uso especificados: 32** — 11 de Cliente (`CU-C01`–`CU-C11`), 9 de Trabajador
-(`CU-T01`–`CU-T09`), 12 de Administrador (`CU-A01`–`CU-A12`). 19 ya implementados, 13 planeados
-(marcados con borde punteado en los diagramas y con `«planeado»` en el texto).
+**Total de casos de uso especificados: 32** — 11 de Cliente (`CU-C01`–`CU-C14`, con huecos
+donde antes hubo códigos hoy renumerados), 9 de Trabajador (`CU-T01`–`CU-T12`, mismo caso), 12
+de Administrador (`CU-A01`–`CU-A16`, mismo caso). 19 ya implementados, 13 planeados (marcados
+con borde punteado en los diagramas y con `«planeado»` en el texto). Dentro de cada actor, los
+implementados usan siempre la numeración más baja y los planeados la más alta — así el catálogo
+se lee de un vistazo sin mezclar lo construido con lo futuro.
 
-> Los 10 casos de uso agregados en la última revisión (`CU-C09`–`CU-C11`, `CU-T07`–`CU-T09`,
-> `CU-A09`–`CU-A12`) cierran la brecha detectada al auditar `11_REQUERIMIENTOS_FUNCIONALES.md`
-> contra los 22 casos originales: había RF ya implementados (autenticación, gestión de
-> clientes, administración de cuentas de usuario, no-show automático) y RF planeados
-> (configuración del módulo de IA, recálculo de niveles, consulta de mi nivel de fidelización)
-> sin un caso de uso que los agrupara. Ningún caso de uso existente cambió de número — se
-> añadieron al final del rango de cada actor para no romper referencias cruzadas en el resto de
-> `docs/`.
+> Los 10 casos de uso agregados en una revisión anterior (`CU-C09`–`CU-C11` en su numeración de
+> entonces, `CU-T07`–`CU-T09`, `CU-A09`–`CU-A12` en su numeración de entonces) cerraron la
+> brecha detectada al auditar `11_REQUERIMIENTOS_FUNCIONALES.md` contra los 22 casos originales:
+> había RF ya implementados (autenticación, gestión de clientes, administración de cuentas de
+> usuario, no-show automático) y RF planeados (configuración del módulo de IA, consulta de mi
+> nivel de fidelización) sin un caso de uso que los agrupara.
+>
+> **Revisión posterior — renumeración de planeados**: los casos de uso planeados de Cliente,
+> Trabajador y Admin se renumeraron para quedar todos al final del rango de su actor (antes
+> estaban intercalados con los implementados). Además: `CU-A12 — Recalcular niveles de
+> fidelización automáticamente` (antiguo) se **retiró del catálogo de casos de uso** — es un
+> proceso batch puramente automático (RN20/RN21), sin ningún punto de decisión humana, por lo
+> que se documenta solo como regla de negocio y en `06_DIAGRAMAS_DE_ACTIVIDAD.md`, no como caso
+> de uso con actor Celery Beat (a diferencia de CU-T09/no-show, que sí conserva ese modelado
+> porque tiene una consecuencia visible y accionable por el trabajador). Se agregó
+> `CU-A16 — Consultar métricas de fidelización` (nuevo) para los widgets planeados de CU-A06. El
+> total se mantiene en 32.
 
 ## Diagrama de casos de uso — Cliente
 
@@ -38,36 +50,36 @@ flowchart LR
         CUC03(["CU-C03<br/>Cancelar tardío"])
         CUC04(["CU-C04<br/>Canjear descuento"])
         CUC05(["CU-C05<br/>Completar reto<br/>«automático»"])
-        CUC06(["CU-C06<br/>Consulta IA<br/>«planeado»"])
-        CUC07(["CU-C07<br/>Comprar catálogo<br/>exclusivo «planeado»"])
-        CUC08(["CU-C08<br/>Favorito de estilo<br/>«planeado»"])
         CUC09(["CU-C09<br/>Solicitar y verificar<br/>acceso"])
         CUC10(["CU-C10<br/>Gestionar mi perfil"])
-        CUC11(["CU-C11<br/>Consultar mi nivel de<br/>fidelización «planeado»"])
+        CUC11(["CU-C11<br/>Consulta de estilo<br/>con IA «planeado»"])
+        CUC12(["CU-C12<br/>Favorito de estilo<br/>«planeado»"])
+        CUC13(["CU-C13<br/>Consultar mi nivel de<br/>fidelización «planeado»"])
+        CUC14(["CU-C14<br/>Comprar catálogo<br/>exclusivo «planeado»"])
     end
 
     Cliente --- CUC01
     Cliente --- CUC02
     Cliente --- CUC03
     Cliente --- CUC04
-    Cliente --- CUC06
-    Cliente --- CUC07
-    Cliente --- CUC08
     Cliente --- CUC09
     Cliente --- CUC10
     Cliente --- CUC11
+    Cliente --- CUC12
+    Cliente --- CUC13
+    Cliente --- CUC14
 
     CUC02 -. "«extends»" .-> CUC01
     CUC03 -. "«extends»" .-> CUC01
-    CUC06 -. "«includes»" .-> CUC01
-    CUC07 -. "«includes»" .-> CUC04
     CUC09 -. "«precede»" .-> CUC01
-    CUC11 -. "«extends»" .-> CUC07
+    CUC11 -. "«includes»" .-> CUC01
+    CUC14 -. "«includes»" .-> CUC04
+    CUC13 -. "«extends»" .-> CUC14
 
     classDef actor fill:#fff,stroke:#333,stroke-width:1px
     classDef planeado stroke-dasharray: 5 5
     class Cliente actor
-    class CUC06,CUC07,CUC08,CUC11 planeado
+    class CUC11,CUC12,CUC13,CUC14 planeado
 ```
 
 ## Diagrama de casos de uso — Trabajador / Especialista
@@ -80,31 +92,31 @@ flowchart LR
         CUT01(["CU-T01<br/>Ver agenda del día"])
         CUT02(["CU-T02<br/>Registrar llegada /<br/>avanzar estado"])
         CUT03(["CU-T03<br/>Atender alerta de<br/>ficha crítica"])
-        CUT04(["CU-T04<br/>Consulta IA en vivo<br/>«planeado»"])
-        CUT05(["CU-T05<br/>Ver historial de<br/>estilos «planeado»"])
-        CUT06(["CU-T06<br/>Feedback de estilo<br/>«planeado»"])
         CUT07(["CU-T07<br/>Autenticarse<br/>como personal"])
         CUT08(["CU-T08<br/>Gestionar mi cuenta"])
         CUT09(["CU-T09<br/>Marcar no-show<br/>«automático»"])
+        CUT10(["CU-T10<br/>Consulta IA en vivo<br/>«planeado»"])
+        CUT11(["CU-T11<br/>Ver historial de<br/>estilos «planeado»"])
+        CUT12(["CU-T12<br/>Feedback de estilo<br/>«planeado»"])
     end
 
     Trabajador --- CUT01
     Trabajador --- CUT02
-    Trabajador --- CUT04
-    Trabajador --- CUT05
-    Trabajador --- CUT06
     Trabajador --- CUT07
     Trabajador --- CUT08
+    Trabajador --- CUT10
+    Trabajador --- CUT11
+    Trabajador --- CUT12
 
     CUT03 -. "«extends»" .-> CUT02
-    CUT06 -. "«extends»" .-> CUT02
     CUT09 -. "«extends»" .-> CUT02
+    CUT12 -. "«extends»" .-> CUT02
     CUT07 -. "«precede»" .-> CUT01
 
     classDef actor fill:#fff,stroke:#333,stroke-width:1px
     classDef planeado stroke-dasharray: 5 5
     class Trabajador actor
-    class CUT04,CUT05,CUT06 planeado
+    class CUT10,CUT11,CUT12 planeado
 ```
 
 ## Diagrama de casos de uso — Administrador
@@ -117,39 +129,41 @@ flowchart LR
         CUA01(["CU-A01<br/>Gestionar personal"])
         CUA02(["CU-A02<br/>Confirmar/rechazar/<br/>reembolsar pago"])
         CUA03(["CU-A03<br/>Configurar descuento<br/>o reto"])
-        CUA04(["CU-A04<br/>Configurar niveles y<br/>catálogo «planeado»"])
-        CUA05(["CU-A05<br/>Gestionar catálogo<br/>de estilos «planeado»"])
         CUA06(["CU-A06<br/>Ver dashboard<br/>operativo"])
-        CUA07(["CU-A07<br/>Gestionar pedidos<br/>del catálogo «planeado»"])
-        CUA08(["CU-A08<br/>Revisar métricas de<br/>confianza «planeado»"])
         CUA09(["CU-A09<br/>Gestionar clientes"])
         CUA10(["CU-A10<br/>Administrar cuentas<br/>de usuario"])
-        CUA11(["CU-A11<br/>Configurar módulo<br/>de IA «planeado»"])
-        CUA12(["CU-A12<br/>Recalcular niveles<br/>«automático, planeado»"])
+        CUA11(["CU-A11<br/>Gestionar catálogo<br/>de estilos «planeado»"])
+        CUA12(["CU-A12<br/>Revisar métricas de<br/>confianza «planeado»"])
+        CUA13(["CU-A13<br/>Configurar módulo<br/>de IA «planeado»"])
+        CUA14(["CU-A14<br/>Gestionar niveles y<br/>catálogo «planeado»"])
+        CUA15(["CU-A15<br/>Gestionar pedidos<br/>del catálogo «planeado»"])
+        CUA16(["CU-A16<br/>Consultar métricas de<br/>fidelización «planeado»"])
     end
 
     Admin --- CUA01
     Admin --- CUA02
     Admin --- CUA03
-    Admin --- CUA04
-    Admin --- CUA05
     Admin --- CUA06
-    Admin --- CUA07
-    Admin --- CUA08
     Admin --- CUA09
     Admin --- CUA10
     Admin --- CUA11
+    Admin --- CUA12
+    Admin --- CUA13
+    Admin --- CUA14
+    Admin --- CUA15
+    Admin --- CUA16
 
-    CUA07 -. "«extends»" .-> CUA04
-    CUA08 -. "«extends»" .-> CUA05
-    CUA11 -. "«extends»" .-> CUA05
-    CUA12 -. "«extends»" .-> CUA04
+    CUA01 -. "«includes»" .-> CUA10
+    CUA15 -. "«extends»" .-> CUA14
+    CUA12 -. "«extends»" .-> CUA11
+    CUA13 -. "«extends»" .-> CUA11
+    CUA16 -. "«includes»" .-> CUA06
 
     classDef actor fill:#fff,stroke:#333,stroke-width:1px
     class Admin actor
 
     classDef planeado stroke-dasharray: 5 5
-    class CUA04,CUA05,CUA07,CUA08,CUA11,CUA12 planeado
+    class CUA11,CUA12,CUA13,CUA14,CUA15,CUA16 planeado
 ```
 
 ---
@@ -232,46 +246,6 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **Postcondición**: nuevo descuento disponible para el cliente sin acción explícita suya.
 - **RN**: RN15.
 
-#### CU-C06 — Consulta de asesoría de estilo con IA *(planeado)*
-
-- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Incluye**: uso posterior en
-  CU-C01 (envío de la selección a la próxima cita).
-- **Precondición**: módulo habilitado; consentimiento aceptado; límite diario no superado
-  (RN18).
-- **Flujo normal**: 1. El cliente activa la cámara y captura una foto. 2. El sistema la envía a
-  Gemini junto con los atributos del catálogo. 3. Gemini devuelve un ranking de estilos del
-  catálogo existente. 4. El sistema descarta la foto (RN17). 5. El cliente elige uno o más
-  estilos y los envía a su especialista, ligados a su próxima cita (RN19).
-- **Flujos alternativos**: sin consentimiento → la cámara no se activa (RN16). Límite diario
-  alcanzado → mensaje con el tiempo de reseteo. Sin cita futura → selección guardada pero envío
-  deshabilitado.
-- **Postcondición**: `ConsultaIA` y, si aplica, `SeleccionEstilo` persistidos — nunca la foto.
-- **RN**: RN16, RN17, RN18, RN19.
-
-#### CU-C07 — Comprar en el catálogo exclusivo *(planeado)*
-
-- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Incluye**: CU-C04 (mismo
-  concepto de canje, aplicado a un producto en vez de un servicio).
-- **Precondición**: `cliente.nivel_actual ≥ producto.nivel_minimo`.
-- **Flujo normal**: 1. El cliente ve el catálogo (productos de nivel superior bloqueados con
-  teaser). 2. Elige un producto habilitado y paga vía Culqi. 3. El sistema crea `PedidoCatalogo`
-  en `pendiente`. 4. Culqi confirma vía webhook. 5. El sistema actualiza el pedido a `pagado`
-  de forma idempotente (RN23).
-- **Flujos alternativos**: nivel insuficiente → 403 también a nivel de API (RN22). Pago
-  rechazado → `cancelado`, sin efecto en el nivel (RN24).
-- **Postcondición**: `PedidoCatalogo` en `pagado`.
-- **RN**: RN20–RN24.
-
-#### CU-C08 — Marcar un estilo como favorito sin cámara *(planeado)*
-
-- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: baja.
-- **Precondición**: catálogo de estilos con al menos un ítem activo.
-- **Flujo normal**: 1. El cliente explora el catálogo directamente. 2. Marca uno o más como
-  favoritos (`SeleccionEstilo` con `origen=favorito`, sin `ConsultaIA` asociada).
-- **Postcondición**: favorito visible junto a las selecciones generadas por IA, sin distinción
-  de origen para la especialista.
-- **RN**: ninguna nueva.
-
 #### CU-C09 — Solicitar y verificar acceso por magic link
 
 - **Actor**: Cliente. **Tipo**: primario. **Prioridad**: alta. **Precede a**: CU-C01 (toda
@@ -300,15 +274,55 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **Postcondición**: `Usuario` actualizado.
 - **RN**: ninguna específica.
 
-#### CU-C11 — Consultar mi nivel de fidelización y progreso *(planeado)*
+#### CU-C11 — Consultar asesoría de estilo con IA *(planeado)*
 
-- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Extiende**: CU-C07 (contexto
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Incluye**: uso posterior en
+  CU-C01 (envío de la selección a la próxima cita).
+- **Precondición**: módulo habilitado; consentimiento aceptado; límite diario no superado
+  (RN18).
+- **Flujo normal**: 1. El cliente activa la cámara y captura una foto. 2. El sistema la envía a
+  Gemini junto con los atributos del catálogo. 3. Gemini devuelve un ranking de estilos del
+  catálogo existente. 4. El sistema descarta la foto (RN17). 5. El cliente elige uno o más
+  estilos y los envía a su especialista, ligados a su próxima cita (RN19).
+- **Flujos alternativos**: sin consentimiento → la cámara no se activa (RN16). Límite diario
+  alcanzado → mensaje con el tiempo de reseteo. Sin cita futura → selección guardada pero envío
+  deshabilitado.
+- **Postcondición**: `ConsultaIA` y, si aplica, `SeleccionEstilo` persistidos — nunca la foto.
+- **RN**: RN16, RN17, RN18, RN19.
+
+#### CU-C12 — Marcar un estilo como favorito sin cámara *(planeado)*
+
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: baja.
+- **Precondición**: catálogo de estilos con al menos un ítem activo.
+- **Flujo normal**: 1. El cliente explora el catálogo directamente. 2. Marca uno o más como
+  favoritos (`SeleccionEstilo` con `origen=favorito`, sin `ConsultaIA` asociada).
+- **Postcondición**: favorito visible junto a las selecciones generadas por IA, sin distinción
+  de origen para la especialista.
+- **RN**: ninguna nueva.
+
+#### CU-C13 — Consultar mi nivel de fidelización y progreso *(planeado)*
+
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Extiende**: CU-C14 (contexto
   de decisión de compra en el catálogo exclusivo).
 - **Precondición**: módulo de fidelización avanzada habilitado.
 - **Flujo normal**: 1. El cliente abre la sección de fidelización. 2. El sistema muestra el
   `NivelFidelizacion` actual y qué le falta (visitas o gasto) para alcanzar el siguiente nivel.
 - **Postcondición**: ninguna — caso de uso de solo consulta.
 - **RN**: RN20.
+
+#### CU-C14 — Comprar en el catálogo exclusivo *(planeado)*
+
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Incluye**: CU-C04 (mismo
+  concepto de canje, aplicado a un producto en vez de un servicio).
+- **Precondición**: `cliente.nivel_actual ≥ producto.nivel_minimo`.
+- **Flujo normal**: 1. El cliente ve el catálogo (productos de nivel superior bloqueados con
+  teaser). 2. Elige un producto habilitado y paga vía Culqi. 3. El sistema crea `PedidoCatalogo`
+  en `pendiente`. 4. Culqi confirma vía webhook. 5. El sistema actualiza el pedido a `pagado`
+  de forma idempotente (RN23).
+- **Flujos alternativos**: nivel insuficiente → 403 también a nivel de API (RN22). Pago
+  rechazado → `cancelado`, sin efecto en el nivel (RN24).
+- **Postcondición**: `PedidoCatalogo` en `pagado`.
+- **RN**: RN20–RN24.
 
 ### Trabajador / Especialista
 
@@ -342,32 +356,6 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   `confirmar_ficha_critica: true`.
 - **Postcondición**: la cita avanza a `en_curso` solo después de que la alerta fue vista.
 - **RN**: RN09.
-
-#### CU-T04 — Iniciar una consulta de IA en vivo durante la cita *(planeado)*
-
-- **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: baja.
-- **Flujo normal**: igual mecánica que CU-C06, iniciada por la especialista durante la atención
-  presencial; el resultado queda ligado a `personal_id` además de a la cita.
-- **RN**: RN16, RN17, RN18, RN19.
-
-#### CU-T05 — Consultar el historial de estilos de una clienta recurrente *(planeado)*
-
-- **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: media.
-- **Precondición**: la clienta tiene `SeleccionEstilo` previas ligadas a citas anteriores.
-- **Flujo normal**: 1. La especialista abre el detalle de una cita agendada. 2. El sistema
-  muestra el historial de estilos de esa clienta, sin volver a analizar ninguna foto.
-- **RN**: RN19.
-
-#### CU-T06 — Dar feedback sobre el resultado de un estilo *(planeado)*
-
-- **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: baja. **Extiende**: CU-T02.
-- **Precondición**: la cita tiene una `SeleccionEstilo` asociada y acaba de pasar a
-  `completada`.
-- **Flujo normal**: 1. La especialista marca si el resultado coincidió con el estilo elegido
-  (sí/no + nota). 2. El sistema lo registra en `SeleccionEstilo.feedback_coincidio`.
-- **Postcondición**: no afecta al cliente; alimenta la métrica de confianza del catálogo
-  (CU-A08).
-- **RN**: ninguna nueva.
 
 #### CU-T07 — Autenticarse como personal
 
@@ -404,14 +392,41 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **Postcondición**: `Cita.estado = no_show`. Las citas en `pendiente` nunca se ven afectadas.
 - **RN**: RN05 (junto con RN03, que cubre el marcado manual de no-show por el staff).
 
+#### CU-T10 — Consultar asesoría de estilo durante la atención *(planeado)*
+
+- **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: baja.
+- **Flujo normal**: igual mecánica que CU-C11, iniciada por la especialista durante la atención
+  presencial; el resultado queda ligado a `personal_id` además de a la cita.
+- **RN**: RN16, RN17, RN18, RN19.
+
+#### CU-T11 — Consultar historial de estilos de cliente *(planeado)*
+
+- **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: media.
+- **Precondición**: la clienta tiene `SeleccionEstilo` previas ligadas a citas anteriores.
+- **Flujo normal**: 1. La especialista abre el detalle de una cita agendada. 2. El sistema
+  muestra el historial de estilos de esa clienta, sin volver a analizar ninguna foto.
+- **RN**: RN19.
+
+#### CU-T12 — Registrar feedback de estilo *(planeado)*
+
+- **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: baja. **Extiende**: CU-T02.
+- **Precondición**: la cita tiene una `SeleccionEstilo` asociada y acaba de pasar a
+  `completada`.
+- **Flujo normal**: 1. La especialista marca si el resultado coincidió con el estilo elegido
+  (sí/no + nota). 2. El sistema lo registra en `SeleccionEstilo.feedback_coincidio`.
+- **Postcondición**: no afecta al cliente; alimenta la métrica de confianza del catálogo
+  (CU-A12).
+- **RN**: ninguna nueva.
+
 ### Administrador
 
 #### CU-A01 — Gestionar personal y su disponibilidad
 
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: alta.
-- **Flujo normal**: 1. Crea el `Usuario` con rol `trabajador`. 2. Crea el `Personal` asociado.
-  3. Define especialidad, comisión, tipo de contrato. 4. Define disponibilidad semanal
-  (día/hora/buffer).
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: alta. **Incluye**: CU-A10 (paso de
+  creación de la cuenta).
+- **Flujo normal**: 1. Crea la cuenta `Usuario` con rol `trabajador` (RF-045, reutilizado de
+  CU-A10). 2. Crea el `Personal` asociado. 3. Define especialidad, comisión, tipo de contrato.
+  4. Define disponibilidad semanal (día/hora/buffer).
 - **RN**: RN13 (el buffer aquí definido es el que se valida en cada reserva).
 
 #### CU-A02 — Confirmar, rechazar o reembolsar un pago
@@ -430,43 +445,13 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **Limitación actual**: solo crear y listar (ver `docs/FASES.md` para el plan de completar el
   CRUD en la Fase 3).
 
-#### CU-A04 — Configurar niveles de fidelización y catálogo exclusivo *(planeado)*
-
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media.
-- **Flujo normal**: define `NivelFidelizacion` (umbral y beneficios), carga
-  `ProductoCatalogoExclusivo` con su `nivel_minimo`, consulta pedidos.
-- **RN**: RN20–RN24.
-
-#### CU-A05 — Gestionar el catálogo de estilos para la IA *(planeado)*
-
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media. **Extiende**: base de CU-A08.
-- **Flujo normal**: carga estilos de referencia (`EstiloCatalogo`) una sola vez, con imagen y
-  atributos — única fuente de imágenes del módulo.
-- **RN**: RN16–RN19.
-
 #### CU-A06 — Ver el dashboard operativo
 
 - **Actor**: Admin. **Tipo**: primario. **Prioridad**: alta.
 - **Flujo normal**: el sistema carga en paralelo citas del día, pagos pendientes y personal
   activo; muestra KPIs en tipografía display bold.
-- **Extensión planeada**: widgets de distribución por nivel de fidelización y de uso de IA.
-
-#### CU-A07 — Gestionar pedidos del catálogo exclusivo *(planeado)*
-
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media. **Extiende**: CU-A04.
-- **Precondición**: existe al menos un `PedidoCatalogo` en `pagado`.
-- **Flujo normal**: 1. Filtra pedidos por estado/cliente/producto. 2. Abre el detalle. 3. Marca
-  como `entregado` tras la entrega física.
-- **Flujos alternativos**: marcar entregado un pedido no `pagado` → 422.
-- **RN**: RN23.
-
-#### CU-A08 — Revisar métricas de confianza del catálogo de estilos *(planeado)*
-
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: baja. **Extiende**: CU-A05.
-- **Precondición**: al menos un feedback registrado (CU-T06).
-- **Flujo normal**: el admin ve, por estilo, el porcentaje de feedback positivo, para decidir si
-  ajustar o retirar el estilo del catálogo.
-- **RN**: ninguna nueva.
+- **Extensión planeada**: widgets de distribución por nivel de fidelización y de uso de IA (ver
+  CU-A16).
 
 #### CU-A09 — Gestionar clientes
 
@@ -485,34 +470,69 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 
 #### CU-A10 — Administrar cuentas de usuario del staff
 
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media.
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media. **Incluido en**: CU-A01 (al dar
+  de alta un trabajador).
 - **Precondición**: sesión de admin iniciada.
-- **Flujo normal**: 1. Lista o consulta usuarios, filtrando por rol y estado. 2. Edita nombre o
-  teléfono. 3. Cambia el correo de una cuenta (resetea `correo_verificado=false`). 4. Resetea la
-  contraseña de una cuenta sin conocer la actual. 5. Activa o desactiva la cuenta.
-- **Postcondición**: `Usuario` actualizado en el campo correspondiente.
-- **RN**: ninguna con ID propio — es la única vía autorizada para tocar credenciales de
+- **Flujo normal**: 1. Crea una cuenta `Usuario` de cualquier rol (si `rol=cliente`, crea
+  también el `Cliente` vinculado automáticamente). 2. Lista o consulta usuarios, filtrando por
+  rol y estado. 3. Edita nombre o teléfono. 4. Cambia el correo de una cuenta (resetea
+  `correo_verificado=false`). 5. Resetea la contraseña de una cuenta sin conocer la actual.
+  6. Activa o desactiva la cuenta.
+- **Postcondición**: `Usuario` creado o actualizado en el campo correspondiente.
+- **RN**: ninguna con ID propio — es la única vía autorizada para crear o tocar credenciales de
   cualquier usuario que no sea el propio (ver CU-T08 para autogestión).
 
-#### CU-A11 — Configurar el módulo de asesoría de IA *(planeado)*
+#### CU-A11 — Gestionar catálogo de estilos *(planeado)*
 
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media. **Extiende**: CU-A05.
+- **Actor**: Admin (o especialista con permiso delegado). **Tipo**: primario. **Prioridad**:
+  media. **Base de**: CU-A12.
+- **Flujo normal**: carga estilos de referencia (`EstiloCatalogo`) una sola vez, con imagen y
+  atributos — única fuente de imágenes del módulo.
+- **RN**: RN16–RN19.
+
+#### CU-A12 — Revisar métricas de confianza del catálogo de estilos *(planeado)*
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: baja. **Extiende**: CU-A11.
+- **Precondición**: al menos un feedback registrado (CU-T12).
+- **Flujo normal**: el admin ve, por estilo, el porcentaje de feedback positivo, para decidir si
+  ajustar o retirar el estilo del catálogo.
+- **RN**: ninguna nueva.
+
+#### CU-A13 — Configurar módulo de asesoría IA *(planeado)*
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media. **Extiende**: CU-A11.
 - **Precondición**: módulo de IA implementado y disponible para configuración.
 - **Flujo normal**: 1. El admin activa o desactiva el módulo. 2. Define el límite diario de
   consultas de IA por cliente.
-- **Postcondición**: configuración persistida, efectiva en la siguiente consulta de CU-C06/CU-T04.
+- **Postcondición**: configuración persistida, efectiva en la siguiente consulta de
+  CU-C11/CU-T10.
 - **RN**: RN18.
 
-#### CU-A12 — Recalcular niveles de fidelización automáticamente *(planeado, automático)*
+#### CU-A14 — Gestionar niveles y catálogo exclusivo *(planeado)*
 
-- **Actor**: Programador de Tareas — Celery Beat (dispara el caso de uso); Admin (beneficiario
-  indirecto, vía CU-A04). **Tipo**: secundario, disparado internamente. **Prioridad**: alta.
-  **Extiende**: CU-A04.
-- **Precondición**: existen `NivelFidelizacion` activos y clientes con historial de visitas o
-  gasto.
-- **Flujo normal**: 1. En un intervalo configurable, el beat evalúa el historial de cada
-  cliente contra los umbrales activos, en orden descendente. 2. Asigna a cada cliente el nivel
-  más alto que cumple.
-- **Postcondición**: `cliente.nivel_actual` actualizado; una baja de nivel no revoca pedidos ya
-  realizados (RN21).
-- **RN**: RN20, RN21.
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media.
+- **Flujo normal**: define `NivelFidelizacion` (umbral y beneficios), carga
+  `ProductoCatalogoExclusivo` con su `nivel_minimo`, consulta pedidos.
+- **RN**: RN20–RN24.
+
+#### CU-A15 — Gestionar pedidos del catálogo exclusivo *(planeado)*
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media. **Extiende**: CU-A14.
+- **Precondición**: existe al menos un `PedidoCatalogo` en `pagado`.
+- **Flujo normal**: 1. Filtra pedidos por estado/cliente/producto. 2. Abre el detalle. 3. Marca
+  como `entregado` tras la entrega física.
+- **Flujos alternativos**: marcar entregado un pedido no `pagado` → 422.
+- **RN**: RN23.
+
+#### CU-A16 — Consultar métricas de fidelización *(planeado)*
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: baja. **Incluido en**: CU-A06 (widgets
+  del dashboard operativo).
+- **Precondición**: módulo de fidelización avanzada habilitado; al menos un cliente con nivel
+  asignado.
+- **Flujo normal**: 1. El admin abre el dashboard operativo. 2. El sistema muestra la
+  distribución de clientes por nivel de fidelización y los ingresos del catálogo exclusivo del
+  mes — agregados de solo lectura.
+- **Postcondición**: ninguna — caso de uso de solo consulta.
+- **RN**: ninguna nueva — lee el resultado de RN20/RN21 (recálculo automático de niveles, sin
+  caso de uso propio) y de las compras de CU-C14.

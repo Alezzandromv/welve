@@ -77,7 +77,7 @@ flowchart TD
     classDef reject fill:#f8d7da,stroke:#dc3545
 ```
 
-## Consulta de asesoría con IA *(planeado, CU-C06/CU-T04)*
+## Consulta de asesoría con IA *(planeado, CU-C11/CU-T10)*
 
 ```mermaid
 flowchart TD
@@ -102,7 +102,7 @@ flowchart TD
     classDef critical fill:#fff3cd,stroke:#ffc107,stroke-width:2px
 ```
 
-## Compra en el catálogo exclusivo *(planeado, CU-C07)*
+## Compra en el catálogo exclusivo *(planeado, CU-C14)*
 
 ```mermaid
 flowchart TD

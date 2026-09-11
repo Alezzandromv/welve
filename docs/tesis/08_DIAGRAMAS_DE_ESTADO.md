@@ -47,12 +47,12 @@ RN13).
 
 ```mermaid
 stateDiagram-v2
-    [*] --> pendiente : cliente inicia checkout (CU-C07)
+    [*] --> pendiente : cliente inicia checkout (CU-C14)
 
     pendiente --> pagado : webhook Culqi confirma (RN23, idempotente)
     pendiente --> cancelado : webhook Culqi rechaza (RN24)
 
-    pagado --> entregado : admin marca entrega física (CU-A07)
+    pagado --> entregado : admin marca entrega física (CU-A15)
 
     entregado --> [*]
     cancelado --> [*]

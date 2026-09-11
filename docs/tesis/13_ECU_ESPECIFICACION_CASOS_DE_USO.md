@@ -4,7 +4,7 @@
 
 **Especificación de Casos de Uso (ECU)**
 
-Versión 1.0
+Versión 1.1
 
 ---
 
@@ -13,6 +13,7 @@ Versión 1.0
 | Fecha | Versión | Descripción | Autor |
 | :---: | :---: | :---: | :---: |
 | 08/09/2026 | 1.0 | Elaboración del documento — 32 ECU (Cliente, Trabajador, Administrador) | Vidal Chumacero, Marco Alessandro |
+| 11/09/2026 | 1.1 | Renumeración de los casos de uso planeados de cada actor al final de su rango (antes intercalados con los implementados); retiro de CU-A12 (recálculo de niveles) del catálogo de casos de uso — proceso batch sin punto de decisión humana, documentado solo como regla de negocio; alta de CU-A16 (Consultar métricas de fidelización) | Vidal Chumacero, Marco Alessandro |
 
 ---
 
@@ -51,35 +52,35 @@ Convenciones de código usadas en las 32 fichas:
    1.3. CU-C03 — Cancelar una cita fuera de ventana (tardía)
    1.4. CU-C04 — Canjear un descuento
    1.5. CU-C05 — Completar un reto de fidelización (automático)
-   1.6. CU-C06 — Consulta de asesoría de estilo con IA (planeado)
-   1.7. CU-C07 — Comprar en el catálogo exclusivo (planeado)
-   1.8. CU-C08 — Marcar un estilo como favorito sin cámara (planeado)
-   1.9. CU-C09 — Solicitar y verificar acceso por magic link
-   1.10. CU-C10 — Consultar y actualizar mi perfil
-   1.11. CU-C11 — Consultar mi nivel de fidelización y progreso (planeado)
+   1.6. CU-C09 — Solicitar y verificar acceso por magic link
+   1.7. CU-C10 — Consultar y actualizar mi perfil
+   1.8. CU-C11 — Consulta de asesoría de estilo con IA (planeado)
+   1.9. CU-C12 — Marcar un estilo como favorito sin cámara (planeado)
+   1.10. CU-C13 — Consultar mi nivel de fidelización y progreso (planeado)
+   1.11. CU-C14 — Comprar en el catálogo exclusivo (planeado)
 2. **Trabajador / Especialista**
    2.1. CU-T01 — Ver agenda del día
    2.2. CU-T02 — Registrar llegada y avanzar el estado de una cita
    2.3. CU-T03 — Atender la alerta de ficha de salud crítica
-   2.4. CU-T04 — Iniciar una consulta de IA en vivo durante la cita (planeado)
-   2.5. CU-T05 — Consultar el historial de estilos de una clienta recurrente (planeado)
-   2.6. CU-T06 — Dar feedback sobre el resultado de un estilo (planeado)
-   2.7. CU-T07 — Autenticarse como personal
-   2.8. CU-T08 — Gestionar mi cuenta
-   2.9. CU-T09 — Marcar inasistencia automáticamente (no-show) (automático)
+   2.4. CU-T07 — Autenticarse como personal
+   2.5. CU-T08 — Gestionar mi cuenta
+   2.6. CU-T09 — Marcar inasistencia automáticamente (no-show) (automático)
+   2.7. CU-T10 — Iniciar una consulta de IA en vivo durante la cita (planeado)
+   2.8. CU-T11 — Consultar el historial de estilos de una clienta recurrente (planeado)
+   2.9. CU-T12 — Dar feedback sobre el resultado de un estilo (planeado)
 3. **Administrador**
    3.1. CU-A01 — Gestionar personal y su disponibilidad
    3.2. CU-A02 — Confirmar, rechazar o reembolsar un pago
    3.3. CU-A03 — Configurar un descuento o un reto
-   3.4. CU-A04 — Configurar niveles de fidelización y catálogo exclusivo (planeado)
-   3.5. CU-A05 — Gestionar el catálogo de estilos para la IA (planeado)
-   3.6. CU-A06 — Ver el dashboard operativo
-   3.7. CU-A07 — Gestionar pedidos del catálogo exclusivo (planeado)
-   3.8. CU-A08 — Revisar métricas de confianza del catálogo de estilos (planeado)
-   3.9. CU-A09 — Gestionar clientes
-   3.10. CU-A10 — Administrar cuentas de usuario del staff
-   3.11. CU-A11 — Configurar el módulo de asesoría de IA (planeado)
-   3.12. CU-A12 — Recalcular niveles de fidelización automáticamente (planeado, automático)
+   3.4. CU-A06 — Ver el dashboard operativo
+   3.5. CU-A09 — Gestionar clientes
+   3.6. CU-A10 — Administrar cuentas de usuario del staff
+   3.7. CU-A11 — Gestionar el catálogo de estilos para la IA (planeado)
+   3.8. CU-A12 — Revisar métricas de confianza del catálogo de estilos (planeado)
+   3.9. CU-A13 — Configurar el módulo de asesoría de IA (planeado)
+   3.10. CU-A14 — Configurar niveles de fidelización y catálogo exclusivo (planeado)
+   3.11. CU-A15 — Gestionar pedidos del catálogo exclusivo (planeado)
+   3.12. CU-A16 — Consultar métricas de fidelización (planeado)
 
 ---
 
@@ -261,117 +262,7 @@ No aplica.
 
 ---
 
-## 1.6. Especificación de caso de uso: Consulta de asesoría de estilo con IA *(planeado)*
-
-| TÉRMINOS | DEFINICIÓN |
-| :---- | :---- |
-| **Caso de Uso** | CUS\_Consultar\_Asesoria\_IA (CU-C06) |
-| **Requerimiento** | RF-060 (Analizar imagen y sugerir estilos), RF-061 (Consultar catálogo de estilos), RF-062 (Enviar selección a especialista) |
-| **Pre-condición** | Módulo de IA habilitado. Consentimiento de procesamiento de imagen aceptado. Límite diario de consultas no superado. |
-| **Post-condición** | `ConsultaIA` persistida y, si el cliente eligió y envió un estilo, `SeleccionEstilo` persistida — nunca la foto original. |
-| **Actores** | AS\_Cliente, AS\_Gemini |
-
-**Flujo Principal — Cliente**
-
-| N° | Descripción |
-| :---: | :---- |
-| 1 | El cliente activa la cámara desde "Reservar" o "Mis Citas" y captura una foto. |
-| 2 | El sistema envía la foto de forma efímera junto con los atributos del catálogo de estilos a Gemini. |
-| 3 | Gemini devuelve un ranking de estilos existentes en el catálogo. |
-| 4 | El sistema descarta la foto original inmediatamente después de obtener la recomendación. |
-| 5 | El cliente elige uno o más estilos sugeridos. |
-| 6 | El sistema liga la selección a la próxima cita futura del cliente y la envía a su especialista. |
-
-**Sub-Flujo**
-
-| N° | Nombre | Descripción |
-| :---: | :---- | :---- |
-| 1 | Sin cita futura registrada | El sistema guarda la consulta y la selección, pero bloquea el botón de envío hasta que exista una cita futura del cliente. |
-
-**Reglas de Negocio**
-
-- El consentimiento de procesamiento de imagen es obligatorio antes de activar la cámara (RN16).
-- La foto nunca se persiste — se procesa en memoria y se descarta de inmediato (RN17).
-- Existe un límite diario de consultas por cliente, configurable por el administrador (RN18).
-
-**Excepciones**
-
-- Sin consentimiento: la cámara no se activa.
-- Límite diario alcanzado: el sistema muestra un mensaje indicando cuándo se resetea el límite.
-
----
-
-## 1.7. Especificación de caso de uso: Comprar en el catálogo exclusivo *(planeado)*
-
-| TÉRMINOS | DEFINICIÓN |
-| :---- | :---- |
-| **Caso de Uso** | CUS\_Comprar\_Catalogo\_Exclusivo (CU-C07) |
-| **Requerimiento** | RF-072 (Consultar catálogo exclusivo), RF-074 (Comprar producto del catálogo), RF-075 (Confirmar pago vía webhook) |
-| **Pre-condición** | `cliente.nivel_actual >= producto.nivel_minimo`. |
-| **Post-condición** | `PedidoCatalogo` en estado `pagado`, visible en el historial del cliente y en el panel de pedidos del administrador. |
-| **Actores** | AS\_Cliente, AS\_Culqi |
-
-**Flujo Principal — Cliente**
-
-| N° | Descripción |
-| :---: | :---- |
-| 1 | El cliente ve el catálogo exclusivo; los productos de nivel superior aparecen bloqueados con un teaser de qué nivel los desbloquea. |
-| 2 | El cliente elige un producto habilitado para su nivel. |
-| 3 | El sistema crea un `PedidoCatalogo` en `pendiente` e inicia el checkout con Culqi. |
-| 4 | El cliente completa el pago en la pasarela. |
-| 5 | Culqi confirma el resultado mediante un webhook firmado. |
-| 6 | El sistema actualiza el pedido a `pagado` de forma idempotente. |
-
-**Sub-Flujo**
-
-No aplica.
-
-**Reglas de Negocio**
-
-- El nivel mínimo se valida en el backend, no solo se oculta en la interfaz — defensa en profundidad (RN22).
-- La confirmación del pago vía webhook es idempotente, porque los webhooks de pasarelas de pago pueden reintentar la entrega (RN23).
-- Un pago rechazado marca el pedido como `cancelado`, sin afectar el nivel de fidelización del cliente (RN24).
-
-**Excepciones**
-
-- Nivel insuficiente: 403 también a nivel de API, aunque la interfaz ya oculte el producto.
-- Pago rechazado o webhook de fallo: `PedidoCatalogo.estado = cancelado`.
-
----
-
-## 1.8. Especificación de caso de uso: Marcar un estilo como favorito sin cámara *(planeado)*
-
-| TÉRMINOS | DEFINICIÓN |
-| :---- | :---- |
-| **Caso de Uso** | CUS\_Marcar\_Estilo\_Favorito (CU-C08) |
-| **Requerimiento** | RF-065 (Marcar estilo como favorito) |
-| **Pre-condición** | Catálogo de estilos con al menos un ítem activo. |
-| **Post-condición** | `SeleccionEstilo` con `origen=favorito` registrada, visible junto a las generadas por IA. |
-| **Actores** | AS\_Cliente |
-
-**Flujo Principal — Cliente**
-
-| N° | Descripción |
-| :---: | :---- |
-| 1 | El cliente explora el catálogo de estilos directamente, sin activar la cámara. |
-| 2 | El cliente marca uno o más estilos como favoritos. |
-| 3 | El sistema registra la selección con `origen=favorito`, sin `ConsultaIA` asociada. |
-
-**Sub-Flujo**
-
-No aplica.
-
-**Reglas de Negocio**
-
-Ninguna nueva — reutiliza el catálogo de RN16–RN19 sin pasar por el análisis de imagen.
-
-**Excepciones**
-
-Ninguna específica.
-
----
-
-## 1.9. Especificación de caso de uso: Solicitar y verificar acceso por magic link
+## 1.6. Especificación de caso de uso: Solicitar y verificar acceso por magic link
 
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
@@ -407,7 +298,7 @@ El enlace es de un solo uso y expira en 1 hora — mecanismo de seguridad centra
 
 ---
 
-## 1.10. Especificación de caso de uso: Consultar y actualizar mi perfil
+## 1.7. Especificación de caso de uso: Consultar y actualizar mi perfil
 
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
@@ -441,11 +332,83 @@ Ninguna específica.
 
 ---
 
-## 1.11. Especificación de caso de uso: Consultar mi nivel de fidelización y progreso *(planeado)*
+## 1.8. Especificación de caso de uso: Consulta de asesoría de estilo con IA *(planeado)*
 
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
-| **Caso de Uso** | CUS\_Consultar\_Nivel\_Fidelizacion (CU-C11) |
+| **Caso de Uso** | CUS\_Consultar\_Asesoria\_IA (CU-C11) |
+| **Requerimiento** | RF-060 (Analizar imagen y sugerir estilos), RF-061 (Consultar catálogo de estilos), RF-062 (Enviar selección a especialista) |
+| **Pre-condición** | Módulo de IA habilitado. Consentimiento de procesamiento de imagen aceptado. Límite diario de consultas no superado. |
+| **Post-condición** | `ConsultaIA` persistida y, si el cliente eligió y envió un estilo, `SeleccionEstilo` persistida — nunca la foto original. |
+| **Actores** | AS\_Cliente, AS\_Gemini |
+
+**Flujo Principal — Cliente**
+
+| N° | Descripción |
+| :---: | :---- |
+| 1 | El cliente activa la cámara desde "Reservar" o "Mis Citas" y captura una foto. |
+| 2 | El sistema envía la foto de forma efímera junto con los atributos del catálogo de estilos a Gemini. |
+| 3 | Gemini devuelve un ranking de estilos existentes en el catálogo. |
+| 4 | El sistema descarta la foto original inmediatamente después de obtener la recomendación. |
+| 5 | El cliente elige uno o más estilos sugeridos. |
+| 6 | El sistema liga la selección a la próxima cita futura del cliente y la envía a su especialista. |
+
+**Sub-Flujo**
+
+| N° | Nombre | Descripción |
+| :---: | :---- | :---- |
+| 1 | Sin cita futura registrada | El sistema guarda la consulta y la selección, pero bloquea el botón de envío hasta que exista una cita futura del cliente. |
+
+**Reglas de Negocio**
+
+- El consentimiento de procesamiento de imagen es obligatorio antes de activar la cámara (RN16).
+- La foto nunca se persiste — se procesa en memoria y se descarta de inmediato (RN17).
+- Existe un límite diario de consultas por cliente, configurable por el administrador (RN18).
+
+**Excepciones**
+
+- Sin consentimiento: la cámara no se activa.
+- Límite diario alcanzado: el sistema muestra un mensaje indicando cuándo se resetea el límite.
+
+---
+
+## 1.9. Especificación de caso de uso: Marcar un estilo como favorito sin cámara *(planeado)*
+
+| TÉRMINOS | DEFINICIÓN |
+| :---- | :---- |
+| **Caso de Uso** | CUS\_Marcar\_Estilo\_Favorito (CU-C12) |
+| **Requerimiento** | RF-065 (Marcar estilo como favorito) |
+| **Pre-condición** | Catálogo de estilos con al menos un ítem activo. |
+| **Post-condición** | `SeleccionEstilo` con `origen=favorito` registrada, visible junto a las generadas por IA. |
+| **Actores** | AS\_Cliente |
+
+**Flujo Principal — Cliente**
+
+| N° | Descripción |
+| :---: | :---- |
+| 1 | El cliente explora el catálogo de estilos directamente, sin activar la cámara. |
+| 2 | El cliente marca uno o más estilos como favoritos. |
+| 3 | El sistema registra la selección con `origen=favorito`, sin `ConsultaIA` asociada. |
+
+**Sub-Flujo**
+
+No aplica.
+
+**Reglas de Negocio**
+
+Ninguna nueva — reutiliza el catálogo de RN16–RN19 sin pasar por el análisis de imagen.
+
+**Excepciones**
+
+Ninguna específica.
+
+---
+
+## 1.10. Especificación de caso de uso: Consultar mi nivel de fidelización y progreso *(planeado)*
+
+| TÉRMINOS | DEFINICIÓN |
+| :---- | :---- |
+| **Caso de Uso** | CUS\_Consultar\_Nivel\_Fidelizacion (CU-C13) |
 | **Requerimiento** | RF-069 (Consultar niveles de fidelización), RF-071 (Consultar mi nivel y progreso) |
 | **Pre-condición** | Módulo de fidelización avanzada habilitado. |
 | **Post-condición** | Ninguna — caso de uso de solo consulta. |
@@ -470,6 +433,44 @@ No aplica.
 **Excepciones**
 
 Ninguna específica.
+
+---
+
+## 1.11. Especificación de caso de uso: Comprar en el catálogo exclusivo *(planeado)*
+
+| TÉRMINOS | DEFINICIÓN |
+| :---- | :---- |
+| **Caso de Uso** | CUS\_Comprar\_Catalogo\_Exclusivo (CU-C14) |
+| **Requerimiento** | RF-072 (Consultar catálogo exclusivo), RF-074 (Comprar producto del catálogo), RF-075 (Confirmar pago vía webhook) |
+| **Pre-condición** | `cliente.nivel_actual >= producto.nivel_minimo`. |
+| **Post-condición** | `PedidoCatalogo` en estado `pagado`, visible en el historial del cliente y en el panel de pedidos del administrador. |
+| **Actores** | AS\_Cliente, AS\_Culqi |
+
+**Flujo Principal — Cliente**
+
+| N° | Descripción |
+| :---: | :---- |
+| 1 | El cliente ve el catálogo exclusivo; los productos de nivel superior aparecen bloqueados con un teaser de qué nivel los desbloquea. |
+| 2 | El cliente elige un producto habilitado para su nivel. |
+| 3 | El sistema crea un `PedidoCatalogo` en `pendiente` e inicia el checkout con Culqi. |
+| 4 | El cliente completa el pago en la pasarela. |
+| 5 | Culqi confirma el resultado mediante un webhook firmado. |
+| 6 | El sistema actualiza el pedido a `pagado` de forma idempotente. |
+
+**Sub-Flujo**
+
+No aplica.
+
+**Reglas de Negocio**
+
+- El nivel mínimo se valida en el backend, no solo se oculta en la interfaz — defensa en profundidad (RN22).
+- La confirmación del pago vía webhook es idempotente, porque los webhooks de pasarelas de pago pueden reintentar la entrega (RN23).
+- Un pago rechazado marca el pedido como `cancelado`, sin afectar el nivel de fidelización del cliente (RN24).
+
+**Excepciones**
+
+- Nivel insuficiente: 403 también a nivel de API, aunque la interfaz ya oculte el producto.
+- Pago rechazado o webhook de fallo: `PedidoCatalogo.estado = cancelado`.
 
 ---
 
@@ -577,104 +578,7 @@ No aplica.
 
 ---
 
-## 2.4. Especificación de caso de uso: Iniciar una consulta de IA en vivo durante la cita *(planeado)*
-
-| TÉRMINOS | DEFINICIÓN |
-| :---- | :---- |
-| **Caso de Uso** | CUS\_Consulta\_IA\_En\_Vivo (CU-T04) |
-| **Requerimiento** | RF-060 (Analizar imagen y sugerir estilos), RF-062 (Enviar selección a especialista) |
-| **Pre-condición** | Módulo de IA habilitado. Cita en curso. |
-| **Post-condición** | `ConsultaIA` y, si aplica, `SeleccionEstilo` persistidas, ligadas también a `personal_id`. |
-| **Actores** | AS\_Trabajador, AS\_Gemini |
-
-**Flujo Principal — Trabajador**
-
-| N° | Descripción |
-| :---: | :---- |
-| 1 | La especialista activa la cámara durante la atención presencial (por ejemplo, si la clienta no lo hizo antes de llegar). |
-| 2 | El sistema envía la foto de forma efímera junto con los atributos del catálogo a Gemini. |
-| 3 | Gemini devuelve un ranking de estilos existentes en el catálogo. |
-| 4 | El sistema descarta la foto original inmediatamente. |
-| 5 | La especialista y/o la clienta eligen uno o más estilos, ligados a la cita en curso y a `personal_id`. |
-
-**Sub-Flujo**
-
-No aplica.
-
-**Reglas de Negocio**
-
-Mismas de CU-C06: consentimiento obligatorio (RN16), no persistencia de la foto (RN17), límite diario de consultas (RN18), selección ligada a una cita real (RN19).
-
-**Excepciones**
-
-Las mismas de CU-C06.
-
----
-
-## 2.5. Especificación de caso de uso: Consultar el historial de estilos de una clienta recurrente *(planeado)*
-
-| TÉRMINOS | DEFINICIÓN |
-| :---- | :---- |
-| **Caso de Uso** | CUS\_Consultar\_Historial\_Estilos (CU-T05) |
-| **Requerimiento** | RF-063 (Consultar historial de estilos de un cliente) |
-| **Pre-condición** | La clienta tiene `SeleccionEstilo` previas ligadas a citas anteriores. |
-| **Post-condición** | Ninguna — caso de uso de solo consulta. |
-| **Actores** | AS\_Trabajador |
-
-**Flujo Principal — Trabajador**
-
-| N° | Descripción |
-| :---: | :---- |
-| 1 | La especialista abre el detalle de una cita agendada. |
-| 2 | El sistema muestra el historial de estilos elegidos por esa clienta en citas anteriores, sin volver a analizar ninguna foto. |
-
-**Sub-Flujo**
-
-No aplica.
-
-**Reglas de Negocio**
-
-- El historial mostrado corresponde solo a selecciones ligadas a una cita real con esa clienta (RN19).
-
-**Excepciones**
-
-Ninguna específica.
-
----
-
-## 2.6. Especificación de caso de uso: Dar feedback sobre el resultado de un estilo *(planeado)*
-
-| TÉRMINOS | DEFINICIÓN |
-| :---- | :---- |
-| **Caso de Uso** | CUS\_Registrar\_Feedback\_Estilo (CU-T06) |
-| **Requerimiento** | RF-064 (Registrar feedback de estilo) |
-| **Pre-condición** | La cita tiene una `SeleccionEstilo` asociada y acaba de pasar a `completada`. |
-| **Post-condición** | `SeleccionEstilo.feedback_coincidio` actualizado; no afecta al cliente. |
-| **Actores** | AS\_Trabajador |
-
-**Flujo Principal — Trabajador**
-
-| N° | Descripción |
-| :---: | :---- |
-| 1 | La especialista marca si el resultado logrado coincidió con el estilo elegido. |
-| 2 | La especialista agrega una nota corta opcional. |
-| 3 | El sistema registra el feedback. |
-
-**Sub-Flujo**
-
-No aplica.
-
-**Reglas de Negocio**
-
-Ninguna nueva — alimenta la métrica de confianza del catálogo (CU-A08).
-
-**Excepciones**
-
-Ninguna específica.
-
----
-
-## 2.7. Especificación de caso de uso: Autenticarse como personal
+## 2.4. Especificación de caso de uso: Autenticarse como personal
 
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
@@ -710,7 +614,7 @@ Ninguna con código propio.
 
 ---
 
-## 2.8. Especificación de caso de uso: Gestionar mi cuenta
+## 2.5. Especificación de caso de uso: Gestionar mi cuenta
 
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
@@ -743,7 +647,7 @@ Ninguna específica.
 
 ---
 
-## 2.9. Especificación de caso de uso: Marcar inasistencia automáticamente (no-show) *(automático)*
+## 2.6. Especificación de caso de uso: Marcar inasistencia automáticamente (no-show) *(automático)*
 
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
@@ -772,6 +676,103 @@ No aplica.
 **Excepciones**
 
 Ninguna — proceso batch sin interacción de usuario.
+
+---
+
+## 2.7. Especificación de caso de uso: Iniciar una consulta de IA en vivo durante la cita *(planeado)*
+
+| TÉRMINOS | DEFINICIÓN |
+| :---- | :---- |
+| **Caso de Uso** | CUS\_Consulta\_IA\_En\_Vivo (CU-T10) |
+| **Requerimiento** | RF-060 (Analizar imagen y sugerir estilos), RF-062 (Enviar selección a especialista) |
+| **Pre-condición** | Módulo de IA habilitado. Cita en curso. |
+| **Post-condición** | `ConsultaIA` y, si aplica, `SeleccionEstilo` persistidas, ligadas también a `personal_id`. |
+| **Actores** | AS\_Trabajador, AS\_Gemini |
+
+**Flujo Principal — Trabajador**
+
+| N° | Descripción |
+| :---: | :---- |
+| 1 | La especialista activa la cámara durante la atención presencial (por ejemplo, si la clienta no lo hizo antes de llegar). |
+| 2 | El sistema envía la foto de forma efímera junto con los atributos del catálogo a Gemini. |
+| 3 | Gemini devuelve un ranking de estilos existentes en el catálogo. |
+| 4 | El sistema descarta la foto original inmediatamente. |
+| 5 | La especialista y/o la clienta eligen uno o más estilos, ligados a la cita en curso y a `personal_id`. |
+
+**Sub-Flujo**
+
+No aplica.
+
+**Reglas de Negocio**
+
+Mismas de CU-C11: consentimiento obligatorio (RN16), no persistencia de la foto (RN17), límite diario de consultas (RN18), selección ligada a una cita real (RN19).
+
+**Excepciones**
+
+Las mismas de CU-C11.
+
+---
+
+## 2.8. Especificación de caso de uso: Consultar el historial de estilos de una clienta recurrente *(planeado)*
+
+| TÉRMINOS | DEFINICIÓN |
+| :---- | :---- |
+| **Caso de Uso** | CUS\_Consultar\_Historial\_Estilos (CU-T11) |
+| **Requerimiento** | RF-063 (Consultar historial de estilos de un cliente) |
+| **Pre-condición** | La clienta tiene `SeleccionEstilo` previas ligadas a citas anteriores. |
+| **Post-condición** | Ninguna — caso de uso de solo consulta. |
+| **Actores** | AS\_Trabajador |
+
+**Flujo Principal — Trabajador**
+
+| N° | Descripción |
+| :---: | :---- |
+| 1 | La especialista abre el detalle de una cita agendada. |
+| 2 | El sistema muestra el historial de estilos elegidos por esa clienta en citas anteriores, sin volver a analizar ninguna foto. |
+
+**Sub-Flujo**
+
+No aplica.
+
+**Reglas de Negocio**
+
+- El historial mostrado corresponde solo a selecciones ligadas a una cita real con esa clienta (RN19).
+
+**Excepciones**
+
+Ninguna específica.
+
+---
+
+## 2.9. Especificación de caso de uso: Dar feedback sobre el resultado de un estilo *(planeado)*
+
+| TÉRMINOS | DEFINICIÓN |
+| :---- | :---- |
+| **Caso de Uso** | CUS\_Registrar\_Feedback\_Estilo (CU-T12) |
+| **Requerimiento** | RF-064 (Registrar feedback de estilo) |
+| **Pre-condición** | La cita tiene una `SeleccionEstilo` asociada y acaba de pasar a `completada`. |
+| **Post-condición** | `SeleccionEstilo.feedback_coincidio` actualizado; no afecta al cliente. |
+| **Actores** | AS\_Trabajador |
+
+**Flujo Principal — Trabajador**
+
+| N° | Descripción |
+| :---: | :---- |
+| 1 | La especialista marca si el resultado logrado coincidió con el estilo elegido. |
+| 2 | La especialista agrega una nota corta opcional. |
+| 3 | El sistema registra el feedback. |
+
+**Sub-Flujo**
+
+No aplica.
+
+**Reglas de Negocio**
+
+Ninguna nueva — alimenta la métrica de confianza del catálogo (CU-A12).
+
+**Excepciones**
+
+Ninguna específica.
 
 ---
 
@@ -880,72 +881,7 @@ Ninguna específica.
 
 ---
 
-## 3.4. Especificación de caso de uso: Configurar niveles de fidelización y catálogo exclusivo *(planeado)*
-
-| TÉRMINOS | DEFINICIÓN |
-| :---- | :---- |
-| **Caso de Uso** | CUS\_Configurar\_Niveles\_Catalogo (CU-A04) |
-| **Requerimiento** | RF-070 (Gestionar niveles de fidelización), RF-073 (Gestionar catálogo exclusivo) |
-| **Pre-condición** | Módulo de fidelización avanzada implementado. |
-| **Post-condición** | `NivelFidelizacion` o `ProductoCatalogoExclusivo` creado/actualizado. |
-| **Actores** | AS\_Administrador |
-
-**Flujo Principal — Administrador**
-
-| N° | Descripción |
-| :---: | :---- |
-| 1 | El administrador define un `NivelFidelizacion` (umbral y beneficios). |
-| 2 | El administrador carga productos del catálogo exclusivo con su `nivel_minimo`. |
-| 3 | El administrador consulta el estado de los pedidos. |
-
-**Sub-Flujo**
-
-No aplica (ver CU-A07 para la gestión de pedidos como caso de uso propio).
-
-**Reglas de Negocio**
-
-RN20, RN21, RN22, RN23, RN24.
-
-**Excepciones**
-
-Ninguna específica.
-
----
-
-## 3.5. Especificación de caso de uso: Gestionar el catálogo de estilos para la IA *(planeado)*
-
-| TÉRMINOS | DEFINICIÓN |
-| :---- | :---- |
-| **Caso de Uso** | CUS\_Gestionar\_Catalogo\_Estilos (CU-A05) |
-| **Requerimiento** | RF-066 (Gestionar catálogo de estilos) |
-| **Pre-condición** | Módulo de IA implementado. |
-| **Post-condición** | `EstiloCatalogo` creado, editado o dado de baja. |
-| **Actores** | AS\_Administrador |
-
-**Flujo Principal — Administrador**
-
-| N° | Descripción |
-| :---: | :---- |
-| 1 | El administrador carga un estilo de referencia con su imagen y atributos (forma de rostro, tipo/largo de cabello, etiquetas). |
-| 2 | El sistema valida y persiste el estilo. |
-
-**Sub-Flujo**
-
-| N° | Nombre | Descripción |
-| :---: | :---- | :---- |
-| 1 | Editar o dar de baja un estilo existente | El administrador modifica los atributos de un estilo ya cargado o lo desactiva del catálogo. |
-
-**Reglas de Negocio**
-
-RN16, RN17, RN18, RN19 — el catálogo es la única fuente de imágenes del módulo.
-
-**Excepciones**
-
-Ninguna específica.
-
----
-
-## 3.6. Especificación de caso de uso: Ver el dashboard operativo
+## 3.4. Especificación de caso de uso: Ver el dashboard operativo
 
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
@@ -977,70 +913,7 @@ Ninguna específica.
 
 ---
 
-## 3.7. Especificación de caso de uso: Gestionar pedidos del catálogo exclusivo *(planeado)*
-
-| TÉRMINOS | DEFINICIÓN |
-| :---- | :---- |
-| **Caso de Uso** | CUS\_Gestionar\_Pedidos\_Catalogo (CU-A07) |
-| **Requerimiento** | RF-076 (Gestionar pedidos del catálogo) |
-| **Pre-condición** | Existe al menos un `PedidoCatalogo` en `pagado`. |
-| **Post-condición** | `PedidoCatalogo.estado = entregado`, visible en el historial del cliente. |
-| **Actores** | AS\_Administrador |
-
-**Flujo Principal — Administrador**
-
-| N° | Descripción |
-| :---: | :---- |
-| 1 | El administrador filtra pedidos por estado, cliente o producto. |
-| 2 | El administrador abre el detalle de un pedido. |
-| 3 | Tras entregar el producto físicamente, el administrador lo marca como `entregado`. |
-
-**Sub-Flujo**
-
-No aplica.
-
-**Reglas de Negocio**
-
-- El pedido debe haber llegado a `pagado` de forma idempotente antes de poder entregarse (RN23).
-
-**Excepciones**
-
-- Intento de marcar como entregado un pedido que no está `pagado`: 422.
-
----
-
-## 3.8. Especificación de caso de uso: Revisar métricas de confianza del catálogo de estilos *(planeado)*
-
-| TÉRMINOS | DEFINICIÓN |
-| :---- | :---- |
-| **Caso de Uso** | CUS\_Revisar\_Metricas\_Confianza (CU-A08) |
-| **Requerimiento** | RF-068 (Consultar métricas de uso de IA) |
-| **Pre-condición** | Al menos un feedback registrado (CU-T06). |
-| **Post-condición** | Ninguna — caso de uso de solo consulta. |
-| **Actores** | AS\_Administrador |
-
-**Flujo Principal — Administrador**
-
-| N° | Descripción |
-| :---: | :---- |
-| 1 | El administrador abre el panel de métricas de IA. |
-| 2 | El sistema muestra, por estilo, el porcentaje de feedback positivo registrado por las especialistas. |
-
-**Sub-Flujo**
-
-No aplica.
-
-**Reglas de Negocio**
-
-Ninguna nueva.
-
-**Excepciones**
-
-Ninguna específica.
-
----
-
-## 3.9. Especificación de caso de uso: Gestionar clientes
+## 3.5. Especificación de caso de uso: Gestionar clientes
 
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
@@ -1078,7 +951,7 @@ Ninguna específica.
 
 ---
 
-## 3.10. Especificación de caso de uso: Administrar cuentas de usuario del staff
+## 3.6. Especificación de caso de uso: Administrar cuentas de usuario del staff
 
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
@@ -1112,11 +985,75 @@ Ninguna específica.
 
 ---
 
-## 3.11. Especificación de caso de uso: Configurar el módulo de asesoría de IA *(planeado)*
+## 3.7. Especificación de caso de uso: Gestionar el catálogo de estilos para la IA *(planeado)*
 
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
-| **Caso de Uso** | CUS\_Configurar\_Modulo\_IA (CU-A11) |
+| **Caso de Uso** | CUS\_Gestionar\_Catalogo\_Estilos (CU-A11) |
+| **Requerimiento** | RF-066 (Gestionar catálogo de estilos) |
+| **Pre-condición** | Módulo de IA implementado. |
+| **Post-condición** | `EstiloCatalogo` creado, editado o dado de baja. |
+| **Actores** | AS\_Administrador |
+
+**Flujo Principal — Administrador**
+
+| N° | Descripción |
+| :---: | :---- |
+| 1 | El administrador carga un estilo de referencia con su imagen y atributos (forma de rostro, tipo/largo de cabello, etiquetas). |
+| 2 | El sistema valida y persiste el estilo. |
+
+**Sub-Flujo**
+
+| N° | Nombre | Descripción |
+| :---: | :---- | :---- |
+| 1 | Editar o dar de baja un estilo existente | El administrador modifica los atributos de un estilo ya cargado o lo desactiva del catálogo. |
+
+**Reglas de Negocio**
+
+RN16, RN17, RN18, RN19 — el catálogo es la única fuente de imágenes del módulo.
+
+**Excepciones**
+
+Ninguna específica.
+
+---
+
+## 3.8. Especificación de caso de uso: Revisar métricas de confianza del catálogo de estilos *(planeado)*
+
+| TÉRMINOS | DEFINICIÓN |
+| :---- | :---- |
+| **Caso de Uso** | CUS\_Revisar\_Metricas\_Confianza (CU-A12) |
+| **Requerimiento** | RF-068 (Consultar métricas de uso de IA) |
+| **Pre-condición** | Al menos un feedback registrado (CU-T12). |
+| **Post-condición** | Ninguna — caso de uso de solo consulta. |
+| **Actores** | AS\_Administrador |
+
+**Flujo Principal — Administrador**
+
+| N° | Descripción |
+| :---: | :---- |
+| 1 | El administrador abre el panel de métricas de IA. |
+| 2 | El sistema muestra, por estilo, el porcentaje de feedback positivo registrado por las especialistas. |
+
+**Sub-Flujo**
+
+No aplica.
+
+**Reglas de Negocio**
+
+Ninguna nueva.
+
+**Excepciones**
+
+Ninguna específica.
+
+---
+
+## 3.9. Especificación de caso de uso: Configurar el módulo de asesoría de IA *(planeado)*
+
+| TÉRMINOS | DEFINICIÓN |
+| :---- | :---- |
+| **Caso de Uso** | CUS\_Configurar\_Modulo\_IA (CU-A13) |
 | **Requerimiento** | RF-067 (Configurar módulo de IA) |
 | **Pre-condición** | Módulo de IA implementado. |
 | **Post-condición** | Configuración persistida, efectiva desde la siguiente consulta. |
@@ -1135,7 +1072,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-- El límite diario configurado aquí es el que se valida en cada consulta de CU-C06/CU-T04 (RN18).
+- El límite diario configurado aquí es el que se valida en cada consulta de CU-C11/CU-T10 (RN18).
 
 **Excepciones**
 
@@ -1143,23 +1080,55 @@ Ninguna específica.
 
 ---
 
-## 3.12. Especificación de caso de uso: Recalcular niveles de fidelización automáticamente *(planeado, automático)*
+## 3.10. Especificación de caso de uso: Configurar niveles de fidelización y catálogo exclusivo *(planeado)*
 
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
-| **Caso de Uso** | CUS\_Recalcular\_Niveles\_Fidelizacion (CU-A12) |
-| **Requerimiento** | RF-077 (Recalcular niveles de fidelización) |
-| **Pre-condición** | Existen `NivelFidelizacion` activos y clientes con historial de visitas o gasto. |
-| **Post-condición** | `cliente.nivel_actual` actualizado. |
-| **Actores** | AS\_CeleryBeat |
+| **Caso de Uso** | CUS\_Configurar\_Niveles\_Catalogo (CU-A14) |
+| **Requerimiento** | RF-070 (Gestionar niveles de fidelización), RF-073 (Gestionar catálogo exclusivo) |
+| **Pre-condición** | Módulo de fidelización avanzada implementado. |
+| **Post-condición** | `NivelFidelizacion` o `ProductoCatalogoExclusivo` creado/actualizado. |
+| **Actores** | AS\_Administrador |
 
-**Flujo Principal — Programador de Tareas**
+**Flujo Principal — Administrador**
 
 | N° | Descripción |
 | :---: | :---- |
-| 1 | En un intervalo configurable, el programador de tareas ejecuta el job de recálculo. |
-| 2 | El sistema evalúa el historial de cada cliente contra los umbrales activos, en orden descendente. |
-| 3 | El sistema asigna a cada cliente el nivel más alto que cumple. |
+| 1 | El administrador define un `NivelFidelizacion` (umbral y beneficios). |
+| 2 | El administrador carga productos del catálogo exclusivo con su `nivel_minimo`. |
+| 3 | El administrador consulta el estado de los pedidos. |
+
+**Sub-Flujo**
+
+No aplica (ver CU-A15 para la gestión de pedidos como caso de uso propio).
+
+**Reglas de Negocio**
+
+RN20, RN21, RN22, RN23, RN24.
+
+**Excepciones**
+
+Ninguna específica.
+
+---
+
+## 3.11. Especificación de caso de uso: Gestionar pedidos del catálogo exclusivo *(planeado)*
+
+| TÉRMINOS | DEFINICIÓN |
+| :---- | :---- |
+| **Caso de Uso** | CUS\_Gestionar\_Pedidos\_Catalogo (CU-A15) |
+| **Requerimiento** | RF-076 (Gestionar pedidos del catálogo) |
+| **Pre-condición** | Existe al menos un `PedidoCatalogo` en `pagado`. |
+| **Post-condición** | `PedidoCatalogo.estado = entregado`, visible en el historial del cliente. |
+| **Actores** | AS\_Administrador |
+
+**Flujo Principal — Administrador**
+
+| N° | Descripción |
+| :---: | :---- |
+| 1 | El administrador filtra pedidos por estado, cliente o producto. |
+| 2 | El administrador abre el detalle de un pedido. |
+| 3 | Tras entregar el producto físicamente, el administrador lo marca como `entregado`. |
 
 **Sub-Flujo**
 
@@ -1167,8 +1136,40 @@ No aplica.
 
 **Reglas de Negocio**
 
-- Una baja de nivel no revoca ningún pedido ya realizado mientras el cliente tenía el nivel anterior (RN21).
+- El pedido debe haber llegado a `pagado` de forma idempotente antes de poder entregarse (RN23).
 
 **Excepciones**
 
-Ninguna — proceso batch sin interacción de usuario.
+- Intento de marcar como entregado un pedido que no está `pagado`: 422.
+
+---
+
+## 3.12. Especificación de caso de uso: Consultar métricas de fidelización *(planeado)*
+
+| TÉRMINOS | DEFINICIÓN |
+| :---- | :---- |
+| **Caso de Uso** | CUS\_Consultar\_Metricas\_Fidelizacion (CU-A16) |
+| **Requerimiento** | RF-078 (Consultar métricas de fidelización) |
+| **Pre-condición** | Módulo de fidelización avanzada habilitado. Al menos un cliente con nivel asignado. |
+| **Post-condición** | Ninguna — caso de uso de solo consulta. |
+| **Actores** | AS\_Administrador |
+
+**Flujo Principal — Administrador**
+
+| N° | Descripción |
+| :---: | :---- |
+| 1 | El administrador abre el dashboard operativo (CU-A06). |
+| 2 | El sistema muestra la distribución de clientes por nivel de fidelización. |
+| 3 | El sistema muestra los ingresos del catálogo exclusivo del mes. |
+
+**Sub-Flujo**
+
+No aplica.
+
+**Reglas de Negocio**
+
+Ninguna con código propio — lee el resultado de RN20/RN21 (recálculo de niveles, proceso automático sin caso de uso propio, ver 2.6) y de las compras registradas en CU-C14.
+
+**Excepciones**
+
+Ninguna específica.

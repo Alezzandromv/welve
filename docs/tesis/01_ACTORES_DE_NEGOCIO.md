@@ -19,7 +19,7 @@ que invocan al sistema, sin iniciativa de negocio propia).
 - **Contexto de uso**: móvil, generalmente fuera del salón (desde casa, en movimiento). Sesión
   iniciada sin contraseña (magic link por WhatsApp) — ver `docs/PRODUCT.md`.
 - **Frecuencia**: alta (es, en volumen, el actor con más transacciones del sistema).
-- **Casos de uso que inicia**: CU-C01–CU-C11 (ver `02_CASOS_DE_USO_UML.md`).
+- **Casos de uso que inicia**: CU-C01–CU-C14 (ver `02_CASOS_DE_USO_UML.md`).
 
 ### Trabajador / Especialista
 
@@ -34,7 +34,7 @@ que invocan al sistema, sin iniciativa de negocio propia).
 - **Restricción de diseño explícita**: nunca ve datos financieros del salón ni citas de otras
   especialistas — es un actor deliberadamente acotado, no una versión "reducida" del
   administrador.
-- **Casos de uso que inicia**: CU-T01–CU-T09.
+- **Casos de uso que inicia**: CU-T01–CU-T12.
 
 ### Administrador
 
@@ -50,7 +50,7 @@ que invocan al sistema, sin iniciativa de negocio propia).
   ejecutar todo lo que un Trabajador puede (operar cualquier cita, no solo las propias), más las
   secciones exclusivas de gestión. En UML esto se modela como una relación de generalización
   (flecha de herencia) desde `Trabajador` hacia `Administrador`.
-- **Casos de uso que inicia**: CU-A01–CU-A12, más todos los de Trabajador sobre cualquier
+- **Casos de uso que inicia**: CU-A01–CU-A16, más todos los de Trabajador sobre cualquier
   especialista.
 
 ### Diagrama de contexto (actores × sistema)
@@ -153,11 +153,14 @@ classDiagram
 ### Programador de Tareas — Celery Beat
 
 - **Naturaleza**: sistema interno (parte de la infraestructura propia de Welve, no un tercero),
-  pero se modela como actor porque **inicia** casos de uso sin que ningún humano lo dispare
-  directamente en ese momento — es quien realmente ejecuta RN05 (no-show automático) y,
-  planeado, el recálculo periódico de niveles de fidelización (RN20).
-- **Rol en el sistema**: dispara `verificar_no_show` cada 5 minutos y, planeado,
-  `recalcular_niveles` en un intervalo configurable.
+  pero se modela como actor de CU-T09 porque **inicia** ese caso de uso sin que ningún humano lo
+  dispare directamente en ese momento — es quien realmente ejecuta RN05 (no-show automático), con
+  una consecuencia visible y accionable por el trabajador (pierde el depósito, cambia su agenda).
+- **Rol en el sistema**: dispara `verificar_no_show` cada 5 minutos. También dispara, planeado,
+  `recalcular_niveles` en un intervalo configurable (RN20/RN21) — pero ese segundo job **no se
+  modela como caso de uso propio**: no tiene ningún punto de decisión humana ni consecuencia que
+  un actor deba atender en el momento, así que se documenta directamente como regla de negocio
+  (ver `docs/REGLAS_DE_NEGOCIO.md`) y en `06_DIAGRAMAS_DE_ACTIVIDAD.md`, sin ficha de caso de uso.
 - **Protocolo**: interno — llamada de función Python vía Redis como broker de mensajes, sin red
   externa.
 

@@ -7,13 +7,22 @@ aplican. Es una re-organización de `01_ACTORES_DE_NEGOCIO.md`, `02_CASOS_DE_USO
 `11_REQUERIMIENTOS_FUNCIONALES.md` alrededor de una sola tabla por caso de uso, más el catálogo
 de RNF (§2), que ninguno de los documentos anteriores tenía formalizado.
 
-Esta revisión agregó 10 casos de uso (`CU-C09`–`CU-C11`, `CU-T07`–`CU-T09`, `CU-A09`–`CU-A12`)
-tras auditar los 77 RF contra los 22 casos de uso originales: quedaban RF ya implementados
-(autenticación de cliente y de staff, perfil propio, gestión general de clientes, administración
-de cuentas de usuario, no-show automático) y RF planeados (configurar el módulo de IA,
-recalcular niveles de fidelización, consultar mi nivel) sin ningún caso de uso que los
-agrupara. Solo queda un RF genuinamente sin CU dedicado — ver §4. Ningún caso de uso existente
-cambió de número.
+Una revisión anterior agregó 10 casos de uso (en su numeración de entonces: `CU-C09`–`CU-C11`,
+`CU-T07`–`CU-T09`, `CU-A09`–`CU-A12`) tras auditar los 77 RF contra los 22 casos de uso
+originales: quedaban RF ya implementados (autenticación de cliente y de staff, perfil propio,
+gestión general de clientes, administración de cuentas de usuario, no-show automático) y RF
+planeados (configurar el módulo de IA, recalcular niveles de fidelización, consultar mi nivel)
+sin ningún caso de uso que los agrupara.
+
+**Revisión posterior — renumeración de planeados**: los casos de uso planeados de cada actor se
+renumeraron para quedar todos al final del rango de su actor (antes estaban intercalados con
+los implementados). Además, `CU-A12 — Recalcular niveles de fidelización automáticamente`
+(antiguo) se **retiró del catálogo de casos de uso**: es un proceso batch puramente automático
+(RN20/RN21) sin ningún punto de decisión humana, así que ahora se documenta solo como regla de
+negocio — a diferencia de CU-T09 (no-show), que sí conserva su modelado como caso de uso porque
+tiene una consecuencia visible y accionable por el trabajador. Se agregó
+`CU-A16 — Consultar métricas de fidelización` (nuevo). El total de casos de uso se mantiene en
+32; el RF que quedó sin CU tras retirar CU-A12 se documenta en §4.
 
 Los identificadores se mantienen sincronizados con el resto de `docs/`: `CU-Cxx` / `CU-Txx` /
 `CU-Axx` (cliente/trabajador/admin), `RF-0xx`, `RN0x`/`RN2x`, y el nuevo `RNF-0x` introducido
@@ -35,9 +44,9 @@ requerimientos → 1 caso de uso**) — ver la nota de trazabilidad al inicio de
 
 | Actor | Descripción | Contexto de uso | Casos de uso que inicia |
 |---|---|---|---|
-| **Cliente** | Persona que reserva y recibe servicios de belleza. Mayor volumen de interacciones, menor superficie de permisos — solo actúa sobre sus propios datos. Sesión sin contraseña (magic link por WhatsApp). | Móvil, generalmente fuera del salón. | CU-C01 – CU-C11 |
-| **Trabajador / Especialista** | Personal operativo (estilistas, manicuristas) que ejecuta los servicios. Nunca ve datos financieros del salón ni citas de otras especialistas — restricción de diseño explícita, no una versión reducida del admin. Sesión con email + contraseña. | Tablet o móvil compartido, en el salón, con las manos frecuentemente ocupadas. | CU-T01 – CU-T09 |
-| **Administrador** | Dueña o gerente del salón; único actor con visión completa (operación, finanzas, configuración). **Generaliza** al Trabajador en UML — puede ejecutar todo lo que un Trabajador puede sobre cualquier especialista, más las secciones exclusivas de gestión. Sesión con email + contraseña. | Escritorio o tablet en el back-office. | CU-A01 – CU-A12, más todos los de Trabajador |
+| **Cliente** | Persona que reserva y recibe servicios de belleza. Mayor volumen de interacciones, menor superficie de permisos — solo actúa sobre sus propios datos. Sesión sin contraseña (magic link por WhatsApp). | Móvil, generalmente fuera del salón. | CU-C01 – CU-C14 |
+| **Trabajador / Especialista** | Personal operativo (estilistas, manicuristas) que ejecuta los servicios. Nunca ve datos financieros del salón ni citas de otras especialistas — restricción de diseño explícita, no una versión reducida del admin. Sesión con email + contraseña. | Tablet o móvil compartido, en el salón, con las manos frecuentemente ocupadas. | CU-T01 – CU-T12 |
+| **Administrador** | Dueña o gerente del salón; único actor con visión completa (operación, finanzas, configuración). **Generaliza** al Trabajador en UML — puede ejecutar todo lo que un Trabajador puede sobre cualquier especialista, más las secciones exclusivas de gestión. Sesión con email + contraseña. | Escritorio o tablet en el back-office. | CU-A01 – CU-A16, más todos los de Trabajador |
 
 ### 1.2 Actores secundarios (sistemas, sin iniciativa de negocio propia salvo Culqi)
 
@@ -46,7 +55,7 @@ requerimientos → 1 caso de uso**) — ver la nota de trazabilidad al inicio de
 | **WhatsApp Business API** (Meta Cloud API) | Externo, ya integrado | Canal exclusivo de magic link y notificaciones salientes. Welve siempre lo invoca; nunca al revés (sin webhook entrante). |
 | **Motor de IA — Gemini** *(planeado)* | Externo, `docs/MODULO_ASESORIA_IA.md` | Recibe una imagen efímera + atributos del catálogo de estilos, devuelve un ranking. Puramente sincrónico dentro de una request. |
 | **Pasarela de Pago — Culqi** *(planeado)* | Externo, `docs/MODULO_FIDELIZACION_AVANZADA.md` | Único actor secundario que **inicia** una interacción hacia Welve (webhook de confirmación de pago) — se autentica por firma criptográfica, no por sesión. |
-| **Programador de Tareas — Celery Beat** | Interno | Dispara `verificar_no_show` cada 5 min y, planeado, el recálculo de niveles de fidelización — inicia casos de uso sin disparo humano directo. |
+| **Programador de Tareas — Celery Beat** | Interno | Dispara `verificar_no_show` (CU-T09) cada 5 min y, planeado, el recálculo de niveles de fidelización (RN20/RN21, sin caso de uso propio — ver §4) — inicia CU-T09 sin disparo humano directo. |
 
 ---
 
@@ -174,46 +183,6 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **RNF**: RNF-13, RNF-20
 - **RN**: RN15
 
-#### CU-C06 — Consulta de asesoría de estilo con IA *(planeado)*
-
-- **Actores**: Cliente (inicia); Motor de IA — Gemini (procesa la imagen).
-- **Tipo**: primario · **Prioridad**: media · **Incluye**: envío posterior de la selección a
-  CU-C01
-- **Descripción**: módulo habilitado, consentimiento aceptado, límite diario no superado. El
-  cliente captura una foto, el sistema la envía a Gemini junto al catálogo de estilos y
-  descarta la foto de inmediato; Gemini devuelve un ranking del catálogo existente (nunca
-  genera imágenes nuevas). El cliente elige uno o más estilos y los envía a su especialista,
-  ligados a su próxima cita.
-- **RF**: RF-060 (analizar imagen), RF-061 (consultar catálogo de estilos), RF-062 (enviar
-  selección)
-- **RNF**: RNF-01, RNF-07
-- **RN**: RN16, RN17, RN18, RN19
-
-#### CU-C07 — Comprar en el catálogo exclusivo *(planeado)*
-
-- **Actores**: Cliente (inicia); Pasarela de Pago — Culqi (procesa y confirma el cobro).
-- **Tipo**: primario · **Prioridad**: media · **Incluye**: CU-C04 (mismo concepto de canje,
-  aplicado a un producto)
-- **Descripción**: requiere `cliente.nivel_actual ≥ producto.nivel_minimo`. El cliente ve el
-  catálogo (productos de nivel superior bloqueados con teaser), elige uno y paga vía Culqi; el
-  sistema crea `PedidoCatalogo` en `pendiente` y, al recibir el webhook de confirmación, lo
-  actualiza a `pagado` de forma idempotente. Nivel insuficiente → 403 también a nivel de API;
-  pago rechazado → `cancelado`, sin efecto en el nivel.
-- **RF**: RF-072 (consultar catálogo), RF-074 (comprar), RF-075 (confirmar pago vía webhook)
-- **RNF**: RNF-06, RNF-13, RNF-01
-- **RN**: RN20, RN21, RN22, RN23, RN24
-
-#### CU-C08 — Marcar un estilo como favorito sin cámara *(planeado)*
-
-- **Actores**: Cliente.
-- **Tipo**: primario · **Prioridad**: baja
-- **Descripción**: el cliente explora el catálogo de estilos directamente y marca uno o más
-  como favoritos (`SeleccionEstilo` con `origen=favorito`, sin `ConsultaIA` asociada) — visible
-  para la especialista junto a las selecciones generadas por IA, sin distinción de origen.
-- **RF**: RF-065 (marcar como favorito)
-- **RNF**: RNF-01, RNF-19
-- **RN**: ninguna nueva
-
 #### CU-C09 — Solicitar y verificar acceso por magic link
 
 - **Actores**: Cliente (inicia); WhatsApp Business API (entrega el enlace).
@@ -238,10 +207,36 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **RNF**: RNF-01
 - **RN**: ninguna específica
 
-#### CU-C11 — Consultar mi nivel de fidelización y progreso *(planeado)*
+#### CU-C11 — Consulta de asesoría de estilo con IA *(planeado)*
+
+- **Actores**: Cliente (inicia); Motor de IA — Gemini (procesa la imagen).
+- **Tipo**: primario · **Prioridad**: media · **Incluye**: envío posterior de la selección a
+  CU-C01
+- **Descripción**: módulo habilitado, consentimiento aceptado, límite diario no superado. El
+  cliente captura una foto, el sistema la envía a Gemini junto al catálogo de estilos y
+  descarta la foto de inmediato; Gemini devuelve un ranking del catálogo existente (nunca
+  genera imágenes nuevas). El cliente elige uno o más estilos y los envía a su especialista,
+  ligados a su próxima cita.
+- **RF**: RF-060 (analizar imagen), RF-061 (consultar catálogo de estilos), RF-062 (enviar
+  selección)
+- **RNF**: RNF-01, RNF-07
+- **RN**: RN16, RN17, RN18, RN19
+
+#### CU-C12 — Marcar un estilo como favorito sin cámara *(planeado)*
 
 - **Actores**: Cliente.
-- **Tipo**: primario · **Prioridad**: media · **Extiende**: CU-C07 (contexto de decisión de
+- **Tipo**: primario · **Prioridad**: baja
+- **Descripción**: el cliente explora el catálogo de estilos directamente y marca uno o más
+  como favoritos (`SeleccionEstilo` con `origen=favorito`, sin `ConsultaIA` asociada) — visible
+  para la especialista junto a las selecciones generadas por IA, sin distinción de origen.
+- **RF**: RF-065 (marcar como favorito)
+- **RNF**: RNF-01, RNF-19
+- **RN**: ninguna nueva
+
+#### CU-C13 — Consultar mi nivel de fidelización y progreso *(planeado)*
+
+- **Actores**: Cliente.
+- **Tipo**: primario · **Prioridad**: media · **Extiende**: CU-C14 (contexto de decisión de
   compra en el catálogo exclusivo)
 - **Descripción**: módulo de fidelización avanzada habilitado. El cliente ve su
   `NivelFidelizacion` actual y qué le falta (visitas o gasto) para el siguiente nivel — caso de
@@ -249,6 +244,20 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **RF**: RF-069 (consultar niveles), RF-071 (consultar mi nivel y progreso)
 - **RNF**: RNF-01
 - **RN**: RN20
+
+#### CU-C14 — Comprar en el catálogo exclusivo *(planeado)*
+
+- **Actores**: Cliente (inicia); Pasarela de Pago — Culqi (procesa y confirma el cobro).
+- **Tipo**: primario · **Prioridad**: media · **Incluye**: CU-C04 (mismo concepto de canje,
+  aplicado a un producto)
+- **Descripción**: requiere `cliente.nivel_actual ≥ producto.nivel_minimo`. El cliente ve el
+  catálogo (productos de nivel superior bloqueados con teaser), elige uno y paga vía Culqi; el
+  sistema crea `PedidoCatalogo` en `pendiente` y, al recibir el webhook de confirmación, lo
+  actualiza a `pagado` de forma idempotente. Nivel insuficiente → 403 también a nivel de API;
+  pago rechazado → `cancelado`, sin efecto en el nivel.
+- **RF**: RF-072 (consultar catálogo), RF-074 (comprar), RF-075 (confirmar pago vía webhook)
+- **RNF**: RNF-06, RNF-13, RNF-01
+- **RN**: RN20, RN21, RN22, RN23, RN24
 
 ### 3.2 Trabajador / Especialista
 
@@ -288,38 +297,6 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **RNF**: RNF-02, RNF-18
 - **RN**: RN09
 
-#### CU-T04 — Iniciar una consulta de IA en vivo durante la cita *(planeado)*
-
-- **Actores**: Trabajador (inicia); Motor de IA — Gemini.
-- **Tipo**: primario · **Prioridad**: baja
-- **Descripción**: misma mecánica que CU-C06, iniciada por la especialista durante la atención
-  presencial; el resultado queda ligado a `personal_id` además de a la cita.
-- **RF**: RF-060 (analizar imagen), RF-062 (enviar selección)
-- **RNF**: RNF-07, RNF-17
-- **RN**: RN16, RN17, RN18, RN19
-
-#### CU-T05 — Consultar el historial de estilos de una clienta recurrente *(planeado)*
-
-- **Actores**: Trabajador.
-- **Tipo**: primario · **Prioridad**: media
-- **Descripción**: la clienta tiene `SeleccionEstilo` previas ligadas a citas anteriores. La
-  especialista abre el detalle de una cita agendada y ve el historial de esa clienta, sin
-  volver a analizar ninguna foto.
-- **RF**: RF-063 (consultar historial de estilos)
-- **RNF**: RNF-02
-- **RN**: RN19
-
-#### CU-T06 — Dar feedback sobre el resultado de un estilo *(planeado)*
-
-- **Actores**: Trabajador.
-- **Tipo**: primario · **Prioridad**: baja · **Extiende**: CU-T02
-- **Descripción**: la cita tiene una `SeleccionEstilo` asociada y acaba de pasar a
-  `completada`. La especialista marca si el resultado coincidió con el estilo elegido (sí/no +
-  nota); no afecta al cliente, alimenta la métrica de confianza del catálogo (CU-A08).
-- **RF**: RF-064 (registrar feedback de estilo)
-- **RNF**: RNF-17
-- **RN**: ninguna nueva
-
 #### CU-T07 — Autenticarse como personal
 
 - **Actores**: Trabajador o Admin.
@@ -353,19 +330,52 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **RNF**: RNF-12, RNF-15
 - **RN**: RN05 (el marcado manual equivalente lo cubre RN03, dentro de CU-T02)
 
+#### CU-T10 — Iniciar una consulta de IA en vivo durante la cita *(planeado)*
+
+- **Actores**: Trabajador (inicia); Motor de IA — Gemini.
+- **Tipo**: primario · **Prioridad**: baja
+- **Descripción**: misma mecánica que CU-C11, iniciada por la especialista durante la atención
+  presencial; el resultado queda ligado a `personal_id` además de a la cita.
+- **RF**: RF-060 (analizar imagen), RF-062 (enviar selección)
+- **RNF**: RNF-07, RNF-17
+- **RN**: RN16, RN17, RN18, RN19
+
+#### CU-T11 — Consultar el historial de estilos de una clienta recurrente *(planeado)*
+
+- **Actores**: Trabajador.
+- **Tipo**: primario · **Prioridad**: media
+- **Descripción**: la clienta tiene `SeleccionEstilo` previas ligadas a citas anteriores. La
+  especialista abre el detalle de una cita agendada y ve el historial de esa clienta, sin
+  volver a analizar ninguna foto.
+- **RF**: RF-063 (consultar historial de estilos)
+- **RNF**: RNF-02
+- **RN**: RN19
+
+#### CU-T12 — Dar feedback sobre el resultado de un estilo *(planeado)*
+
+- **Actores**: Trabajador.
+- **Tipo**: primario · **Prioridad**: baja · **Extiende**: CU-T02
+- **Descripción**: la cita tiene una `SeleccionEstilo` asociada y acaba de pasar a
+  `completada`. La especialista marca si el resultado coincidió con el estilo elegido (sí/no +
+  nota); no afecta al cliente, alimenta la métrica de confianza del catálogo (CU-A12).
+- **RF**: RF-064 (registrar feedback de estilo)
+- **RNF**: RNF-17
+- **RN**: ninguna nueva
+
 ### 3.3 Administrador
 
 #### CU-A01 — Gestionar personal y su disponibilidad
 
 - **Actores**: Admin.
 - **Tipo**: primario · **Prioridad**: alta
-- **Descripción**: crea el `Usuario` con rol `trabajador`, luego el `Personal` asociado
-  (flujo de dos pasos), define especialidad, comisión, tipo de contrato y disponibilidad
-  semanal (día/hora/buffer). Incluye también, dentro del mismo caso de uso de gestión
-  administrativa, la configuración de categorías/servicios y la creación directa de citas para
-  un cliente.
+- **Descripción**: da de alta un trabajador en dos pasos — crea la cuenta `Usuario` (RF-045,
+  reutilizado de CU-A10) y luego el `Personal` asociado — define especialidad, comisión, tipo
+  de contrato y disponibilidad semanal (día/hora/buffer). Incluye también, dentro del mismo
+  caso de uso de gestión administrativa, la configuración de categorías/servicios y la creación
+  directa de citas para un cliente.
+- **Incluye**: CU-A10 (paso de creación de la cuenta, antes de crear el `Personal`).
 - **RF**: RF-011–RF-014 (categorías/servicios), RF-022 (crear cita para un cliente), RF-030–
-  RF-035 (CRUD de personal y disponibilidad), RF-045 (crear usuario)
+  RF-035 (CRUD de personal y disponibilidad)
 - **RNF**: RNF-02, RNF-20, RNF-21, RNF-22
 - **RN**: RN13
 
@@ -394,27 +404,6 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **RNF**: RNF-02, RNF-20
 - **RN**: ninguna nueva
 
-#### CU-A04 — Configurar niveles de fidelización y catálogo exclusivo *(planeado)*
-
-- **Actores**: Admin.
-- **Tipo**: primario · **Prioridad**: media
-- **Descripción**: define `NivelFidelizacion` (umbral y beneficios), carga
-  `ProductoCatalogoExclusivo` con su `nivel_minimo`, consulta pedidos.
-- **RF**: RF-070 (gestionar niveles), RF-073 (gestionar catálogo exclusivo)
-- **RNF**: RNF-02, RNF-21
-- **RN**: RN20, RN21, RN22, RN23, RN24
-
-#### CU-A05 — Gestionar el catálogo de estilos para la IA *(planeado)*
-
-- **Actores**: Admin (o especialista con permiso delegado).
-- **Tipo**: primario · **Prioridad**: media · **Base de**: CU-A08
-- **Descripción**: carga estilos de referencia (`EstiloCatalogo`) una sola vez, con imagen y
-  atributos — única fuente de imágenes del módulo, evitando generar/almacenar una imagen nueva
-  por cada consulta de cliente.
-- **RF**: RF-066 (gestionar catálogo de estilos)
-- **RNF**: RNF-02, RNF-07
-- **RN**: RN16, RN17, RN18, RN19
-
 #### CU-A06 — Ver el dashboard operativo
 
 - **Actores**: Admin.
@@ -422,30 +411,9 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **Descripción**: el sistema carga en paralelo (a nivel de frontend; secuencial dentro de cada
   sesión de base de datos) citas del día, pagos pendientes y personal activo; muestra KPIs en
   tipografía display bold. Extensión planeada: widgets de distribución por nivel de
-  fidelización y de uso de IA.
+  fidelización y de uso de IA (ver CU-A16).
 - **RF**: RF-021 (listar todas las citas), RF-026 (listar pagos pendientes)
 - **RNF**: RNF-08, RNF-16, RNF-18
-- **RN**: ninguna nueva
-
-#### CU-A07 — Gestionar pedidos del catálogo exclusivo *(planeado)*
-
-- **Actores**: Admin.
-- **Tipo**: primario · **Prioridad**: media · **Extiende**: CU-A04
-- **Descripción**: existe al menos un `PedidoCatalogo` en `pagado`. El admin filtra pedidos por
-  estado/cliente/producto, abre el detalle y, tras la entrega física, lo marca `entregado`.
-  Marcar entregado un pedido no `pagado` → 422.
-- **RF**: RF-076 (gestionar pedidos del catálogo)
-- **RNF**: RNF-02, RNF-13
-- **RN**: RN23
-
-#### CU-A08 — Revisar métricas de confianza del catálogo de estilos *(planeado)*
-
-- **Actores**: Admin.
-- **Tipo**: primario · **Prioridad**: baja · **Extiende**: CU-A05
-- **Descripción**: con al menos un feedback registrado (CU-T06), el admin ve, por estilo, el
-  porcentaje de feedback positivo, para decidir si ajustar o retirar el estilo del catálogo.
-- **RF**: RF-068 (consultar métricas de uso de IA)
-- **RNF**: RNF-02
 - **RN**: ninguna nueva
 
 #### CU-A09 — Gestionar clientes
@@ -466,50 +434,94 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 
 - **Actores**: Admin.
 - **Tipo**: primario · **Prioridad**: media
-- **Descripción**: lista/consulta usuarios por rol y estado, edita nombre/teléfono, cambia el
-  correo (resetea `correo_verificado=false`), resetea contraseña sin conocer la actual, y
+- **Descripción**: crea una cuenta de cualquier rol (RF-045 — si `rol=cliente`, crea también el
+  `Cliente` vinculado), lista/consulta usuarios por rol y estado, edita nombre/teléfono, cambia
+  el correo (resetea `correo_verificado=false`), resetea contraseña sin conocer la actual, y
   activa/desactiva la cuenta — única vía autorizada para tocar credenciales ajenas (ver CU-T08
   para autogestión).
-- **RF**: RF-046 (listar usuarios), RF-047 (consultar usuario), RF-048 (editar usuario), RF-049
-  (cambiar correo), RF-050 (resetear contraseña), RF-051 (cambiar estado)
+- **RF**: RF-045 (crear usuario), RF-046 (listar usuarios), RF-047 (consultar usuario), RF-048
+  (editar usuario), RF-049 (cambiar correo), RF-050 (resetear contraseña), RF-051 (cambiar
+  estado)
 - **RNF**: RNF-02, RNF-03
 - **RN**: ninguna con ID propio
 
-#### CU-A11 — Configurar el módulo de asesoría de IA *(planeado)*
+#### CU-A11 — Gestionar el catálogo de estilos para la IA *(planeado)*
+
+- **Actores**: Admin (o especialista con permiso delegado).
+- **Tipo**: primario · **Prioridad**: media · **Base de**: CU-A12
+- **Descripción**: carga estilos de referencia (`EstiloCatalogo`) una sola vez, con imagen y
+  atributos — única fuente de imágenes del módulo, evitando generar/almacenar una imagen nueva
+  por cada consulta de cliente.
+- **RF**: RF-066 (gestionar catálogo de estilos)
+- **RNF**: RNF-02, RNF-07
+- **RN**: RN16, RN17, RN18, RN19
+
+#### CU-A12 — Revisar métricas de confianza del catálogo de estilos *(planeado)*
 
 - **Actores**: Admin.
-- **Tipo**: primario · **Prioridad**: media · **Extiende**: CU-A05
+- **Tipo**: primario · **Prioridad**: baja · **Extiende**: CU-A11
+- **Descripción**: con al menos un feedback registrado (CU-T12), el admin ve, por estilo, el
+  porcentaje de feedback positivo, para decidir si ajustar o retirar el estilo del catálogo.
+- **RF**: RF-068 (consultar métricas de uso de IA)
+- **RNF**: RNF-02
+- **RN**: ninguna nueva
+
+#### CU-A13 — Configurar el módulo de asesoría de IA *(planeado)*
+
+- **Actores**: Admin.
+- **Tipo**: primario · **Prioridad**: media · **Extiende**: CU-A11
 - **Descripción**: módulo de IA implementado y disponible para configuración. Activa o
   desactiva el módulo y define el límite diario de consultas de IA por cliente; efectivo desde
-  la siguiente consulta (CU-C06/CU-T04).
+  la siguiente consulta (CU-C11/CU-T10).
 - **RF**: RF-067 (configurar módulo de IA)
 - **RNF**: RNF-02, RNF-07
 - **RN**: RN18
 
-#### CU-A12 — Recalcular niveles de fidelización automáticamente *(planeado, automático)*
+#### CU-A14 — Configurar niveles de fidelización y catálogo exclusivo *(planeado)*
 
-- **Actores**: Programador de Tareas — Celery Beat (dispara el caso de uso); Admin (beneficiario
-  indirecto, vía CU-A04).
-- **Tipo**: secundario, disparado por el sistema · **Prioridad**: alta · **Extiende**: CU-A04
-- **Descripción**: existen `NivelFidelizacion` activos y clientes con historial de visitas o
-  gasto. En un intervalo configurable, evalúa el historial de cada cliente contra los umbrales
-  activos (orden descendente) y le asigna el nivel más alto que cumple; una baja de nivel no
-  revoca pedidos ya realizados.
-- **RF**: RF-077 (recalcular niveles de fidelización)
-- **RNF**: RNF-13, RNF-21
-- **RN**: RN20, RN21
+- **Actores**: Admin.
+- **Tipo**: primario · **Prioridad**: media
+- **Descripción**: define `NivelFidelizacion` (umbral y beneficios), carga
+  `ProductoCatalogoExclusivo` con su `nivel_minimo`, consulta pedidos.
+- **RF**: RF-070 (gestionar niveles), RF-073 (gestionar catálogo exclusivo)
+- **RNF**: RNF-02, RNF-21
+- **RN**: RN20, RN21, RN22, RN23, RN24
+
+#### CU-A15 — Gestionar pedidos del catálogo exclusivo *(planeado)*
+
+- **Actores**: Admin.
+- **Tipo**: primario · **Prioridad**: media · **Extiende**: CU-A14
+- **Descripción**: existe al menos un `PedidoCatalogo` en `pagado`. El admin filtra pedidos por
+  estado/cliente/producto, abre el detalle y, tras la entrega física, lo marca `entregado`.
+  Marcar entregado un pedido no `pagado` → 422.
+- **RF**: RF-076 (gestionar pedidos del catálogo)
+- **RNF**: RNF-02, RNF-13
+- **RN**: RN23
+
+#### CU-A16 — Consultar métricas de fidelización *(planeado)*
+
+- **Actores**: Admin.
+- **Tipo**: primario · **Prioridad**: baja · **Incluido en**: CU-A06 (widgets del dashboard
+  operativo)
+- **Descripción**: módulo de fidelización avanzada habilitado, al menos un cliente con nivel
+  asignado. El admin consulta, desde el dashboard operativo, la distribución de clientes por
+  nivel de fidelización y los ingresos del catálogo exclusivo del mes — agregados de solo
+  lectura, sin ninguna acción de escritura propia.
+- **RF**: RF-078 (consultar métricas de fidelización)
+- **RNF**: RNF-02
+- **RN**: ninguna nueva — lee el resultado de RN20/RN21 (recálculo de niveles, sin caso de uso
+  propio) y de las compras de CU-C14
 
 ---
 
 ## 4. RF sin caso de uso dedicado
 
-Tras agregar los 10 casos de uso nuevos (§3), un único RF queda sin un caso de uso propio —
-deliberadamente, porque es un detalle de apoyo consumido dentro de otro flujo, no un objetivo
-independiente de ningún actor:
+Dos RF quedan sin un caso de uso propio — deliberadamente, en ambos casos:
 
 | RF | Nombre | Actor(es) | Motivo |
 |---|---|---|---|
 | RF-020 | Consultar servicios de una cita | Trabajador, Admin | Lectura de detalle que la UI dispara dentro de CU-T02/CU-A02 (ver el detalle de los servicios ya cobrados de una cita) — no es, por sí sola, un objetivo que el actor persiga de forma independiente |
+| RF-077 | Recalcular niveles de fidelización | Sistema (Celery Beat) | Proceso batch puramente automático (RN20/RN21), sin ningún punto de decisión humana ni consecuencia que un actor deba atender en el momento — se documenta como regla de negocio y en `06_DIAGRAMAS_DE_ACTIVIDAD.md`, no como caso de uso. A diferencia de CU-T09 (no-show), que sí tiene una consecuencia visible y accionable por el trabajador |
 
 ---
 
@@ -520,6 +532,6 @@ independiente de ningún actor:
 | Actores primarios | 3 (Cliente, Trabajador/Especialista, Administrador) |
 | Actores secundarios | 4 (WhatsApp, Gemini *(planeado)*, Culqi *(planeado)*, Celery Beat) |
 | Casos de uso | 32 (11 Cliente, 9 Trabajador, 12 Admin) — 19 implementados, 13 planeados |
-| Requerimientos funcionales (RF) | 77 (59 implementados, 18 planeados) — 76 cubiertos por un caso de uso, 1 de apoyo sin CU propio (§4) |
+| Requerimientos funcionales (RF) | 78 (59 implementados, 19 planeados) — 76 cubiertos por un caso de uso, 2 de apoyo sin CU propio (§4) |
 | Requerimientos no funcionales (RNF) | 22 (5 categorías: Seguridad, Rendimiento/Concurrencia, Disponibilidad/Confiabilidad, Usabilidad/Accesibilidad, Mantenibilidad/Portabilidad) |
 | Reglas de negocio (RN) | 19 (10 implementadas, 9 planeadas) — numeración con huecos intencionales en RN04, RN06, RN07, RN10, RN12 (ver `docs/REGLAS_DE_NEGOCIO.md`); el ID más alto es RN24 |

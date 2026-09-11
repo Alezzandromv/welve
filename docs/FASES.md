@@ -158,8 +158,8 @@ recomendar).
   UI); `npm run build` limpio.
 
 **4.5 — Vistas trabajador (frontend)**
-- Extensión de `pages/worker/Agenda.tsx` (badge + panel de historial de estilos, CU-T05) y
-  `pages/worker/ConsultaIA.tsx` (consulta en vivo, CU-T04).
+- Extensión de `pages/worker/Agenda.tsx` (badge + panel de historial de estilos, CU-T11) y
+  `pages/worker/ConsultaIA.tsx` (consulta en vivo, CU-T10).
 - *Aceptación*: una especialista ve el historial de estilos de una clienta recurrente sin
   volver a analizar ninguna foto.
 

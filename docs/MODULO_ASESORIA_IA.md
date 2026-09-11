@@ -53,19 +53,19 @@ ConsultaIA
   estilos_sugeridos (jsonb: [{estilo_catalogo_id, score}, ...])
 
 SeleccionEstilo
-  id, consulta_id → ConsultaIA (opcional — null cuando origen=favorito, ver CU-C08),
+  id, consulta_id → ConsultaIA (opcional — null cuando origen=favorito, ver CU-C12),
   estilo_catalogo_id → EstiloCatalogo, cliente_id → Cliente,
   cita_id → Cita (opcional — se llena al presionar "enviar a mi estilista"; RN19 exige que,
   si se llena, sea una cita futura en estado no terminal del mismo cliente),
   origen (consulta_ia|favorito), seleccionado_por (cliente|trabajador),
   enviado_a_trabajador (bool), fecha_seleccion,
-  feedback_coincidio (bool, opcional — lo llena el trabajador al completar la cita, CU-T06),
+  feedback_coincidio (bool, opcional — lo llena el trabajador al completar la cita, CU-T12),
   feedback_nota (texto, opcional)
 ```
 
-Un "favorito" (CU-C08, explorar el catálogo sin cámara) es una `SeleccionEstilo` con
+Un "favorito" (CU-C12, explorar el catálogo sin cámara) es una `SeleccionEstilo` con
 `consulta_id=null` y `origen=favorito` — misma tabla, para que la especialista vea ambos
-orígenes en un solo lugar sin distinguir de dónde vino cada uno (tal como pide CU-C08), en vez
+orígenes en un solo lugar sin distinguir de dónde vino cada uno (tal como pide CU-C12), en vez
 de duplicar el concepto en una tabla `EstiloFavorito` aparte.
 
 Ninguna de estas tablas tiene una columna de imagen de la clienta — es una garantía a nivel de
@@ -100,15 +100,15 @@ cualquier revisión de código futura.
    (tablet) antes de que la clienta llegue.
 7. **Historial**: al completarse la cita, la selección queda en el historial de estilos de esa
    clienta — visible para cualquier especialista que la atienda después, sin volver a analizar
-   nada (CU-T05 en `docs/CASOS_DE_USO.md`).
+   nada (CU-T11 en `docs/CASOS_DE_USO.md`).
 8. **Trabajador en vivo**: la especialista también puede iniciar el mismo flujo durante la cita
-   presencial (CU-T04) — mismo modelo de datos, con `personal_id` poblado.
+   presencial (CU-T10) — mismo modelo de datos, con `personal_id` poblado.
 
 ## Configuración por el admin
 
 - Activar/desactivar el módulo globalmente.
 - Límite de consultas por cliente por día (RN18) — control de costo de la API de Gemini.
-- Gestión del catálogo de estilos (`EstiloCatalogo`): alta, edición, baja — CU-A05.
+- Gestión del catálogo de estilos (`EstiloCatalogo`): alta, edición, baja — CU-A11.
 - Métricas de uso agregadas (número de consultas, estilos más elegidos) — nunca fotos, porque
   no existen.
 
@@ -157,9 +157,9 @@ GET    /api/v1/ia/consultas/cliente/{id}     # trabajador/admin — historial de
                                               # (para la especialista que lo va a atender)
 POST   /api/v1/ia/consultas/{id}/seleccion   # cliente o trabajador — registra SeleccionEstilo
                                               # y la liga a la próxima cita (RN19)
-POST   /api/v1/ia/consultas/{id}/feedback    # trabajador — feedback post-servicio (CU-T06)
+POST   /api/v1/ia/consultas/{id}/feedback    # trabajador — feedback post-servicio (CU-T12)
 GET    /api/v1/ia/catalogo                   # cualquier rol autenticado — estilos activos
-POST   /api/v1/ia/favoritos                  # cliente — favorito sin pasar por consulta (CU-C08)
+POST   /api/v1/ia/favoritos                  # cliente — favorito sin pasar por consulta (CU-C12)
 GET    /api/v1/ia/favoritos                  # cliente — sus favoritos
 DELETE /api/v1/ia/favoritos/{id}             # cliente
 POST   /api/v1/ia/catalogo                   # admin — crear EstiloCatalogo
@@ -168,7 +168,7 @@ DELETE /api/v1/ia/catalogo/{id}              # admin — baja lógica (esta_acti
 GET    /api/v1/ia/configuracion               # admin — ver config (habilitada, límite diario)
 PATCH  /api/v1/ia/configuracion               # admin — activar/desactivar, ajustar límite
 GET    /api/v1/ia/metricas                    # admin — consultas totales, estilos más
-                                              # elegidos, % de feedback positivo (CU-A08), sin fotos
+                                              # elegidos, % de feedback positivo (CU-A12), sin fotos
 ```
 
 ## Vistas y componentes nuevos (frontend)
@@ -191,20 +191,20 @@ Siguiendo la estructura ya establecida (`pages/{admin,worker,client}/`, `service
 **Trabajador** (`pages/worker/`):
 - `Agenda.tsx` (extensión) — cada tarjeta de cita con una `SeleccionEstilo` asociada muestra un
   badge "Estilo sugerido" con thumbnail; click abre un panel con el detalle y el historial de
-  estilos previos de esa clienta (CU-T05).
+  estilos previos de esa clienta (CU-T11).
 - `ConsultaIA.tsx` (nueva) — mismo componente `CamaraConsulta`/`GridEstilos` reutilizados,
-  para iniciar una consulta en vivo durante la cita (CU-T04), con `personal_id` poblado.
+  para iniciar una consulta en vivo durante la cita (CU-T10), con `personal_id` poblado.
 
 **Admin** (`pages/admin/`):
 - `CatalogoEstilos.tsx` (nueva) — CRUD de `EstiloCatalogo`: grid con imagen, atributos
   (forma de rostro, tipo/largo de cabello, tags), toggle activo/inactivo, formulario de alta/
   edición con subida de imagen (única por estilo, reutilizada — ver política de storage), y un
-  indicador de "% feedback positivo" por estilo (CU-A08) para decidir si retirarlo o ajustarlo.
+  indicador de "% feedback positivo" por estilo (CU-A12) para decidir si retirarlo o ajustarlo.
 - `ConfiguracionPage.tsx` (extensión) — nueva sección "Asesoría IA": toggle
   activar/desactivar, input de límite de consultas diarias, texto informativo de costo
   estimado por consulta.
 - `Dashboard.tsx` (extensión) — widget nuevo "Uso de IA este mes": consultas totales, estilos
-  más elegidos (top 5), % de feedback positivo agregado (CU-A08) — sin ningún dato de imagen de
+  más elegidos (top 5), % de feedback positivo agregado (CU-A12) — sin ningún dato de imagen de
   clienta.
 
 **Nuevos archivos de soporte**: `services/ia.service.ts` (llamadas Axios a los endpoints de

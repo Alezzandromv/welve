@@ -3,7 +3,7 @@
 Especificación completa de requerimientos funcionales (RF), organizada por módulo del sistema
 — formato estándar de especificación de requerimientos de software (ERS): código, nombre,
 descripción (entrada → proceso → salida), actor(es), prioridad, caso de uso relacionado y regla
-de negocio asociada. **77 requerimientos funcionales en total**: 59 implementados, 18 planeados
+de negocio asociada. **78 requerimientos funcionales en total**: 59 implementados, 19 planeados
 (ver el resumen cuantitativo al final del documento).
 
 Cada módulo trae su propio diagrama de casos de uso (notación UML formal — actor como
@@ -316,7 +316,7 @@ flowchart LR
 
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
-| RF-045 | Crear usuario | Entrada: nombre, rol, correo/teléfono según rol. Proceso: si `rol=cliente`, crea también el `Cliente` vinculado automáticamente. Salida: `Usuario` creado. | Admin | Alta | CU-A01 | — |
+| RF-045 | Crear usuario | Entrada: nombre, rol, correo/teléfono según rol. Proceso: si `rol=cliente`, crea también el `Cliente` vinculado automáticamente. Salida: `Usuario` creado. Reutilizado también por CU-A01 (mismo endpoint, primer paso al dar de alta un trabajador antes de crear su `Personal`). | Admin | Alta | CU-A10 | — |
 | RF-046 | Listar usuarios | Entrada: filtros `rol`, `esta_activo`. Salida: lista de usuarios. | Admin | Media | CU-A10 | — |
 | RF-047 | Consultar usuario | Salida: detalle de un `Usuario`. | Admin | Baja | CU-A10 | — |
 | RF-048 | Editar usuario | Entrada: nombre, teléfono, `esta_activo`. Salida: `Usuario` actualizado. | Admin | Media | CU-A10 | — |
@@ -418,15 +418,15 @@ flowchart LR
 
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
-| RF-060 | Analizar imagen y sugerir estilos | Entrada: foto capturada (efímera). Proceso: envío a Gemini + catálogo, descarte inmediato de la foto. Salida: ranking de `EstiloCatalogo`, nunca la imagen. Reutilizado también por CU-T04 (mismo endpoint, iniciado por la especialista). | Cliente, Trabajador | Alta | CU-C06 | RN16, RN17, RN18 |
-| RF-061 | Consultar catálogo de estilos | Salida: `EstiloCatalogo` activos con atributos. | Cualquier rol autenticado | Media | CU-C06 | — |
-| RF-062 | Enviar selección a especialista | Entrada: estilo elegido. Proceso: liga a la próxima `Cita` no terminal. Salida: `SeleccionEstilo` creada. Reutilizado también por CU-T04. | Cliente, Trabajador | Alta | CU-C06 | RN19 |
-| RF-063 | Consultar historial de estilos de un cliente | Salida: `SeleccionEstilo` previas de ese cliente, sin reanálisis. | Trabajador, Admin | Media | CU-T05 | RN19 |
-| RF-064 | Registrar feedback de estilo | Entrada: coincidió sí/no + nota. Salida: `SeleccionEstilo.feedback_coincidio` actualizado. | Trabajador | Baja | CU-T06 | — |
-| RF-065 | Marcar estilo como favorito | Entrada: estilo elegido sin cámara. Salida: `SeleccionEstilo` con `origen=favorito`. | Cliente | Baja | CU-C08 | — |
-| RF-066 | Gestionar catálogo de estilos | CRUD completo de `EstiloCatalogo` (alta, edición, baja lógica). | Admin | Media | CU-A05 | RN16–RN19 |
-| RF-067 | Configurar módulo de IA | Entrada: activar/desactivar, límite diario de consultas. Salida: configuración persistida. | Admin | Media | CU-A11 | RN18 |
-| RF-068 | Consultar métricas de uso de IA | Salida: consultas totales, estilos más elegidos, % de feedback positivo — nunca fotos. | Admin | Baja | CU-A08 | — |
+| RF-060 | Analizar imagen y sugerir estilos | Entrada: foto capturada (efímera). Proceso: envío a Gemini + catálogo, descarte inmediato de la foto. Salida: ranking de `EstiloCatalogo`, nunca la imagen. Reutilizado también por CU-T10 (mismo endpoint, iniciado por la especialista). | Cliente, Trabajador | Alta | CU-C11 | RN16, RN17, RN18 |
+| RF-061 | Consultar catálogo de estilos | Salida: `EstiloCatalogo` activos con atributos. | Cualquier rol autenticado | Media | CU-C11 | — |
+| RF-062 | Enviar selección a especialista | Entrada: estilo elegido. Proceso: liga a la próxima `Cita` no terminal. Salida: `SeleccionEstilo` creada. Reutilizado también por CU-T10. | Cliente, Trabajador | Alta | CU-C11 | RN19 |
+| RF-063 | Consultar historial de estilos de un cliente | Salida: `SeleccionEstilo` previas de ese cliente, sin reanálisis. | Trabajador, Admin | Media | CU-T11 | RN19 |
+| RF-064 | Registrar feedback de estilo | Entrada: coincidió sí/no + nota. Salida: `SeleccionEstilo.feedback_coincidio` actualizado. | Trabajador | Baja | CU-T12 | — |
+| RF-065 | Marcar estilo como favorito | Entrada: estilo elegido sin cámara. Salida: `SeleccionEstilo` con `origen=favorito`. | Cliente | Baja | CU-C12 | — |
+| RF-066 | Gestionar catálogo de estilos | CRUD completo de `EstiloCatalogo` (alta, edición, baja lógica). | Admin | Media | CU-A11 | RN16–RN19 |
+| RF-067 | Configurar módulo de IA | Entrada: activar/desactivar, límite diario de consultas. Salida: configuración persistida. | Admin | Media | CU-A13 | RN18 |
+| RF-068 | Consultar métricas de uso de IA | Salida: consultas totales, estilos más elegidos, % de feedback positivo — nunca fotos. | Admin | Baja | CU-A12 | — |
 
 ---
 
@@ -448,7 +448,8 @@ flowchart LR
         RF074(["RF-074<br/>Comprar producto<br/>del catálogo"])
         RF075(["RF-075<br/>Confirmar pago<br/>vía webhook"])
         RF076(["RF-076<br/>Gestionar pedidos<br/>del catálogo"])
-        RF077(["RF-077<br/>Recalcular niveles<br/>de fidelización"])
+        RF077(["RF-077<br/>Recalcular niveles<br/>de fidelización<br/>«sin CU propio»"])
+        RF078(["RF-078<br/>Consultar métricas<br/>de fidelización"])
     end
 
     Cliente --- RF069
@@ -461,6 +462,7 @@ flowchart LR
     Culqi --> RF075
     Admin --- RF076
     Beat --- RF077
+    Admin --- RF078
 
     RF074 -. "«includes»" .-> RF072
     RF077 -. "«extends»" .-> RF071
@@ -468,20 +470,21 @@ flowchart LR
     classDef actor fill:#fff,stroke:#333,stroke-width:1px
     classDef planeado stroke-dasharray: 5 5
     class Cliente,Admin,Culqi,Beat actor
-    class RF069,RF070,RF071,RF072,RF073,RF074,RF075,RF076,RF077 planeado
+    class RF069,RF070,RF071,RF072,RF073,RF074,RF075,RF076,RF077,RF078 planeado
 ```
 
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
-| RF-069 | Consultar niveles de fidelización | Salida: `NivelFidelizacion` activos con sus beneficios visibles. | Cualquier rol autenticado | Media | CU-C11 | — |
-| RF-070 | Gestionar niveles de fidelización | CRUD completo: nombre, orden, tipo/valor de umbral, beneficios. | Admin | Alta | CU-A04 | RN20 |
-| RF-071 | Consultar mi nivel y progreso | Salida: nivel actual del cliente + qué falta para el siguiente. | Cliente | Media | CU-C11 | RN20 |
-| RF-072 | Consultar catálogo exclusivo | Salida: `ProductoCatalogoExclusivo`, con los de nivel superior marcados `bloqueado`. | Cliente | Media | CU-C07 | RN22 |
-| RF-073 | Gestionar catálogo exclusivo | CRUD completo de productos (nombre, precio, imagen, nivel mínimo, stock). | Admin | Alta | CU-A04 | — |
-| RF-074 | Comprar producto del catálogo | Entrada: producto elegido. Proceso: valida nivel, crea `PedidoCatalogo` pendiente, inicia checkout Culqi. Salida: token de pago. | Cliente | Alta | CU-C07 | RN22 |
-| RF-075 | Confirmar pago vía webhook | Entrada: evento firmado de Culqi. Proceso: verifica firma, actualiza estado de forma idempotente. Salida: `PedidoCatalogo` en `pagado`/`cancelado`. | Sistema (Culqi) | Alta | CU-C07 | RN23, RN24 |
-| RF-076 | Gestionar pedidos del catálogo | Entrada: filtros estado/cliente/producto. Proceso: marcar `entregado`. Salida: pedidos actualizados. | Admin | Media | CU-A07 | RN23 |
-| RF-077 | Recalcular niveles de fidelización | Proceso batch periódico: recalcula el nivel de cada cliente contra los umbrales activos. | Sistema (Celery Beat) | Alta | CU-A12 | RN20, RN21 |
+| RF-069 | Consultar niveles de fidelización | Salida: `NivelFidelizacion` activos con sus beneficios visibles. | Cualquier rol autenticado | Media | CU-C13 | — |
+| RF-070 | Gestionar niveles de fidelización | CRUD completo: nombre, orden, tipo/valor de umbral, beneficios. | Admin | Alta | CU-A14 | RN20 |
+| RF-071 | Consultar mi nivel y progreso | Salida: nivel actual del cliente + qué falta para el siguiente. | Cliente | Media | CU-C13 | RN20 |
+| RF-072 | Consultar catálogo exclusivo | Salida: `ProductoCatalogoExclusivo`, con los de nivel superior marcados `bloqueado`. | Cliente | Media | CU-C14 | RN22 |
+| RF-073 | Gestionar catálogo exclusivo | CRUD completo de productos (nombre, precio, imagen, nivel mínimo, stock). | Admin | Alta | CU-A14 | — |
+| RF-074 | Comprar producto del catálogo | Entrada: producto elegido. Proceso: valida nivel, crea `PedidoCatalogo` pendiente, inicia checkout Culqi. Salida: token de pago. | Cliente | Alta | CU-C14 | RN22 |
+| RF-075 | Confirmar pago vía webhook | Entrada: evento firmado de Culqi. Proceso: verifica firma, actualiza estado de forma idempotente. Salida: `PedidoCatalogo` en `pagado`/`cancelado`. | Sistema (Culqi) | Alta | CU-C14 | RN23, RN24 |
+| RF-076 | Gestionar pedidos del catálogo | Entrada: filtros estado/cliente/producto. Proceso: marcar `entregado`. Salida: pedidos actualizados. | Admin | Media | CU-A15 | RN23 |
+| RF-077 | Recalcular niveles de fidelización | Proceso batch periódico: recalcula el nivel de cada cliente contra los umbrales activos. Sin caso de uso propio — no tiene ningún punto de decisión humana (ver `12_CASOS_DE_USO_RF_RNF.md` §4). | Sistema (Celery Beat) | Alta | — | RN20, RN21 |
+| RF-078 | Consultar métricas de fidelización | Salida: distribución de clientes por nivel de fidelización + ingresos del catálogo exclusivo del mes, agregados de solo lectura. | Admin | Baja | CU-A16 | — |
 
 ---
 
@@ -498,5 +501,5 @@ flowchart LR
 | 7. Usuarios | 7 | 0 | 7 |
 | 8. Fidelización | 8 | 0 | 8 |
 | 9. Asesoría IA | 0 | 9 | 9 |
-| 10. Fidelización Avanzada | 0 | 9 | 9 |
-| **Total** | **59** | **18** | **77** |
+| 10. Fidelización Avanzada | 0 | 10 | 10 |
+| **Total** | **59** | **19** | **78** |
