@@ -14,6 +14,16 @@ Prioridad: **Alta** (crítico para la operación diaria), **Media** (valor claro
 **Baja** (mejora incremental). Los RF planeados se marcan `«planeado»` y remiten a
 `docs/MODULO_ASESORIA_IA.md` / `docs/MODULO_FIDELIZACION_AVANZADA.md`.
 
+**Trazabilidad RF ↔ CU**: la columna **CU** de cada tabla es el **caso de uso de origen** de ese
+requerimiento — cardinalidad **N requerimientos → 1 caso de uso** (cada RF pertenece a un único
+CU, nunca a dos). Cuando el mismo endpoint es invocado desde más de un caso de uso (p. ej.
+`PATCH /citas/{id}/cancelar` desde CU-C02 y CU-C03, o `GET/PATCH /auth/perfil` desde CU-C10 y
+CU-T08), el RF se documenta una sola vez bajo su CU de origen y la descripción anota el reuso en
+prosa — nunca como una segunda entrada en la columna CU. La dirección inversa (**1 caso de uso →
+N requerimientos**, incluyendo los reutilizados de otro CU) vive en
+`12_CASOS_DE_USO_RF_RNF.md#3-casos-de-uso--ficha-completa-actores--rf--rnf--rn`, organizada por
+caso de uso.
+
 ---
 
 ## Módulo 1 — Autenticación
@@ -53,8 +63,8 @@ flowchart LR
 | RF-002 | Verificar magic link | Entrada: token UUID. Proceso: valida no usado/no expirado, `UPDATE` atómico `usado=true`, emite JWT. Salida: `access_token`, rol, nombre. | Cliente | Alta | CU-C09 | — |
 | RF-003 | Registrar personal (staff) | Entrada: nombre, correo, contraseña, rol (`admin`\|`trabajador`). Proceso: valida correo único, hashea contraseña, crea `Usuario`. Salida: JWT. | Admin/Trabajador (auto-registro) | Media | CU-T07 | — |
 | RF-004 | Iniciar sesión staff | Entrada: correo, contraseña. Proceso: valida credenciales y `esta_activo`. Salida: JWT. | Trabajador, Admin | Alta | CU-T07 | — |
-| RF-005 | Consultar perfil propio | Entrada: JWT. Salida: datos del `Usuario` autenticado. | Cliente, Trabajador, Admin | Media | CU-C10, CU-T08 | — |
-| RF-006 | Actualizar perfil propio | Entrada: nombre/correo/teléfono (parciales). Proceso: valida unicidad de correo/teléfono. Salida: perfil actualizado. | Cliente, Trabajador, Admin | Media | CU-C10, CU-T08 | — |
+| RF-005 | Consultar perfil propio | Entrada: JWT. Salida: datos del `Usuario` autenticado. Reutilizado también por CU-T08 (mismo endpoint, actor staff). | Cliente, Trabajador, Admin | Media | CU-C10 | — |
+| RF-006 | Actualizar perfil propio | Entrada: nombre/correo/teléfono (parciales). Proceso: valida unicidad de correo/teléfono. Salida: perfil actualizado. Reutilizado también por CU-T08. | Cliente, Trabajador, Admin | Media | CU-C10 | — |
 | RF-007 | Cambiar contraseña | Entrada: contraseña actual + nueva (≥8 caracteres). Proceso: valida actual, hashea nueva. Salida: confirmación. | Trabajador, Admin | Baja | CU-T08 | — |
 
 ---
@@ -143,8 +153,8 @@ flowchart LR
 |---|---|---|---|---|---|---|
 | RF-015 | Crear cita | Entrada: servicios, especialista, horario, notas. Proceso: valida bloqueo, ficha de salud, solapamiento. Salida: `Cita` en `pendiente`. | Cliente | Alta | CU-C01 | RN08, RN11, RN13 |
 | RF-016 | Listar mis citas | Salida: citas del cliente autenticado, ordenadas por fecha descendente. | Cliente | Alta | CU-C01 | — |
-| RF-017 | Cancelar cita | Entrada: motivo opcional. Proceso: calcula horas restantes vs. umbral del servicio. Salida: `cancelada` o `cancelada_tardia`. | Cliente | Alta | CU-C02, CU-C03 | RN01, RN02 |
-| RF-018 | Cambiar estado de cita | Entrada: nuevo estado, `confirmar_ficha_critica` opcional. Proceso: valida transición y ficha crítica. Salida: `Cita` actualizada. | Trabajador, Admin | Alta | CU-T02, CU-T03 | RN09, RN15 |
+| RF-017 | Cancelar cita | Entrada: motivo opcional. Proceso: calcula horas restantes vs. umbral del servicio. Salida: `cancelada` (CU-C02) o `cancelada_tardia` (reutilizado por CU-C03, mismo endpoint, rama tardía). | Cliente | Alta | CU-C02 | RN01, RN02 |
+| RF-018 | Cambiar estado de cita | Entrada: nuevo estado, `confirmar_ficha_critica` opcional. Proceso: valida transición y ficha crítica. Salida: `Cita` actualizada. Reutilizado también por CU-T03 (misma llamada, rama que retorna 422 por ficha crítica — RN09). | Trabajador, Admin | Alta | CU-T02 | RN09, RN15 |
 | RF-019 | Registrar llegada | Entrada: hora de llegada. Salida: `hora_llegada_real` registrada, sin cambiar estado. | Trabajador, Admin | Media | CU-T02 | — |
 | RF-020 | Consultar servicios de una cita | Salida: lista de `CitaServicio` con precio y duración congelados al momento de la reserva. | Trabajador, Admin | Baja | — | — |
 | RF-021 | Listar todas las citas | Entrada: filtros opcionales (fecha, estado). Salida: citas enriquecidas con nombres de cliente/especialista/servicio. | Admin | Alta | CU-A06 | — |
@@ -269,8 +279,8 @@ flowchart LR
 | RF-038 | Consultar cliente | Salida: perfil completo de un `Cliente`. | Admin | Media | CU-A09 | — |
 | RF-039 | Editar cliente | Entrada: etiquetas, notas internas (nunca `correo`/`password`, rechazados explícitamente). Salida: `Cliente` actualizado. | Admin | Media | CU-A09 | — |
 | RF-040 | Consultar historial de citas | Salida: lista de `Cita` pasadas del cliente. | Admin | Media | CU-A09 | — |
-| RF-041 | Listar fichas de salud | Salida: `FichaSalud` del cliente, con severidad. | Admin | Alta | CU-T03 | RN08, RN09 |
-| RF-042 | Registrar ficha de salud | Entrada: tipo de restricción, descripción, severidad. Salida: `FichaSalud` creada. | Admin | Alta | CU-T03 | RN08, RN09 |
+| RF-041 | Listar fichas de salud | Salida: `FichaSalud` del cliente, con severidad. No confundir con la alerta de CU-T03: esa viaja embebida en la respuesta 422 de RF-018, sin invocar este RF por separado. | Admin | Alta | CU-A09 | RN08 |
+| RF-042 | Registrar ficha de salud | Entrada: tipo de restricción, descripción, severidad. Salida: `FichaSalud` creada. | Admin | Alta | CU-A09 | RN08, RN09 |
 | RF-043 | Bloquear cliente | Entrada: motivo. Salida: `esta_bloqueada=true`, `fecha_bloqueo` registrada. | Admin | Media | CU-A09 | RN11 |
 | RF-044 | Desbloquear cliente | Salida: `esta_bloqueada=false`. | Admin | Baja | CU-A09 | RN11 |
 
@@ -408,9 +418,9 @@ flowchart LR
 
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
-| RF-060 | Analizar imagen y sugerir estilos | Entrada: foto capturada (efímera). Proceso: envío a Gemini + catálogo, descarte inmediato de la foto. Salida: ranking de `EstiloCatalogo`, nunca la imagen. | Cliente, Trabajador | Alta | CU-C06, CU-T04 | RN16, RN17, RN18 |
+| RF-060 | Analizar imagen y sugerir estilos | Entrada: foto capturada (efímera). Proceso: envío a Gemini + catálogo, descarte inmediato de la foto. Salida: ranking de `EstiloCatalogo`, nunca la imagen. Reutilizado también por CU-T04 (mismo endpoint, iniciado por la especialista). | Cliente, Trabajador | Alta | CU-C06 | RN16, RN17, RN18 |
 | RF-061 | Consultar catálogo de estilos | Salida: `EstiloCatalogo` activos con atributos. | Cualquier rol autenticado | Media | CU-C06 | — |
-| RF-062 | Enviar selección a especialista | Entrada: estilo elegido. Proceso: liga a la próxima `Cita` no terminal. Salida: `SeleccionEstilo` creada. | Cliente, Trabajador | Alta | CU-C06, CU-T04 | RN19 |
+| RF-062 | Enviar selección a especialista | Entrada: estilo elegido. Proceso: liga a la próxima `Cita` no terminal. Salida: `SeleccionEstilo` creada. Reutilizado también por CU-T04. | Cliente, Trabajador | Alta | CU-C06 | RN19 |
 | RF-063 | Consultar historial de estilos de un cliente | Salida: `SeleccionEstilo` previas de ese cliente, sin reanálisis. | Trabajador, Admin | Media | CU-T05 | RN19 |
 | RF-064 | Registrar feedback de estilo | Entrada: coincidió sí/no + nota. Salida: `SeleccionEstilo.feedback_coincidio` actualizado. | Trabajador | Baja | CU-T06 | — |
 | RF-065 | Marcar estilo como favorito | Entrada: estilo elegido sin cámara. Salida: `SeleccionEstilo` con `origen=favorito`. | Cliente | Baja | CU-C08 | — |

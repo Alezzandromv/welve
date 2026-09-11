@@ -474,13 +474,14 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **Precondición**: sesión de admin iniciada.
 - **Flujo normal**: 1. Lista clientes con sus etiquetas y estado de bloqueo. 2. Consulta el
   detalle de una clienta, incluyendo su historial de citas. 3. Edita etiquetas o notas internas
-  (nunca `correo`/`password`, rechazados explícitamente por el schema — ver CU-A10). 4. Si
+  (nunca `correo`/`password`, rechazados explícitamente por el schema — ver CU-A10). 4. Registra
+  o consulta sus fichas de salud (tipo de restricción, descripción, severidad). 5. Si
   corresponde, bloquea a la clienta indicando un motivo, o revierte un bloqueo previo.
 - **Flujos alternativos**: intento de editar `correo` o `password` vía este flujo → 422 (usar
   CU-A10). Cliente ya bloqueada intentando reservar → ver RN11 en CU-C01.
 - **Postcondición**: `Cliente` actualizado; si aplica, `esta_bloqueada` y `motivo_bloqueo`
-  (o su reverso) persistidos.
-- **RN**: RN11.
+  (o su reverso) persistidos; si aplica, nueva `FichaSalud` registrada.
+- **RN**: RN08, RN11.
 
 #### CU-A10 — Administrar cuentas de usuario del staff
 

@@ -548,7 +548,7 @@ Ninguna específica.
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
 | **Caso de Uso** | CUS\_Atender\_Alerta\_Ficha\_Critica (CU-T03) |
-| **Requerimiento** | RF-018 (Cambiar estado de cita), RF-041 (Listar fichas de salud), RF-042 (Registrar ficha de salud) |
+| **Requerimiento** | RF-018 (Cambiar estado de cita) — el detalle de las fichas críticas viaja en el cuerpo del error 422 de esta misma llamada; no invoca RF-041/RF-042 por separado (esos son de CU-A09) |
 | **Pre-condición** | La clienta tiene al menos una `FichaSalud` con severidad `critica` activa. |
 | **Post-condición** | La cita avanza a `en_curso` solo después de que la alerta fue vista explícitamente. |
 | **Actores** | AS\_Trabajador |
@@ -818,7 +818,7 @@ Ninguna — proceso batch sin interacción de usuario.
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
 | **Caso de Uso** | CUS\_Gestionar\_Pago (CU-A02) |
-| **Requerimiento** | RF-023 (Consultar pagos de una cita), RF-025–RF-029 (registrar/confirmar/rechazar/reembolsar pago) |
+| **Requerimiento** | RF-023 (Consultar pagos de una cita), RF-025 (Registrar pago), RF-026 (Listar pagos pendientes — origen en CU-A06, reutilizado aquí), RF-027–RF-029 (Confirmar/rechazar/reembolsar pago) |
 | **Pre-condición** | `Pago` en `pendiente` (para confirmar o rechazar) o en `confirmado` (para reembolsar). |
 | **Post-condición** | `Pago.estado` actualizado; `confirmado_por` y `fecha_confirmacion` registrados. |
 | **Actores** | AS\_Administrador |
@@ -1045,9 +1045,9 @@ Ninguna específica.
 | TÉRMINOS | DEFINICIÓN |
 | :---- | :---- |
 | **Caso de Uso** | CUS\_Gestionar\_Clientes (CU-A09) |
-| **Requerimiento** | RF-037 (Listar clientes), RF-038 (Consultar cliente), RF-039 (Editar cliente), RF-040 (Consultar historial de citas), RF-043 (Bloquear cliente), RF-044 (Desbloquear cliente) |
+| **Requerimiento** | RF-037 (Listar clientes), RF-038 (Consultar cliente), RF-039 (Editar cliente), RF-040 (Consultar historial de citas), RF-041 (Listar fichas de salud), RF-042 (Registrar ficha de salud), RF-043 (Bloquear cliente), RF-044 (Desbloquear cliente) |
 | **Pre-condición** | Sesión de administrador iniciada. |
-| **Post-condición** | `Cliente` actualizado; si aplica, `esta_bloqueada`/`motivo_bloqueo` (o su reverso) persistidos. |
+| **Post-condición** | `Cliente` actualizado; si aplica, `esta_bloqueada`/`motivo_bloqueo` (o su reverso) persistidos; si aplica, nueva `FichaSalud` registrada. |
 | **Actores** | AS\_Administrador |
 
 **Flujo Principal — Administrador**
@@ -1064,10 +1064,13 @@ Ninguna específica.
 | :---: | :---- | :---- |
 | 1 | Bloquear cliente | El administrador indica un motivo y el sistema marca `esta_bloqueada=true` con la fecha de bloqueo. |
 | 2 | Desbloquear cliente | El administrador revierte el bloqueo. |
+| 3 | Registrar ficha de salud | El administrador ingresa tipo de restricción, descripción y severidad (`informativa`/`moderada`/`critica`); el sistema crea la `FichaSalud` ligada a la clienta. |
+| 4 | Consultar fichas de salud | El administrador lista las `FichaSalud` registradas de la clienta. |
 
 **Reglas de Negocio**
 
 - Una clienta bloqueada no puede reservar — el sistema rechaza la reserva con un mensaje genérico, sin exponer el motivo (RN11, ver CU-C01).
+- Un servicio con `requiere_ficha_salud=true` no puede reservarse sin una ficha activa registrada aquí para esa clienta (RN08, ver CU-C01). Una ficha con `severidad='critica'` dispara la alerta de CU-T03 al iniciar la cita.
 
 **Excepciones**
 

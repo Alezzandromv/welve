@@ -4,6 +4,16 @@ Formato por caso: **Actor**, **Precondición**, **Flujo principal**, **Flujos al
 error**, **Postcondición**, **RN involucradas**. Los casos marcados **(planeado)** pertenecen a
 módulos documentados pero no implementados — ver `docs/FASES.md`.
 
+Para el detalle de los **requerimientos funcionales (RF)** que implementa cada caso de uso, ver
+`docs/tesis/11_REQUERIMIENTOS_FUNCIONALES.md` (RF por módulo) y
+`docs/tesis/12_CASOS_DE_USO_RF_RNF.md` (ficha consolidada por caso de uso, con RF + RNF + RN).
+Convención de trazabilidad: **un caso de uso agrupa de 1 a N requerimientos funcionales**; cada
+requerimiento funcional, a su vez, **tiene un único caso de uso de origen** (N requerimientos → 1
+caso de uso) — si dos casos de uso invocan el mismo endpoint (p. ej. CU-C02/CU-C03 cancelando la
+misma cita, o CU-T02/CU-T03 sobre el mismo cambio de estado), el requerimiento se documenta una
+sola vez en su caso de uso de origen y el otro lo referencia en prosa, nunca como una segunda
+entrada formal.
+
 ---
 
 ## Cliente
@@ -336,10 +346,16 @@ Ver `docs/MODULO_FIDELIZACION_AVANZADA.md`.
 - **Actor**: Admin.
 - **Flujo principal**: lista clientes con etiquetas y estado de bloqueo, consulta el detalle de
   una clienta con su historial de citas, edita etiquetas/notas internas (nunca `correo`/
-  `password` — ver CU-A10), y bloquea/desbloquea con motivo cuando corresponde.
-- **Flujos alternativos**: intento de editar `correo`/`password` por este flujo → 422.
-- **Postcondición**: `Cliente` actualizado; si aplica, `esta_bloqueada`/`motivo_bloqueo`.
-- **RN**: RN11.
+  `password` — ver CU-A10), registra o consulta sus fichas de salud (`GET/POST
+  /clientes/{id}/fichas-salud`, con tipo de restricción, descripción y severidad), y
+  bloquea/desbloquea con motivo cuando corresponde.
+- **Flujos alternativos**: intento de editar `correo`/`password` por este flujo → 422. Nota: el
+  detalle de una ficha con `severidad='critica'` también se muestra automáticamente al
+  trabajador dentro de CU-T03, sin que este necesite una consulta propia — viaja en el cuerpo del
+  error 422 de `PATCH /citas/{id}/estado`.
+- **Postcondición**: `Cliente` actualizado; si aplica, `esta_bloqueada`/`motivo_bloqueo`; si
+  aplica, nueva `FichaSalud` registrada.
+- **RN**: RN08, RN11.
 
 ### CU-A10 — Administrar cuentas de usuario del staff
 

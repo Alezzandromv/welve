@@ -20,6 +20,13 @@ Los identificadores se mantienen sincronizados con el resto de `docs/`: `CU-Cxx`
 aquí. Cualquier cambio futuro a un caso de uso debe reflejarse en los cuatro documentos por
 igual.
 
+**Trazabilidad CU ↔ RF**: cada ficha de §3 lista los RF que ese caso de uso **usa** —
+cardinalidad **1 caso de uso → N requerimientos**, y esa lista sí puede incluir un RF cuyo caso
+de uso de origen es otro (p. ej. CU-T08 usa RF-005/RF-006 aunque su origen sea CU-C10) cuando
+ambos invocan el mismo endpoint. La dirección inversa es estricta: en
+`11_REQUERIMIENTOS_FUNCIONALES.md` cada RF tiene exactamente **un** CU de origen (**N
+requerimientos → 1 caso de uso**) — ver la nota de trazabilidad al inicio de ese documento.
+
 ---
 
 ## 1. Actores
@@ -276,7 +283,8 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
   pasar la cita a `en_curso`, el sistema responde 422 con el detalle de las fichas críticas; la
   especialista las revisa y reenvía la petición con `confirmar_ficha_critica: true` para
   proceder.
-- **RF**: RF-018 (cambiar estado), RF-041 (listar fichas de salud), RF-042 (registrar ficha)
+- **RF**: RF-018 (cambiar estado — el detalle de las fichas críticas viaja en el cuerpo del
+  error 422 de esta misma llamada; no se invoca RF-041 por separado)
 - **RNF**: RNF-02, RNF-18
 - **RN**: RN09
 
@@ -369,8 +377,9 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
   admin revisa el comprobante fuera del sistema y confirma o rechaza manualmente, registrando
   `confirmado_por` y `fecha_confirmacion` — proceso manual, sin integración automática con la
   fuente del pago original.
-- **RF**: RF-023 (consultar pagos de una cita), RF-025–RF-029 (registrar/confirmar/rechazar/
-  reembolsar pago)
+- **RF**: RF-023 (consultar pagos de una cita), RF-025 (registrar pago), RF-026 (listar pagos
+  pendientes — origen en CU-A06, reutilizado aquí para elegir qué confirmar/rechazar),
+  RF-027–RF-029 (confirmar/rechazar/reembolsar pago)
 - **RNF**: RNF-02, RNF-20
 - **RN**: ninguna nueva (proceso manual)
 
@@ -445,12 +454,13 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **Tipo**: primario · **Prioridad**: media
 - **Descripción**: lista clientes con etiquetas y estado de bloqueo, consulta el detalle de una
   clienta con su historial de citas, edita etiquetas/notas internas (nunca `correo`/`password`
-  — ver CU-A10), y bloquea/desbloquea con motivo cuando corresponde. Intento de editar
-  `correo`/`password` por este flujo → 422.
+  — ver CU-A10), registra o consulta sus fichas de salud, y bloquea/desbloquea con motivo cuando
+  corresponde. Intento de editar `correo`/`password` por este flujo → 422.
 - **RF**: RF-037 (listar clientes), RF-038 (consultar cliente), RF-039 (editar cliente), RF-040
-  (historial de citas), RF-043 (bloquear), RF-044 (desbloquear)
+  (historial de citas), RF-041 (listar fichas de salud), RF-042 (registrar ficha de salud),
+  RF-043 (bloquear), RF-044 (desbloquear)
 - **RNF**: RNF-02, RNF-20
-- **RN**: RN11
+- **RN**: RN08, RN11
 
 #### CU-A10 — Administrar cuentas de usuario del staff
 
@@ -512,4 +522,4 @@ independiente de ningún actor:
 | Casos de uso | 32 (11 Cliente, 9 Trabajador, 12 Admin) — 19 implementados, 13 planeados |
 | Requerimientos funcionales (RF) | 77 (59 implementados, 18 planeados) — 76 cubiertos por un caso de uso, 1 de apoyo sin CU propio (§4) |
 | Requerimientos no funcionales (RNF) | 22 (5 categorías: Seguridad, Rendimiento/Concurrencia, Disponibilidad/Confiabilidad, Usabilidad/Accesibilidad, Mantenibilidad/Portabilidad) |
-| Reglas de negocio (RN) | 24 (15 implementadas, 9 planeadas) |
+| Reglas de negocio (RN) | 19 (10 implementadas, 9 planeadas) — numeración con huecos intencionales en RN04, RN06, RN07, RN10, RN12 (ver `docs/REGLAS_DE_NEGOCIO.md`); el ID más alto es RN24 |

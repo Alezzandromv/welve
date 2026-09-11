@@ -163,7 +163,7 @@ Clientes: magic link via WhatsApp — sin contraseña
 
 - `pages/auth/` — `LoginPage.tsx` (solicitar magic link), `RegistroPage.tsx` (primer acceso)
 - `pages/` (raíz) — `VerificarTokenPage.tsx` (ruta `/auth?token=xxx`), `UnauthorizedPage.tsx`, `LoginPage.tsx` (scaffold legacy — usa `pages/auth/LoginPage.tsx`)
-- `pages/admin/` — rutas anidadas bajo `AdminLayout` (usa `<Outlet />`); incluye Dashboard, Agenda, Clientes, Servicios, Pagos, Fidelización, Personal, Perfil, Configuración
+- `pages/admin/` — rutas anidadas bajo `AdminLayout` (usa `<Outlet />`); incluye Dashboard, Agenda, Clientes, Servicios, Pagos, Fidelización, Personal, Usuarios, Perfil, Configuración
 - `pages/worker/` — solo `Agenda.tsx`; accesible por rol `trabajador` y `admin`
 - `pages/client/` — `MisCitas.tsx` y `Reservar.tsx`; solo rol `cliente`
 - `components/ProtectedRoute.tsx` — guarda por token + rol; redirige a `/login` o `/unauthorized`
