@@ -10,33 +10,21 @@ cercana a un óvalo dentro de sus formas nativas), todo dentro de un `subgraph` 
 límite del sistema («system boundary»).
 
 Cada caso de uso conserva el ID de `docs/CASOS_DE_USO.md` para que ambos documentos queden
-sincronizados. Las relaciones «extends»/«includes» de UML se marcan con flecha punteada y su
-estereotipo correspondiente, tal como exige la notación formal.
+sincronizados. Las relaciones «extends»/«includes»/«precede» de UML se marcan con flecha
+punteada y su estereotipo correspondiente, tal como exige la notación formal.
 
-**Total de casos de uso especificados: 32** — 11 de Cliente (`CU-C01`–`CU-C14`, con huecos
-donde antes hubo códigos hoy renumerados), 9 de Trabajador (`CU-T01`–`CU-T12`, mismo caso), 12
-de Administrador (`CU-A01`–`CU-A16`, mismo caso). 19 ya implementados, 13 planeados (marcados
-con borde punteado en los diagramas y con `«planeado»` en el texto). Dentro de cada actor, los
-implementados usan siempre la numeración más baja y los planeados la más alta — así el catálogo
-se lee de un vistazo sin mezclar lo construido con lo futuro.
-
-> Los 10 casos de uso agregados en una revisión anterior (`CU-C09`–`CU-C11` en su numeración de
-> entonces, `CU-T07`–`CU-T09`, `CU-A09`–`CU-A12` en su numeración de entonces) cerraron la
-> brecha detectada al auditar `11_REQUERIMIENTOS_FUNCIONALES.md` contra los 22 casos originales:
-> había RF ya implementados (autenticación, gestión de clientes, administración de cuentas de
-> usuario, no-show automático) y RF planeados (configuración del módulo de IA, consulta de mi
-> nivel de fidelización) sin un caso de uso que los agrupara.
->
-> **Revisión posterior — renumeración de planeados**: los casos de uso planeados de Cliente,
-> Trabajador y Admin se renumeraron para quedar todos al final del rango de su actor (antes
-> estaban intercalados con los implementados). Además: `CU-A12 — Recalcular niveles de
-> fidelización automáticamente` (antiguo) se **retiró del catálogo de casos de uso** — es un
-> proceso batch puramente automático (RN20/RN21), sin ningún punto de decisión humana, por lo
-> que se documenta solo como regla de negocio y en `06_DIAGRAMAS_DE_ACTIVIDAD.md`, no como caso
-> de uso con actor Celery Beat (a diferencia de CU-T09/no-show, que sí conserva ese modelado
-> porque tiene una consecuencia visible y accionable por el trabajador). Se agregó
-> `CU-A16 — Consultar métricas de fidelización` (nuevo) para los widgets planeados de CU-A06. El
-> total se mantiene en 32.
+> **Revisión actual — renumeración completa**: el catálogo pasó de tres rangos por actor
+> (`CU-C0x`/`CU-T0x`/`CU-A0x`, 32 casos de uso en total) a un solo espacio de numeración
+> compartido, **CUS01–CUS21** (catálogo oficial, alineado a los entregables TP1–TP4 del curso),
+> más un apéndice de 13 casos de uso planeados renumerados **CUS22–CUS34**. Los casos
+> redundantes de cancelar cita (antes `CU-C02`/`CU-C03`) y de avanzar-estado/ficha-crítica/
+> no-show (antes `CU-T02`/`CU-T03`/`CU-T09`) se fusionaron en uno solo cada uno (`CUS08`,
+> `CUS11`); se agregaron seis casos de uso que ya existían como endpoint pero no tenían ficha
+> propia (`CUS04`, `CUS05`, `CUS07`, `CUS16`, `CUS21`, y `CUS06` como caso **pendiente** — sin
+> backend implementado). El mapeo completo hacia la numeración anterior está al final de este
+> documento. **Total: 34 casos de uso especificados** — 21 oficiales (19 implementados, 1
+> pendiente de implementar — `CUS06` —, y 2 con brecha de permisos por resolver — `CUS12`,
+> `CUS14`) + 13 planeados de los módulos futuros.
 
 ## Diagrama de casos de uso — Cliente
 
@@ -45,41 +33,37 @@ flowchart LR
     Cliente["«actor»<br/>Cliente"]
 
     subgraph SistemaC["Sistema Welve"]
-        CUC01(["CU-C01<br/>Reservar cita"])
-        CUC02(["CU-C02<br/>Cancelar a tiempo"])
-        CUC03(["CU-C03<br/>Cancelar tardío"])
-        CUC04(["CU-C04<br/>Canjear descuento"])
-        CUC05(["CU-C05<br/>Completar reto<br/>«automático»"])
-        CUC09(["CU-C09<br/>Solicitar y verificar<br/>acceso"])
-        CUC10(["CU-C10<br/>Gestionar mi perfil"])
-        CUC11(["CU-C11<br/>Consulta de estilo<br/>con IA «planeado»"])
-        CUC12(["CU-C12<br/>Favorito de estilo<br/>«planeado»"])
-        CUC13(["CU-C13<br/>Consultar mi nivel de<br/>fidelización «planeado»"])
-        CUC14(["CU-C14<br/>Comprar catálogo<br/>exclusivo «planeado»"])
+        CUS01(["CUS01<br/>Solicitar y verificar<br/>acceso"])
+        CUS02(["CUS02<br/>Consultar/actualizar<br/>mi perfil"])
+        CUS03(["CUS03<br/>Reservar cita"])
+        CUS04(["CUS04<br/>Realizar pago<br/>de cita"])
+        CUS05(["CUS05<br/>Consultar citas"])
+        CUS06(["CUS06<br/>Reprogramar cita<br/>«pendiente»"])
+        CUS07(["CUS07<br/>Consultar historial<br/>de servicios"])
+        CUS08(["CUS08<br/>Cancelar cita"])
+        CUS09(["CUS09<br/>Consultar y canjear<br/>beneficios"])
     end
 
-    Cliente --- CUC01
-    Cliente --- CUC02
-    Cliente --- CUC03
-    Cliente --- CUC04
-    Cliente --- CUC09
-    Cliente --- CUC10
-    Cliente --- CUC11
-    Cliente --- CUC12
-    Cliente --- CUC13
-    Cliente --- CUC14
+    Cliente --- CUS01
+    Cliente --- CUS02
+    Cliente --- CUS03
+    Cliente --- CUS04
+    Cliente --- CUS05
+    Cliente --- CUS06
+    Cliente --- CUS07
+    Cliente --- CUS08
+    Cliente --- CUS09
 
-    CUC02 -. "«extends»" .-> CUC01
-    CUC03 -. "«extends»" .-> CUC01
-    CUC09 -. "«precede»" .-> CUC01
-    CUC11 -. "«includes»" .-> CUC01
-    CUC14 -. "«includes»" .-> CUC04
-    CUC13 -. "«extends»" .-> CUC14
+    CUS01 -. "«precede»" .-> CUS03
+    CUS03 -. "«precede»" .-> CUS04
+    CUS06 -. "«extends»" .-> CUS03
+    CUS08 -. "«extends»" .-> CUS03
+    CUS05 -. "«includes»" .-> CUS07
 
     classDef actor fill:#fff,stroke:#333,stroke-width:1px
-    classDef planeado stroke-dasharray: 5 5
+    classDef pendiente stroke-dasharray: 3 3
     class Cliente actor
-    class CUC11,CUC12,CUC13,CUC14 planeado
+    class CUS06 pendiente
 ```
 
 ## Diagrama de casos de uso — Trabajador / Especialista
@@ -89,35 +73,32 @@ flowchart LR
     Trabajador["«actor»<br/>Trabajador / Especialista"]
 
     subgraph SistemaT["Sistema Welve"]
-        CUT01(["CU-T01<br/>Ver agenda del día"])
-        CUT02(["CU-T02<br/>Registrar llegada /<br/>avanzar estado"])
-        CUT03(["CU-T03<br/>Atender alerta de<br/>ficha crítica"])
-        CUT07(["CU-T07<br/>Autenticarse<br/>como personal"])
-        CUT08(["CU-T08<br/>Gestionar mi cuenta"])
-        CUT09(["CU-T09<br/>Marcar no-show<br/>«automático»"])
-        CUT10(["CU-T10<br/>Consulta IA en vivo<br/>«planeado»"])
-        CUT11(["CU-T11<br/>Ver historial de<br/>estilos «planeado»"])
-        CUT12(["CU-T12<br/>Feedback de estilo<br/>«planeado»"])
+        CUS10(["CUS10<br/>Consultar agenda<br/>del día"])
+        CUS11(["CUS11<br/>Actualizar estado<br/>de la cita"])
+        CUS12(["CUS12<br/>Consultar alertas<br/>de salud «brecha»"])
+        CUS13(["CUS13<br/>Gestionar cuenta<br/>personal"])
+        CUS14(["CUS14<br/>Consultar historial<br/>de cliente «brecha»"])
     end
 
-    Trabajador --- CUT01
-    Trabajador --- CUT02
-    Trabajador --- CUT07
-    Trabajador --- CUT08
-    Trabajador --- CUT10
-    Trabajador --- CUT11
-    Trabajador --- CUT12
+    Trabajador --- CUS10
+    Trabajador --- CUS11
+    Trabajador --- CUS12
+    Trabajador --- CUS14
 
-    CUT03 -. "«extends»" .-> CUT02
-    CUT09 -. "«extends»" .-> CUT02
-    CUT12 -. "«extends»" .-> CUT02
-    CUT07 -. "«precede»" .-> CUT01
+    CUS13 -. "«precede»" .-> CUS10
+    CUS12 -. "«extends»" .-> CUS11
 
     classDef actor fill:#fff,stroke:#333,stroke-width:1px
-    classDef planeado stroke-dasharray: 5 5
+    classDef brecha stroke-dasharray: 2 6
     class Trabajador actor
-    class CUT10,CUT11,CUT12 planeado
+    class CUS12,CUS14 brecha
 ```
+
+> `CUS12` y `CUS14` se dibujan con el mismo trazo punteado que "planeado" pero con su propio
+> estereotipo — no son funcionalidad futura, son endpoints que **ya existen** pero con el guard
+> de rol puesto en `admin` en vez de `admin`/`trabajador` (ver la ficha de cada uno para el
+> archivo y línea exactos). `CUS13` no tiene arista propia hacia `CUS12`/`CUS14` porque no hay
+> una relación de inclusión directa, solo la misma sesión de staff como precondición común.
 
 ## Diagrama de casos de uso — Administrador
 
@@ -126,130 +107,50 @@ flowchart LR
     Admin["«actor»<br/>Administrador"]
 
     subgraph SistemaA["Sistema Welve"]
-        CUA01(["CU-A01<br/>Gestionar personal"])
-        CUA02(["CU-A02<br/>Confirmar/rechazar/<br/>reembolsar pago"])
-        CUA03(["CU-A03<br/>Configurar descuento<br/>o reto"])
-        CUA06(["CU-A06<br/>Ver dashboard<br/>operativo"])
-        CUA09(["CU-A09<br/>Gestionar clientes"])
-        CUA10(["CU-A10<br/>Administrar cuentas<br/>de usuario"])
-        CUA11(["CU-A11<br/>Gestionar catálogo<br/>de estilos «planeado»"])
-        CUA12(["CU-A12<br/>Revisar métricas de<br/>confianza «planeado»"])
-        CUA13(["CU-A13<br/>Configurar módulo<br/>de IA «planeado»"])
-        CUA14(["CU-A14<br/>Gestionar niveles y<br/>catálogo «planeado»"])
-        CUA15(["CU-A15<br/>Gestionar pedidos<br/>del catálogo «planeado»"])
-        CUA16(["CU-A16<br/>Consultar métricas de<br/>fidelización «planeado»"])
+        CUS15(["CUS15<br/>Gestionar<br/>personal"])
+        CUS16(["CUS16<br/>Gestionar<br/>citas"])
+        CUS17(["CUS17<br/>Gestionar<br/>clientes"])
+        CUS18(["CUS18<br/>Gestionar pagos<br/>y reembolsos"])
+        CUS19(["CUS19<br/>Gestionar<br/>beneficios"])
+        CUS20(["CUS20<br/>Consultar<br/>dashboard"])
+        CUS21(["CUS21<br/>Gestionar catálogo<br/>de servicios"])
     end
 
-    Admin --- CUA01
-    Admin --- CUA02
-    Admin --- CUA03
-    Admin --- CUA06
-    Admin --- CUA09
-    Admin --- CUA10
-    Admin --- CUA11
-    Admin --- CUA12
-    Admin --- CUA13
-    Admin --- CUA14
-    Admin --- CUA15
-    Admin --- CUA16
+    Admin --- CUS15
+    Admin --- CUS16
+    Admin --- CUS17
+    Admin --- CUS18
+    Admin --- CUS19
+    Admin --- CUS20
+    Admin --- CUS21
 
-    CUA01 -. "«includes»" .-> CUA10
-    CUA15 -. "«extends»" .-> CUA14
-    CUA12 -. "«extends»" .-> CUA11
-    CUA13 -. "«extends»" .-> CUA11
-    CUA16 -. "«includes»" .-> CUA06
+    CUS21 -. "«precede»" .-> CUS16
+    CUS16 -. "«precede»" .-> CUS18
 
     classDef actor fill:#fff,stroke:#333,stroke-width:1px
     class Admin actor
-
-    classDef planeado stroke-dasharray: 5 5
-    class CUA11,CUA12,CUA13,CUA14,CUA15,CUA16 planeado
 ```
+
+> El Administrador además **generaliza** al Trabajador (ver
+> `01_ACTORES_DE_NEGOCIO.md#diagrama-de-generalización-de-actores`): puede ejecutar `CUS11` sobre
+> cualquier especialista, no solo repetir sus propios casos de uso. Esa relación de herencia se
+> modela en el diagrama de actores, no aquí, para no duplicar los óvalos de Trabajador dentro del
+> diagrama de Administrador.
 
 ---
 
 ## Especificación detallada de casos de uso
 
-Formato de cada ficha: **ID**, **Nombre**, **Actor(es)**, **Tipo** (primario/secundario según
-si el sistema lo hace por sí solo o a pedido directo), **Prioridad**, **Precondición**, **Flujo
+Formato de cada ficha: **ID**, **Nombre**, **Actor(es)**, **Tipo** (primario/secundario según si
+el sistema lo hace por sí solo o a pedido directo), **Prioridad**, **Precondición**, **Flujo
 normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de negocio**.
 
 ### Cliente
 
-#### CU-C01 — Reservar cita
+#### CUS01 — Solicitar y verificar acceso por magic link
 
-- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: alta.
-- **Precondición**: sesión iniciada; `Cliente.esta_bloqueada = false`.
-- **Flujo normal**:
-  1. El cliente abre la vista de reserva y selecciona uno o más servicios.
-  2. El sistema muestra especialistas disponibles para esos servicios.
-  3. El cliente elige especialista y horario dentro de la disponibilidad real (ya descontando
-     buffer y citas existentes).
-  4. El sistema valida bloqueo (RN11), ficha de salud si corresponde (RN08) y solapamiento
-     (RN13).
-  5. El sistema crea la `Cita` en estado `pendiente` con sus `CitaServicio` asociados.
-  6. El sistema confirma la reserva al cliente.
-- **Flujos alternativos**:
-  - 4a. Cliente bloqueada → el sistema rechaza con mensaje genérico (RN11), fin de caso de uso.
-  - 4b. Servicio requiere ficha de salud inexistente → 422, el sistema indica contactar al
-    salón.
-  - 4c. Horario ya no disponible (carrera con otra reserva) → 409, se refresca la
-    disponibilidad y se vuelve al paso 3.
-- **Postcondición**: `Cita` persistida en `pendiente`.
-- **RN**: RN08, RN11, RN13.
-
-#### CU-C02 — Cancelar una cita a tiempo
-
-- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: alta. **Extiende**: CU-C01.
-- **Precondición**: cita propia en `pendiente` o `confirmada`; horas restantes ≥
-  `servicio.horas_cancelacion_sin_penalidad`.
-- **Flujo normal**: 1. Cliente solicita cancelar con motivo opcional. 2. El sistema calcula
-  horas restantes vs. umbral del servicio. 3. El sistema marca `Cita.estado = cancelada`,
-  `penalizacion_aplicada = false`. 4. Se dispara el reembolso completo del depósito (proceso
-  manual de admin).
-- **Flujos alternativos**: si el umbral no se cumple → ver CU-C03. Si el estado no es cancelable
-  → 422.
-- **Postcondición**: cita en `cancelada`, sin penalidad.
-- **RN**: RN01.
-
-#### CU-C03 — Cancelar una cita fuera de ventana (tardía)
-
-- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: alta. **Extiende**: CU-C01.
-- **Precondición**: cita propia en `pendiente` o `confirmada`; horas restantes <
-  `servicio.horas_cancelacion_sin_penalidad`.
-- **Flujo normal**: idéntico a CU-C02 hasta el paso 2; en el paso 3 el sistema marca
-  `Cita.estado = cancelada_tardia`, `penalizacion_aplicada = true` (pierde el depósito).
-- **Postcondición**: cita en `cancelada_tardia`, con penalidad.
-- **RN**: RN02.
-
-#### CU-C04 — Canjear un descuento
-
-- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media.
-- **Precondición**: código de descuento vigente, con cupo global y personal disponibles.
-- **Flujo normal**: 1. El cliente ingresa el código al pagar una cita. 2. El sistema bloquea la
-  fila del descuento (`SELECT ... FOR UPDATE`) para serializar canjes concurrentes. 3. Valida
-  vigencia, `max_usos_global` y `max_usos_por_cliente` (RN14). 4. Registra `DescuentoUso`.
-- **Flujos alternativos**: código inexistente/inactivo → 404. Fuera de vigencia o cupo agotado
-  → 422.
-- **Postcondición**: `DescuentoUso` persistido, ligado a cita y cliente.
-- **RN**: RN14.
-
-#### CU-C05 — Completar un reto de fidelización (automático)
-
-- **Actor**: Cliente (pasivo — lo dispara el sistema, no una acción explícita del cliente).
-  **Tipo**: secundario, disparado internamente al completar CU-T02. **Prioridad**: media.
-- **Precondición**: reto activo y vigente; el cliente acumula suficientes citas `completada`
-  dentro de la ventana del reto.
-- **Flujo normal**: 1. Al completarse una cita (CU-T02), el sistema evalúa todos los retos
-  activos contra el historial del cliente. 2. Si un reto se cumple, genera un `Descuento`
-  premio único, idempotente (`ON CONFLICT DO NOTHING`).
-- **Postcondición**: nuevo descuento disponible para el cliente sin acción explícita suya.
-- **RN**: RN15.
-
-#### CU-C09 — Solicitar y verificar acceso por magic link
-
-- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: alta. **Precede a**: CU-C01 (toda
-  acción del cliente requiere sesión iniciada).
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: alta. **Precede a**: CUS03 (toda acción
+  del cliente requiere sesión iniciada).
 - **Precondición**: ninguna (es el punto de entrada del cliente al sistema).
 - **Flujo normal**: 1. El cliente ingresa su teléfono. 2. El sistema busca o crea el `Usuario` y
   el `Cliente` asociado, genera un `MagicLink` (token UUID, TTL 1h) y lo envía por WhatsApp si
@@ -263,7 +164,7 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **RN**: ninguna con ID propio — el TTL de 1 hora y el uso único son el mecanismo central de
   seguridad de este caso de uso.
 
-#### CU-C10 — Consultar y actualizar mi perfil
+#### CUS02 — Consultar y actualizar mi perfil
 
 - **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media.
 - **Precondición**: sesión iniciada.
@@ -274,10 +175,328 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **Postcondición**: `Usuario` actualizado.
 - **RN**: ninguna específica.
 
-#### CU-C11 — Consultar asesoría de estilo con IA *(planeado)*
+#### CUS03 — Reservar cita
+
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: alta.
+- **Precondición**: sesión iniciada; `Cliente.esta_bloqueada = false`.
+- **Flujo normal**:
+  1. El cliente abre la vista de reserva y selecciona uno o más servicios.
+  2. El sistema muestra especialistas disponibles para esos servicios.
+  3. El cliente elige especialista y horario dentro de la disponibilidad real (ya descontando
+     buffer y citas existentes).
+  4. El sistema valida bloqueo (RN11), ficha de salud si corresponde (RN08) y solapamiento
+     (RN13).
+  5. El sistema crea la `Cita` en estado `pendiente` con sus `CitaServicio` asociados.
+  6. El sistema confirma la reserva al cliente y muestra el depósito requerido (CUS04).
+- **Flujos alternativos**:
+  - 4a. Cliente bloqueada → el sistema rechaza con mensaje genérico (RN11), fin de caso de uso.
+  - 4b. Servicio requiere ficha de salud inexistente → 422, el sistema indica contactar al
+    salón.
+  - 4c. Horario ya no disponible (carrera con otra reserva) → 409, se refresca la
+    disponibilidad y se vuelve al paso 3.
+- **Postcondición**: `Cita` persistida en `pendiente`.
+- **RN**: RN08, RN11, RN13.
+
+#### CUS04 — Realizar pago de cita
+
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: alta. **Sigue a**: CUS03.
+- **Precondición**: `Cita` en `pendiente` con depósito pendiente de pago.
+- **Flujo normal**: 1. El sistema muestra el monto de `servicio.monto_deposito`. 2. El cliente
+  paga fuera del sistema (Yape, Plin, transferencia o efectivo — no hay pasarela integrada
+  todavía, ver `docs/FASES.md` Fase 3). 3. El cliente envía el comprobante por WhatsApp o lo
+  presenta en el local. 4. El admin registra el pago (CUS18) y lo confirma tras verificar el
+  comprobante.
+- **Flujos alternativos**: comprobante rechazado por el admin → el cliente debe reenviarlo (ver
+  CUS18).
+- **Postcondición**: `Pago` con `tipo=deposito` y `estado=confirmado`.
+- **RN**: ninguna con ID propio — el monto nunca es un valor fijo, siempre
+  `servicio.monto_deposito` (configurado en CUS21).
+
+#### CUS05 — Consultar citas
+
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Incluye**: CUS07 (mismo
+  endpoint, distinto filtro de presentación).
+- **Precondición**: sesión iniciada.
+- **Flujo normal**: 1. El cliente abre "Mis citas". 2. El sistema devuelve todas sus citas
+  enriquecidas con nombre de especialista y servicios. 3. La vista agrupa como "próximas" las
+  que están en `pendiente`, `confirmada` o `en_curso`.
+- **Postcondición**: ninguna — caso de uso de solo consulta.
+- **RN**: ninguna específica.
+
+#### CUS06 — Reprogramar cita «pendiente»
+
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media (deseada). **Extiende**: CUS03.
+- **Estado**: **no implementado** — no existe endpoint de reprogramación en
+  `backend/app/routers/citas.py` hoy. Ficha especificada para quedar lista de construir, no
+  documenta comportamiento real.
+- **Precondición (deseada)**: cita propia en `pendiente`/`confirmada`, con al menos las horas de
+  anticipación de `servicio.horas_cancelacion_sin_penalidad` (mismo umbral de RN01).
+- **Flujo normal (deseado)**: 1. El cliente elige un nuevo horario/especialista para una cita
+  existente. 2. El sistema revalida disponibilidad (RN13) y ficha de salud (RN08) igual que en
+  CUS03. 3. El sistema actualiza `programada_en`/`termina_en` sin crear una `Cita` nueva ni
+  tocar el `Pago` ya confirmado.
+- **Flujos alternativos (deseados)**: fuera de la ventana de anticipación → se ofrece CUS08 en
+  su lugar. Nuevo horario no disponible → 409, igual que en CUS03.
+- **Postcondición (deseada)**: `Cita` reprogramada, sin impacto en el depósito ya pagado.
+- **RN**: ninguna todavía — candidatas: RN01 (techo de anticipación mínima), RN13 (nueva franja).
+
+#### CUS07 — Consultar historial de servicios
+
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: baja. **Incluido en**: CUS05 (mismo
+  endpoint).
+- **Precondición**: sesión iniciada.
+- **Flujo normal**: 1. El cliente abre la sección de historial dentro de "Mis citas". 2. El
+  sistema filtra, del mismo resultado de CUS05, las citas en estado terminal (`completada`,
+  `cancelada`, `cancelada_tardia`, `no_show`).
+- **Postcondición**: ninguna — caso de uso de solo consulta.
+- **RN**: ninguna específica.
+
+#### CUS08 — Cancelar cita
+
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: alta. **Extiende**: CUS03.
+- **Precondición**: cita propia en `pendiente` o `confirmada`.
+- **Flujo normal**: 1. Cliente solicita cancelar con motivo opcional. 2. El sistema calcula
+  horas restantes vs. `servicio.horas_cancelacion_sin_penalidad`.
+  - 3a. Si horas restantes ≥ umbral → `Cita.estado = cancelada`, `penalizacion_aplicada =
+    false`, reembolso completo del depósito (proceso manual de admin, CUS18) (RN01).
+  - 3b. Si horas restantes < umbral → `Cita.estado = cancelada_tardia`,
+    `penalizacion_aplicada = true`, pierde el depósito (RN02).
+- **Flujos alternativos**: estado no cancelable (p. ej. `en_curso`/`completada`) → 422.
+- **Postcondición**: cita en `cancelada` o `cancelada_tardia` según la rama.
+- **RN**: RN01, RN02.
+
+#### CUS09 — Consultar y canjear beneficios de fidelización
+
+- **Actor**: Cliente. **Tipo**: primario (consulta y canje) + secundario (el premio de reto se
+  genera solo). **Prioridad**: media.
+- **Precondición**: sesión iniciada; para el canje, código de descuento vigente con cupo
+  disponible.
+- **Flujo normal**: 1. El cliente consulta sus retos en curso y sus descuentos disponibles.
+  2. Al pagar una cita (CUS04), ingresa un código de descuento. 3. El sistema bloquea la fila
+  del descuento (`SELECT ... FOR UPDATE`) para serializar canjes concurrentes. 4. Valida
+  vigencia, `max_usos_global` y `max_usos_por_cliente` (RN14). 5. Registra `DescuentoUso`.
+- **Flujo automático (secundario)**: al completarse una cita (CUS11 marca `completada`), el
+  sistema evalúa todos los retos activos contra el historial del cliente; si uno se cumple,
+  genera un `Descuento` premio único e idempotente (`ON CONFLICT DO NOTHING`) (RN15), sin que
+  el cliente reclame nada.
+- **Flujos alternativos**: código inexistente/inactivo → 404. Fuera de vigencia o cupo agotado →
+  422.
+- **Postcondición**: `DescuentoUso` persistido, ligado a cita y cliente; o nuevo `Descuento`
+  disponible para el cliente sin acción explícita suya.
+- **RN**: RN14, RN15.
+
+### Trabajador / Especialista
+
+#### CUS10 — Consultar agenda del día
+
+- **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: alta.
+- **Precondición**: sesión iniciada con rol `trabajador` (o `admin`).
+- **Flujo normal**: 1. El trabajador abre su agenda. 2. El sistema resuelve `Personal` por
+  `usuario_id` y devuelve únicamente sus propias citas del día.
+- **Postcondición**: agenda mostrada, sin datos de otras especialistas ni financieros.
+- **RN**: ninguna específica — regla de aislamiento de datos por rol.
+
+#### CUS11 — Actualizar estado de la cita
+
+- **Actor**: Trabajador (o Admin, sobre cualquier cita — CUS16); Programador de Tareas — Celery
+  Beat (dispara la rama automática). **Tipo**: primario + secundario (rama automática).
+  **Prioridad**: alta.
+- **Precondición**: cita asignada a esa especialista (si el actor es Trabajador); transición
+  permitida según `_TRANSICIONES_VALIDAS`.
+- **Flujo normal**: 1. Registra `hora_llegada_real`. 2. Confirma la cita. 3. Al llegar la
+  clienta, pasa a `en_curso`. 4. Al terminar, pasa a `completada` (dispara CUS09).
+- **Flujos alternativos**:
+  - Transición no permitida por la tabla de estados → 422.
+  - Ficha de salud crítica sin confirmar al pasar a `en_curso` → 422 con
+    `codigo: FICHA_CRITICA` y el detalle de las fichas (ver CUS12); la especialista reenvía la
+    petición con `confirmar_ficha_critica: true` para proceder (RN09).
+  - **Rama automática**: cita `confirmada` con `programada_en + 15min < now()` y sin
+    `hora_llegada_real` → Celery Beat la marca `no_show` cada 5 minutos, con la misma pérdida de
+    depósito que un no-show marcado manualmente (RN05). Las citas en `pendiente` nunca se ven
+    afectadas.
+- **Postcondición**: estado de cita actualizado.
+- **RN**: RN05, RN09, RN15.
+
+#### CUS12 — Consultar alertas de salud de la clienta «brecha de permisos»
+
+- **Actor**: Trabajador. **Tipo**: primario (deseado). **Prioridad**: media. **Extiende**:
+  CUS11.
+- **Estado**: **brecha de permisos** — `GET /clientes/{cliente_id}/fichas-salud` existe pero
+  tiene `requerir_rol("admin")` en `backend/app/routers/clientes.py`; la especialista solo ve
+  la alerta de forma reactiva, dentro del 422 de CUS11.
+- **Precondición (deseada)**: cita propia agendada con esa clienta.
+- **Flujo normal (deseado)**: 1. La especialista abre el detalle de una cita en su agenda.
+  2. El sistema muestra las fichas de salud registradas de esa clienta (tipo de restricción,
+  descripción, severidad), antes de que la clienta llegue.
+- **Postcondición**: ninguna — caso de uso de solo consulta.
+- **RN**: RN08, RN09.
+
+#### CUS13 — Gestionar cuenta personal
+
+- **Actor**: Trabajador o Admin. **Tipo**: primario. **Prioridad**: alta (autenticación) / baja
+  (autogestión de perfil). **Precede a**: CUS10.
+- **Precondición**: cuenta de staff ya creada (por auto-registro o por CUS15).
+- **Flujo normal**: 1. El staff ingresa correo y contraseña. 2. El sistema valida credenciales
+  y que `esta_activo=true`. 3. Emite un JWT. 4. Opcionalmente, consulta o edita su perfil
+  (nombre/correo/teléfono) y cambia su contraseña indicando la actual.
+- **Flujos alternativos**: credenciales inválidas → 401. Usuario desactivado → 403. Contraseña
+  actual incorrecta → 401. Correo ya usado → 409.
+- **Postcondición**: sesión de staff iniciada; o `Usuario` (y su hash de contraseña, si aplica)
+  actualizado.
+- **RN**: ninguna con ID propio.
+
+#### CUS14 — Consultar historial de cliente «brecha de permisos»
+
+- **Actor**: Trabajador. **Tipo**: primario (deseado). **Prioridad**: media.
+- **Estado**: **brecha de permisos** — `GET /clientes/{cliente_id}/historial` existe pero tiene
+  `requerir_rol("admin")`; el mismo caso que CUS12. Ampliar a
+  `requerir_rol("admin", "trabajador")` no debería violar el aislamiento de datos del
+  trabajador (es información de la clienta, no financiera ni de otra especialista).
+- **Precondición (deseada)**: la clienta tiene al menos una cita previa en el salón.
+- **Flujo normal (deseado)**: 1. La especialista abre el detalle de una clienta agendada.
+  2. El sistema muestra su historial de citas anteriores (servicios, fecha, especialista).
+- **Postcondición**: ninguna — caso de uso de solo consulta.
+- **RN**: ninguna específica.
+
+### Administrador
+
+#### CUS15 — Gestionar personal
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: alta. **Incluye**: creación de la cuenta
+  de staff (mismo flujo que usa CUS13 para autenticarse después).
+- **Flujo normal**: 1. Crea la cuenta `Usuario` con rol `trabajador`. 2. Crea el `Personal`
+  asociado. 3. Define especialidad, comisión, tipo de contrato. 4. Define disponibilidad
+  semanal (día/hora/buffer). 5. Administra cuentas de staff existentes: lista/consulta por rol
+  y estado, edita nombre/teléfono, cambia correo (resetea `correo_verificado=false`), resetea
+  contraseña, activa/desactiva.
+- **RN**: RN13 (el buffer aquí definido es el que se valida en CUS03/CUS16).
+
+#### CUS16 — Gestionar citas
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: alta. **Precede a**: CUS18.
+- **Flujo normal**: 1. Lista todas las citas del salón con filtros (no solo las propias, a
+  diferencia de CUS10). 2. Crea una cita en nombre de un cliente (reserva telefónica o
+  presencial), con las mismas validaciones que CUS03. 3. Avanza el estado o cancela cualquier
+  cita usando los mismos endpoints que CUS11/CUS08, sin restricción de "solo mis citas".
+- **Flujos alternativos**: los mismos de CUS03 (bloqueo, ficha faltante, solapamiento).
+- **RN**: RN08, RN11, RN13 (compartidas con CUS03).
+
+#### CUS17 — Gestionar clientes
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media.
+- **Precondición**: sesión de admin iniciada.
+- **Flujo normal**: 1. Lista clientes con sus etiquetas y estado de bloqueo. 2. Consulta el
+  detalle de una clienta, incluyendo su historial de citas. 3. Edita etiquetas o notas internas
+  (nunca `correo`/`password`, rechazados explícitamente por el schema — ver CUS15). 4. Registra
+  o consulta sus fichas de salud (tipo de restricción, descripción, severidad). 5. Si
+  corresponde, bloquea a la clienta indicando un motivo, o revierte un bloqueo previo.
+- **Flujos alternativos**: intento de editar `correo` o `password` vía este flujo → 422 (usar
+  CUS15). Cliente ya bloqueada intentando reservar → ver RN11 en CUS03.
+- **Postcondición**: `Cliente` actualizado; si aplica, `esta_bloqueada` y `motivo_bloqueo` (o su
+  reverso) persistidos; si aplica, nueva `FichaSalud` registrada.
+- **RN**: RN08, RN11.
+
+#### CUS18 — Gestionar pagos y reembolsos
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: alta.
+- **Precondición**: `Pago` en `pendiente` (confirmar/rechazar) o `confirmado` (reembolsar).
+- **Flujo normal**: 1. Registra el pago que el cliente hizo fuera del sistema (CUS04).
+  2. Revisa el comprobante fuera del sistema. 3. Confirma o rechaza manualmente. 4. Registra
+  `confirmado_por` y `fecha_confirmacion`. 5. Si corresponde, registra el reembolso.
+- **RN**: ninguna con ID propio — ejecuta la parte administrativa de RN01/RN02 decidida en
+  CUS08.
+
+#### CUS19 — Gestionar beneficios
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media.
+- **Flujo normal**: crea `Descuento` (tipo, scope, código, valor, límites, vigencia) o `Reto`
+  (visitas, ventana, recompensa) que los clientes consultan y canjean en CUS09.
+- **Limitación actual**: solo crear y listar (ver `docs/FASES.md` para el plan de completar el
+  CRUD en la Fase 3).
+- **RN**: RN14 (los límites configurados aquí son los que valida el canje de CUS09).
+
+#### CUS20 — Consultar dashboard
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: alta.
+- **Flujo normal**: el sistema carga en paralelo citas del día, pagos pendientes y personal
+  activo; muestra KPIs en tipografía display bold.
+- **Postcondición**: ninguna — caso de uso de solo consulta.
+- **RN**: ninguna específica.
+
+#### CUS21 — Gestionar catálogo de servicios
+
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: alta. **Precede a**: CUS16.
+- **Flujo normal**: 1. Crea y edita `Categoria`s. 2. Crea y edita `Servicio`s, incluyendo los
+  campos que otros casos de uso leen en vez de un valor fijo: `duracion_minutos`, `precio`,
+  `monto_deposito` (CUS04), `requiere_ficha_salud` (RN08), y
+  `horas_cancelacion_sin_penalidad` (RN01/RN02). La lectura pública del catálogo (sin sesión) la
+  usa CUS03/CUS16.
+- **Postcondición**: `Categoria`/`Servicio` creado o actualizado.
+- **RN**: ninguna con ID propio — es el punto de configuración de los umbrales que RN01/RN02/RN08
+  usan en tiempo de reserva.
+
+---
+
+## Apéndice — Casos de uso planeados (fuera del alcance de TP1–TP4)
+
+Mismos módulos que en `docs/CASOS_DE_USO.md` (asesoría de estilo con IA, fidelización avanzada
+con catálogo exclusivo); se documentan con el mismo nivel de detalle porque forman parte del
+diseño completo evaluado en la tesis, aunque no pertenezcan a ningún entregable del curso.
+
+```mermaid
+flowchart LR
+    Cliente2["«actor»<br/>Cliente"]
+    Trabajador2["«actor»<br/>Trabajador"]
+    Admin2["«actor»<br/>Administrador"]
+
+    subgraph SistemaP["Sistema Welve — módulos planeados"]
+        CUS22(["CUS22<br/>Consulta de estilo<br/>con IA"])
+        CUS23(["CUS23<br/>Favorito de estilo<br/>sin cámara"])
+        CUS24(["CUS24<br/>Consultar mi nivel<br/>de fidelización"])
+        CUS25(["CUS25<br/>Comprar catálogo<br/>exclusivo"])
+        CUS26(["CUS26<br/>Consulta IA<br/>en vivo"])
+        CUS27(["CUS27<br/>Ver historial<br/>de estilos"])
+        CUS28(["CUS28<br/>Registrar feedback<br/>de estilo"])
+        CUS29(["CUS29<br/>Gestionar catálogo<br/>de estilos"])
+        CUS30(["CUS30<br/>Revisar métricas<br/>de confianza"])
+        CUS31(["CUS31<br/>Configurar módulo<br/>de IA"])
+        CUS32(["CUS32<br/>Gestionar niveles<br/>y catálogo"])
+        CUS33(["CUS33<br/>Gestionar pedidos<br/>del catálogo"])
+        CUS34(["CUS34<br/>Consultar métricas<br/>de fidelización"])
+    end
+
+    Cliente2 --- CUS22
+    Cliente2 --- CUS23
+    Cliente2 --- CUS24
+    Cliente2 --- CUS25
+    Trabajador2 --- CUS26
+    Trabajador2 --- CUS27
+    Trabajador2 --- CUS28
+    Admin2 --- CUS29
+    Admin2 --- CUS30
+    Admin2 --- CUS31
+    Admin2 --- CUS32
+    Admin2 --- CUS33
+    Admin2 --- CUS34
+
+    CUS25 -. "«includes»" .-> CUS24
+    CUS30 -. "«extends»" .-> CUS29
+    CUS31 -. "«extends»" .-> CUS29
+    CUS33 -. "«extends»" .-> CUS32
+    CUS34 -. "«includes»" .-> CUS29
+
+    classDef actor fill:#fff,stroke:#333,stroke-width:1px
+    classDef planeado stroke-dasharray: 5 5
+    class Cliente2,Trabajador2,Admin2 actor
+    class CUS22,CUS23,CUS24,CUS25,CUS26,CUS27,CUS28,CUS29,CUS30,CUS31,CUS32,CUS33,CUS34 planeado
+```
+
+### Cliente
+
+#### CUS22 — Consultar asesoría de estilo con IA *(planeado)*
 
 - **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Incluye**: uso posterior en
-  CU-C01 (envío de la selección a la próxima cita).
+  CUS03 (envío de la selección a la próxima cita).
 - **Precondición**: módulo habilitado; consentimiento aceptado; límite diario no superado
   (RN18).
 - **Flujo normal**: 1. El cliente activa la cámara y captura una foto. 2. El sistema la envía a
@@ -290,7 +509,7 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **Postcondición**: `ConsultaIA` y, si aplica, `SeleccionEstilo` persistidos — nunca la foto.
 - **RN**: RN16, RN17, RN18, RN19.
 
-#### CU-C12 — Marcar un estilo como favorito sin cámara *(planeado)*
+#### CUS23 — Marcar un estilo como favorito sin cámara *(planeado)*
 
 - **Actor**: Cliente. **Tipo**: primario. **Prioridad**: baja.
 - **Precondición**: catálogo de estilos con al menos un ítem activo.
@@ -300,19 +519,19 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   de origen para la especialista.
 - **RN**: ninguna nueva.
 
-#### CU-C13 — Consultar mi nivel de fidelización y progreso *(planeado)*
+#### CUS24 — Consultar mi nivel de fidelización y progreso *(planeado)*
 
-- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Extiende**: CU-C14 (contexto
-  de decisión de compra en el catálogo exclusivo).
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Extiende**: CUS25 (contexto de
+  decisión de compra en el catálogo exclusivo).
 - **Precondición**: módulo de fidelización avanzada habilitado.
 - **Flujo normal**: 1. El cliente abre la sección de fidelización. 2. El sistema muestra el
   `NivelFidelizacion` actual y qué le falta (visitas o gasto) para alcanzar el siguiente nivel.
 - **Postcondición**: ninguna — caso de uso de solo consulta.
 - **RN**: RN20.
 
-#### CU-C14 — Comprar en el catálogo exclusivo *(planeado)*
+#### CUS25 — Comprar en el catálogo exclusivo *(planeado)*
 
-- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Incluye**: CU-C04 (mismo
+- **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Incluye**: CUS09 (mismo
   concepto de canje, aplicado a un producto en vez de un servicio).
 - **Precondición**: `cliente.nivel_actual ≥ producto.nivel_minimo`.
 - **Flujo normal**: 1. El cliente ve el catálogo (productos de nivel superior bloqueados con
@@ -326,80 +545,14 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 
 ### Trabajador / Especialista
 
-#### CU-T01 — Ver agenda del día
-
-- **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: alta.
-- **Precondición**: sesión iniciada con rol `trabajador` (o `admin`).
-- **Flujo normal**: 1. El trabajador abre su agenda. 2. El sistema resuelve `Personal` por
-  `usuario_id` y devuelve únicamente sus propias citas del día.
-- **Postcondición**: agenda mostrada, sin datos de otras especialistas ni financieros.
-- **RN**: ninguna específica — regla de aislamiento de datos por rol.
-
-#### CU-T02 — Registrar llegada y avanzar el estado de una cita
-
-- **Actor**: Trabajador (o Admin). **Tipo**: primario. **Prioridad**: alta.
-- **Precondición**: cita asignada a esa especialista (si el actor es Trabajador); transición
-  permitida según `_TRANSICIONES_VALIDAS`.
-- **Flujo normal**: 1. Registra `hora_llegada_real`. 2. Confirma la cita. 3. Al llegar la
-  clienta, pasa a `en_curso`. 4. Al terminar, pasa a `completada` (dispara CU-C05).
-- **Flujos alternativos**: transición no permitida → 422. Ficha crítica sin confirmar al pasar a
-  `en_curso` → ver CU-T03.
-- **Postcondición**: estado de cita actualizado.
-- **RN**: RN09, RN15.
-
-#### CU-T03 — Atender la alerta de ficha de salud crítica
-
-- **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: alta. **Extiende**: CU-T02.
-- **Precondición**: la clienta tiene al menos una `FichaSalud` con `severidad='critica'` activa.
-- **Flujo normal**: 1. Al pasar a `en_curso`, el sistema responde 422 con el detalle de las
-  fichas críticas. 2. La especialista las revisa. 3. Reenvía la petición con
-  `confirmar_ficha_critica: true`.
-- **Postcondición**: la cita avanza a `en_curso` solo después de que la alerta fue vista.
-- **RN**: RN09.
-
-#### CU-T07 — Autenticarse como personal
-
-- **Actor**: Trabajador o Admin. **Tipo**: primario. **Prioridad**: alta. **Precede a**: CU-T01.
-- **Precondición**: cuenta de staff ya creada (por auto-registro o por CU-A10).
-- **Flujo normal**: 1. El staff ingresa correo y contraseña. 2. El sistema valida credenciales
-  y que `esta_activo=true`. 3. Emite un JWT. Alternativamente, si es el primer acceso de un rol
-  `admin`/`trabajador` sin cuenta previa, se registra con nombre, correo y contraseña antes del
-  paso 1.
-- **Flujos alternativos**: credenciales inválidas → 401. Usuario desactivado → 403.
-- **Postcondición**: sesión de staff iniciada.
-- **RN**: ninguna con ID propio.
-
-#### CU-T08 — Gestionar mi cuenta
-
-- **Actor**: Trabajador o Admin. **Tipo**: primario. **Prioridad**: baja.
-- **Precondición**: sesión de staff iniciada.
-- **Flujo normal**: 1. Consulta o edita nombre/correo/teléfono de su perfil. 2. Opcionalmente
-  cambia su contraseña, indicando la actual y una nueva de al menos 8 caracteres.
-- **Flujos alternativos**: contraseña actual incorrecta → 401. Correo ya usado → 409.
-- **Postcondición**: `Usuario` (y su hash de contraseña, si aplica) actualizado.
-- **RN**: ninguna específica.
-
-#### CU-T09 — Marcar inasistencia automáticamente (no-show) *(automático)*
-
-- **Actor**: Trabajador (dueño de la cita, pasivo); Programador de Tareas — Celery Beat
-  (dispara el caso de uso). **Tipo**: secundario, disparado internamente. **Prioridad**: alta.
-  **Extiende**: CU-T02.
-- **Precondición**: una `Cita` está en `confirmada`, con `programada_en + 15min < now()` y sin
-  `hora_llegada_real` registrada.
-- **Flujo normal**: 1. Cada 5 minutos, el beat ejecuta el job de verificación. 2. Por cada cita
-  que cumple la condición, la marca `no_show`, aplica la pérdida del depósito y
-  `penalizacion_aplicada=true`.
-- **Postcondición**: `Cita.estado = no_show`. Las citas en `pendiente` nunca se ven afectadas.
-- **RN**: RN05 (junto con RN03, que cubre el marcado manual de no-show por el staff).
-
-#### CU-T10 — Consultar asesoría de estilo durante la atención *(planeado)*
+#### CUS26 — Consultar asesoría de estilo durante la atención *(planeado)*
 
 - **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: baja.
-- **Flujo normal**: igual mecánica que CU-C11, iniciada por la especialista durante la atención
+- **Flujo normal**: igual mecánica que CUS22, iniciada por la especialista durante la atención
   presencial; el resultado queda ligado a `personal_id` además de a la cita.
 - **RN**: RN16, RN17, RN18, RN19.
 
-#### CU-T11 — Consultar historial de estilos de cliente *(planeado)*
+#### CUS27 — Consultar historial de estilos de cliente *(planeado)*
 
 - **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: media.
 - **Precondición**: la clienta tiene `SeleccionEstilo` previas ligadas a citas anteriores.
@@ -407,132 +560,95 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   muestra el historial de estilos de esa clienta, sin volver a analizar ninguna foto.
 - **RN**: RN19.
 
-#### CU-T12 — Registrar feedback de estilo *(planeado)*
+#### CUS28 — Registrar feedback de estilo *(planeado)*
 
-- **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: baja. **Extiende**: CU-T02.
+- **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: baja. **Extiende**: CUS11.
 - **Precondición**: la cita tiene una `SeleccionEstilo` asociada y acaba de pasar a
   `completada`.
 - **Flujo normal**: 1. La especialista marca si el resultado coincidió con el estilo elegido
   (sí/no + nota). 2. El sistema lo registra en `SeleccionEstilo.feedback_coincidio`.
 - **Postcondición**: no afecta al cliente; alimenta la métrica de confianza del catálogo
-  (CU-A12).
+  (CUS30).
 - **RN**: ninguna nueva.
 
 ### Administrador
 
-#### CU-A01 — Gestionar personal y su disponibilidad
-
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: alta. **Incluye**: CU-A10 (paso de
-  creación de la cuenta).
-- **Flujo normal**: 1. Crea la cuenta `Usuario` con rol `trabajador` (RF-045, reutilizado de
-  CU-A10). 2. Crea el `Personal` asociado. 3. Define especialidad, comisión, tipo de contrato.
-  4. Define disponibilidad semanal (día/hora/buffer).
-- **RN**: RN13 (el buffer aquí definido es el que se valida en cada reserva).
-
-#### CU-A02 — Confirmar, rechazar o reembolsar un pago
-
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: alta.
-- **Precondición**: `Pago` en `pendiente` (confirmar/rechazar) o `confirmado` (reembolsar).
-- **Flujo normal**: 1. Revisa el comprobante fuera del sistema. 2. Confirma o rechaza
-  manualmente. 3. Registra `confirmado_por` y `fecha_confirmacion`.
-- **RN**: ninguna nueva (proceso manual).
-
-#### CU-A03 — Configurar un descuento o un reto
-
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media.
-- **Flujo normal**: crea `Descuento` (tipo, scope, código, valor, límites, vigencia) o `Reto`
-  (visitas, ventana, recompensa).
-- **Limitación actual**: solo crear y listar (ver `docs/FASES.md` para el plan de completar el
-  CRUD en la Fase 3).
-
-#### CU-A06 — Ver el dashboard operativo
-
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: alta.
-- **Flujo normal**: el sistema carga en paralelo citas del día, pagos pendientes y personal
-  activo; muestra KPIs en tipografía display bold.
-- **Extensión planeada**: widgets de distribución por nivel de fidelización y de uso de IA (ver
-  CU-A16).
-
-#### CU-A09 — Gestionar clientes
-
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media.
-- **Precondición**: sesión de admin iniciada.
-- **Flujo normal**: 1. Lista clientes con sus etiquetas y estado de bloqueo. 2. Consulta el
-  detalle de una clienta, incluyendo su historial de citas. 3. Edita etiquetas o notas internas
-  (nunca `correo`/`password`, rechazados explícitamente por el schema — ver CU-A10). 4. Registra
-  o consulta sus fichas de salud (tipo de restricción, descripción, severidad). 5. Si
-  corresponde, bloquea a la clienta indicando un motivo, o revierte un bloqueo previo.
-- **Flujos alternativos**: intento de editar `correo` o `password` vía este flujo → 422 (usar
-  CU-A10). Cliente ya bloqueada intentando reservar → ver RN11 en CU-C01.
-- **Postcondición**: `Cliente` actualizado; si aplica, `esta_bloqueada` y `motivo_bloqueo`
-  (o su reverso) persistidos; si aplica, nueva `FichaSalud` registrada.
-- **RN**: RN08, RN11.
-
-#### CU-A10 — Administrar cuentas de usuario del staff
-
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media. **Incluido en**: CU-A01 (al dar
-  de alta un trabajador).
-- **Precondición**: sesión de admin iniciada.
-- **Flujo normal**: 1. Crea una cuenta `Usuario` de cualquier rol (si `rol=cliente`, crea
-  también el `Cliente` vinculado automáticamente). 2. Lista o consulta usuarios, filtrando por
-  rol y estado. 3. Edita nombre o teléfono. 4. Cambia el correo de una cuenta (resetea
-  `correo_verificado=false`). 5. Resetea la contraseña de una cuenta sin conocer la actual.
-  6. Activa o desactiva la cuenta.
-- **Postcondición**: `Usuario` creado o actualizado en el campo correspondiente.
-- **RN**: ninguna con ID propio — es la única vía autorizada para crear o tocar credenciales de
-  cualquier usuario que no sea el propio (ver CU-T08 para autogestión).
-
-#### CU-A11 — Gestionar catálogo de estilos *(planeado)*
+#### CUS29 — Gestionar catálogo de estilos *(planeado)*
 
 - **Actor**: Admin (o especialista con permiso delegado). **Tipo**: primario. **Prioridad**:
-  media. **Base de**: CU-A12.
+  media. **Base de**: CUS30.
 - **Flujo normal**: carga estilos de referencia (`EstiloCatalogo`) una sola vez, con imagen y
   atributos — única fuente de imágenes del módulo.
 - **RN**: RN16–RN19.
 
-#### CU-A12 — Revisar métricas de confianza del catálogo de estilos *(planeado)*
+#### CUS30 — Revisar métricas de confianza del catálogo de estilos *(planeado)*
 
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: baja. **Extiende**: CU-A11.
-- **Precondición**: al menos un feedback registrado (CU-T12).
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: baja. **Extiende**: CUS29.
+- **Precondición**: al menos un feedback registrado (CUS28).
 - **Flujo normal**: el admin ve, por estilo, el porcentaje de feedback positivo, para decidir si
   ajustar o retirar el estilo del catálogo.
 - **RN**: ninguna nueva.
 
-#### CU-A13 — Configurar módulo de asesoría IA *(planeado)*
+#### CUS31 — Configurar módulo de asesoría IA *(planeado)*
 
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media. **Extiende**: CU-A11.
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media. **Extiende**: CUS29.
 - **Precondición**: módulo de IA implementado y disponible para configuración.
 - **Flujo normal**: 1. El admin activa o desactiva el módulo. 2. Define el límite diario de
   consultas de IA por cliente.
 - **Postcondición**: configuración persistida, efectiva en la siguiente consulta de
-  CU-C11/CU-T10.
+  CUS22/CUS26.
 - **RN**: RN18.
 
-#### CU-A14 — Gestionar niveles y catálogo exclusivo *(planeado)*
+#### CUS32 — Gestionar niveles y catálogo exclusivo *(planeado)*
 
 - **Actor**: Admin. **Tipo**: primario. **Prioridad**: media.
 - **Flujo normal**: define `NivelFidelizacion` (umbral y beneficios), carga
   `ProductoCatalogoExclusivo` con su `nivel_minimo`, consulta pedidos.
 - **RN**: RN20–RN24.
 
-#### CU-A15 — Gestionar pedidos del catálogo exclusivo *(planeado)*
+#### CUS33 — Gestionar pedidos del catálogo exclusivo *(planeado)*
 
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media. **Extiende**: CU-A14.
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: media. **Extiende**: CUS32.
 - **Precondición**: existe al menos un `PedidoCatalogo` en `pagado`.
 - **Flujo normal**: 1. Filtra pedidos por estado/cliente/producto. 2. Abre el detalle. 3. Marca
   como `entregado` tras la entrega física.
 - **Flujos alternativos**: marcar entregado un pedido no `pagado` → 422.
 - **RN**: RN23.
 
-#### CU-A16 — Consultar métricas de fidelización *(planeado)*
+#### CUS34 — Consultar métricas de fidelización *(planeado)*
 
-- **Actor**: Admin. **Tipo**: primario. **Prioridad**: baja. **Incluido en**: CU-A06 (widgets
-  del dashboard operativo).
+- **Actor**: Admin. **Tipo**: primario. **Prioridad**: baja. **Incluido en**: CUS20 (widgets del
+  dashboard operativo).
 - **Precondición**: módulo de fidelización avanzada habilitado; al menos un cliente con nivel
   asignado.
 - **Flujo normal**: 1. El admin abre el dashboard operativo. 2. El sistema muestra la
   distribución de clientes por nivel de fidelización y los ingresos del catálogo exclusivo del
   mes — agregados de solo lectura.
 - **Postcondición**: ninguna — caso de uso de solo consulta.
-- **RN**: ninguna nueva — lee el resultado de RN20/RN21 (recálculo automático de niveles, sin
-  caso de uso propio) y de las compras de CU-C14.
+- **RN**: ninguna nueva — lee el resultado de RN20/RN21 y de las compras de CUS25.
+
+---
+
+## Mapeo con la numeración anterior
+
+| Anterior | Actual | Anterior | Actual | Anterior | Actual |
+|---|---|---|---|---|---|
+| CU-C01 | CUS03 | CU-T01 | CUS10 | CU-A01 | CUS15 |
+| CU-C02 | CUS08 *(fusionado)* | CU-T02 | CUS11 *(fusionado)* | CU-A02 | CUS18 |
+| CU-C03 | CUS08 *(fusionado)* | CU-T03 | CUS11 *(fusionado)* | CU-A03 | CUS19 |
+| CU-C04 | CUS09 *(fusionado)* | CU-T07 | CUS13 | CU-A06 | CUS20 |
+| CU-C05 | CUS09 *(fusionado)* | CU-T08 | CUS13 *(fusionado)* | CU-A09 | CUS17 |
+| CU-C09 | CUS01 | CU-T09 | CUS11 *(fusionado)* | CU-A10 | CUS15 *(fusionado)* |
+| CU-C10 | CUS02 | CU-T10 | CUS26 | CU-A11 | CUS29 |
+| CU-C11 | CUS22 | CU-T11 | CUS27 | CU-A12 | CUS30 |
+| CU-C12 | CUS23 | CU-T12 | CUS28 | CU-A13 | CUS31 |
+| CU-C13 | CUS24 | — | CUS12 *(nuevo — brecha)* | CU-A14 | CUS32 |
+| CU-C14 | CUS25 | — | CUS14 *(nuevo — brecha)* | CU-A15 | CUS33 |
+| — | CUS04 *(nuevo)* | | | CU-A16 | CUS34 |
+| — | CUS05 *(nuevo)* | | | — | CUS16 *(nuevo)* |
+| — | CUS06 *(nuevo — pendiente)* | | | — | CUS21 *(nuevo)* |
+| — | CUS07 *(nuevo)* | | | | |
+
+*(nuevo)* = no tenía ficha de caso de uso propia antes, aunque el endpoint ya existía.
+*(nuevo — pendiente)* = no tenía ficha ni endpoint. *(fusionado)* = dos o más fichas anteriores
+se consolidaron en una sola, documentando las ramas como flujos alternativos.

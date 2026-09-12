@@ -50,6 +50,13 @@ Cada fase lista objetivo, entregables, criterios de aceptación y dependencias.
 - **Pendiente explícito para una fase futura** (fuera de alcance de esta ronda, solo
   documentado): revisar la falta de guarda de rol en `POST /auth/registrar` (ver
   `docs/ROLES_Y_PERMISOS.md`); completar CRUD (editar/eliminar) de `Descuento`/`Reto`.
+- **Pendiente de la revisión de casos de uso** (renumeración completa a `CUS01`–`CUS34`, ya
+  reflejada en `docs/CASOS_DE_USO.md` y en los seis documentos de `docs/tesis/` que la citan),
+  solo documentado por ahora, sin cambios de código: implementar el endpoint de reprogramación
+  de cita (`CUS06` — no existe hoy en `backend/app/routers/citas.py`); ampliar
+  `requerir_rol("admin")` a `requerir_rol("admin", "trabajador")` en
+  `GET /clientes/{id}/fichas-salud` y `GET /clientes/{id}/historial` (`CUS12`/`CUS14`, ver
+  `docs/ROLES_Y_PERMISOS.md`).
 
 ## Fase 3 — Fidelización avanzada (futuro)
 
@@ -158,8 +165,8 @@ recomendar).
   UI); `npm run build` limpio.
 
 **4.5 — Vistas trabajador (frontend)**
-- Extensión de `pages/worker/Agenda.tsx` (badge + panel de historial de estilos, CU-T11) y
-  `pages/worker/ConsultaIA.tsx` (consulta en vivo, CU-T10).
+- Extensión de `pages/worker/Agenda.tsx` (badge + panel de historial de estilos, CUS27) y
+  `pages/worker/ConsultaIA.tsx` (consulta en vivo, CUS26).
 - *Aceptación*: una especialista ve el historial de estilos de una clienta recurrente sin
   volver a analizar ninguna foto.
 

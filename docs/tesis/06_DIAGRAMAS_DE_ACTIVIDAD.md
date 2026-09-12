@@ -4,7 +4,7 @@ Mermaid no soporta carriles (swimlanes) nativos en `flowchart`; se aproximan con
 actor/componente cuando aporta claridad, y con nodos de decisión (`{...}`) para las reglas de
 negocio. Cada diagrama corresponde a uno o más casos de uso de `02_CASOS_DE_USO_UML.md`.
 
-## Reservar una cita (CU-C01)
+## Reservar una cita (CUS03)
 
 ```mermaid
 flowchart TD
@@ -28,7 +28,7 @@ flowchart TD
     classDef reject fill:#f8d7da,stroke:#dc3545
 ```
 
-## Cancelar una cita (CU-C02 / CU-C03)
+## Cancelar una cita (CUS08)
 
 ```mermaid
 flowchart TD
@@ -60,7 +60,7 @@ flowchart TD
     D --> End2([Fin — RN05])
 ```
 
-## Completar una cita y verificar retos (CU-T02 → CU-C05)
+## Completar una cita y verificar retos (CUS11 → CUS09)
 
 ```mermaid
 flowchart TD
@@ -77,7 +77,7 @@ flowchart TD
     classDef reject fill:#f8d7da,stroke:#dc3545
 ```
 
-## Consulta de asesoría con IA *(planeado, CU-C11/CU-T10)*
+## Consulta de asesoría con IA *(planeado, CUS22/CUS26)*
 
 ```mermaid
 flowchart TD
@@ -102,7 +102,7 @@ flowchart TD
     classDef critical fill:#fff3cd,stroke:#ffc107,stroke-width:2px
 ```
 
-## Compra en el catálogo exclusivo *(planeado, CU-C14)*
+## Compra en el catálogo exclusivo *(planeado, CUS25)*
 
 ```mermaid
 flowchart TD

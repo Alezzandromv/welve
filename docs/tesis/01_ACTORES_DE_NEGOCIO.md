@@ -19,7 +19,8 @@ que invocan al sistema, sin iniciativa de negocio propia).
 - **Contexto de uso**: móvil, generalmente fuera del salón (desde casa, en movimiento). Sesión
   iniciada sin contraseña (magic link por WhatsApp) — ver `docs/PRODUCT.md`.
 - **Frecuencia**: alta (es, en volumen, el actor con más transacciones del sistema).
-- **Casos de uso que inicia**: CU-C01–CU-C14 (ver `02_CASOS_DE_USO_UML.md`).
+- **Casos de uso que inicia**: CUS01–CUS09 (oficiales) + CUS22–CUS25 (planeados) — ver
+  `02_CASOS_DE_USO_UML.md`.
 
 ### Trabajador / Especialista
 
@@ -33,8 +34,9 @@ que invocan al sistema, sin iniciativa de negocio propia).
 - **Frecuencia**: media-alta, concentrada en horario de atención del salón.
 - **Restricción de diseño explícita**: nunca ve datos financieros del salón ni citas de otras
   especialistas — es un actor deliberadamente acotado, no una versión "reducida" del
-  administrador.
-- **Casos de uso que inicia**: CU-T01–CU-T12.
+  administrador. Dos de sus casos de uso (`CUS12`, `CUS14`) están definidos pero con una brecha
+  de permisos pendiente de resolver — ver `02_CASOS_DE_USO_UML.md`.
+- **Casos de uso que inicia**: CUS10–CUS14 (oficiales) + CUS26–CUS28 (planeados).
 
 ### Administrador
 
@@ -50,8 +52,8 @@ que invocan al sistema, sin iniciativa de negocio propia).
   ejecutar todo lo que un Trabajador puede (operar cualquier cita, no solo las propias), más las
   secciones exclusivas de gestión. En UML esto se modela como una relación de generalización
   (flecha de herencia) desde `Trabajador` hacia `Administrador`.
-- **Casos de uso que inicia**: CU-A01–CU-A16, más todos los de Trabajador sobre cualquier
-  especialista.
+- **Casos de uso que inicia**: CUS15–CUS21 (oficiales) + CUS29–CUS34 (planeados), más todos los
+  de Trabajador (CUS10–CUS14) sobre cualquier especialista.
 
 ### Diagrama de contexto (actores × sistema)
 
@@ -153,9 +155,10 @@ classDiagram
 ### Programador de Tareas — Celery Beat
 
 - **Naturaleza**: sistema interno (parte de la infraestructura propia de Welve, no un tercero),
-  pero se modela como actor de CU-T09 porque **inicia** ese caso de uso sin que ningún humano lo
-  dispare directamente en ese momento — es quien realmente ejecuta RN05 (no-show automático), con
-  una consecuencia visible y accionable por el trabajador (pierde el depósito, cambia su agenda).
+  pero se modela como actor secundario de la rama automática de CUS11 porque **inicia** esa
+  transición sin que ningún humano la dispare directamente en ese momento — es quien realmente
+  ejecuta RN05 (no-show automático), con una consecuencia visible y accionable por el trabajador
+  (pierde el depósito, cambia su agenda).
 - **Rol en el sistema**: dispara `verificar_no_show` cada 5 minutos. También dispara, planeado,
   `recalcular_niveles` en un intervalo configurable (RN20/RN21) — pero ese segundo job **no se
   modela como caso de uso propio**: no tiene ningún punto de decisión humana ni consecuencia que

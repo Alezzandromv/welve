@@ -8,7 +8,7 @@ de verdad en código.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> pendiente : crear (CU-C01)
+    [*] --> pendiente : crear (CUS03)
 
     pendiente --> confirmada : admin/trabajador confirma
     pendiente --> cancelada : cliente cancela a tiempo (RN01)
@@ -34,7 +34,7 @@ stateDiagram-v2
 
     note right of completada
         Al entrar aquí se dispara
-        verificar_retos_completados() (RN15/CU-C05).
+        verificar_retos_completados() (RN15/CUS09).
     end note
 ```
 
@@ -47,12 +47,12 @@ RN13).
 
 ```mermaid
 stateDiagram-v2
-    [*] --> pendiente : cliente inicia checkout (CU-C14)
+    [*] --> pendiente : cliente inicia checkout (CUS25)
 
     pendiente --> pagado : webhook Culqi confirma (RN23, idempotente)
     pendiente --> cancelado : webhook Culqi rechaza (RN24)
 
-    pagado --> entregado : admin marca entrega física (CU-A15)
+    pagado --> entregado : admin marca entrega física (CUS33)
 
     entregado --> [*]
     cancelado --> [*]

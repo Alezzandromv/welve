@@ -92,3 +92,12 @@ firma que envía Culqi en la cabecera del webhook, nunca por sesión de usuario.
   `trabajador`) no tiene ninguna dependencia de rol/autenticación visible en el router — el
   service sí restringe el `rol` del body a `admin`/`trabajador`, pero cualquiera sin sesión
   podría invocarlo. Debe revisarse antes de exponer el backend fuera de un entorno controlado.
+- **Brecha de permisos identificada en la revisión de casos de uso** (`CUS12`/`CUS14` en
+  `docs/CASOS_DE_USO.md`): la fila "Ficha de salud crítica (alerta)" de la tabla de Trabajador
+  arriba es hoy la **única** vía por la que la especialista se entera de una ficha crítica —
+  reactiva, dentro del 422 de `PATCH /citas/{id}/estado`. `GET /clientes/{id}/fichas-salud` y
+  `GET /clientes/{id}/historial` (consulta proactiva de alertas e historial) existen pero tienen
+  `requerir_rol("admin")` en `backend/app/routers/clientes.py` — el trabajador no puede llamarlos
+  todavía. Ampliar a `requerir_rol("admin", "trabajador")` es candidato natural (es información
+  de la clienta, no financiera ni de otra especialista), pero no se aplicó en esta ronda —
+  documentación solamente, ver `docs/FASES.md`.
