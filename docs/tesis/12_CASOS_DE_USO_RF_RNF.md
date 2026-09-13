@@ -27,7 +27,7 @@ documentos anteriores tenía formalizado.
 > `CU-C09`–`CU-C11`, `CU-T07`–`CU-T09`, `CU-A09`–`CU-A12`) tras auditar los RF contra los 22
 > casos de uso originales, y había retirado del catálogo `CU-A12 — Recalcular niveles de
 > fidelización automáticamente` (antiguo) por ser un proceso batch sin ningún punto de decisión
-> humana — documentado solo como regla de negocio (RN20/RN21), a diferencia de la rama
+> humana — documentado solo como regla de negocio (RN14/RN15), a diferencia de la rama
 > automática de `CUS11` (no-show), que sí tiene una consecuencia visible y accionable por el
 > trabajador.
 
@@ -61,7 +61,7 @@ requerimientos → 1 caso de uso**) — ver la nota de trazabilidad al inicio de
 | **WhatsApp Business API** (Meta Cloud API) | Externo, ya integrado | Canal exclusivo de magic link y notificaciones salientes. Welve siempre lo invoca; nunca al revés (sin webhook entrante). |
 | **Motor de IA — Gemini** *(planeado)* | Externo, `docs/MODULO_ASESORIA_IA.md` | Recibe una imagen efímera + atributos del catálogo de estilos, devuelve un ranking. Puramente sincrónico dentro de una request. |
 | **Pasarela de Pago — Culqi** *(planeado)* | Externo, `docs/MODULO_FIDELIZACION_AVANZADA.md` | Único actor secundario que **inicia** una interacción hacia Welve (webhook de confirmación de pago) — se autentica por firma criptográfica, no por sesión. |
-| **Programador de Tareas — Celery Beat** | Interno | Dispara `verificar_no_show` (rama automática de `CUS11`) cada 5 min y, planeado, el recálculo de niveles de fidelización (RN20/RN21, sin caso de uso propio — ver §4) — inicia esa transición sin disparo humano directo. |
+| **Programador de Tareas — Celery Beat** | Interno | Dispara `verificar_no_show` (rama automática de `CUS11`) cada 5 min y, planeado, el recálculo de niveles de fidelización (RN14/RN15, sin caso de uso propio — ver §4) — inicia esa transición sin disparo humano directo. |
 
 ---
 
@@ -82,7 +82,7 @@ el mecanismo real que lo cumple.
 | RNF-04 | El magic link de un cliente es de un solo uso y expira. | `MagicLink.expira_en = ahora + 1h`, `usado=true` marcado atómicamente al verificar; un token reusado o vencido se rechaza. |
 | RNF-05 | El backend solo acepta peticiones cross-origin de orígenes explícitamente permitidos. | `CORSMiddleware` con `allow_origin_regex=r"https://.*\.app\.github\.dev"` + `settings.cors_origins`, nunca `*` sin restricción. |
 | RNF-06 *(planeado)* | Un webhook entrante (pago) se valida por firma criptográfica del payload, no por sesión de usuario. | Culqi es el único actor externo que abre conexión hacia Welve — no hay JWT de sesión del lado de la pasarela. |
-| RNF-07 *(planeado)* | Ninguna imagen biométrica capturada para la asesoría de IA se persiste, y su captura requiere consentimiento explícito previo. | RN16 (consentimiento) y RN17 (descarte inmediato tras el análisis) — dato sensible, superficie de riesgo minimizada de raíz. |
+| RNF-07 *(planeado)* | Ninguna imagen biométrica capturada para la asesoría de IA se persiste, y su captura requiere consentimiento explícito previo. | RN10 (consentimiento) y RN11 (descarte inmediato tras el análisis) — dato sensible, superficie de riesgo minimizada de raíz. |
 
 ### 2.2 Rendimiento y Concurrencia
 
@@ -90,17 +90,17 @@ el mecanismo real que lo cumple.
 |---|---|---|
 | RNF-08 | Cargar N filas relacionadas nunca dispara N consultas individuales. | Patrón `Modelo.columna.in_(lista_de_ids)` en una sola query (`citas_service.listar_todas_con_nombres`), usado también para enriquecer el dashboard. |
 | RNF-09 | Ninguna `AsyncSession` de SQLAlchemy ejecuta más de una operación a la vez. | Convención explícita del proyecto: nunca `asyncio.gather` sobre varios `session.execute()` de la misma sesión — siempre secuencial (a diferencia de un driver Motor/Beanie). |
-| RNF-10 | Un canje concurrente del mismo código de descuento no debe generar dos usos válidos. | `SELECT ... FOR UPDATE` al aplicar un descuento (RN14) antes de validar `max_usos_global`/`max_usos_por_cliente`. |
+| RNF-10 | Un canje concurrente del mismo código de descuento no debe generar dos usos válidos. | `SELECT ... FOR UPDATE` al aplicar un descuento (RT04) antes de validar `max_usos_global`/`max_usos_por_cliente`. |
 | RNF-11 | Un envío de WhatsApp o una tarea periódica nunca bloquea el hilo de eventos web. | Worker y Beat de Celery corren como procesos separados del proceso Uvicorn, comunicados solo por Redis como broker. |
 
 ### 2.3 Disponibilidad y Confiabilidad
 
 | ID | Requerimiento | Cómo se cumple hoy |
 |---|---|---|
-| RNF-12 | El marcado automático de inasistencia debe tolerar demoras razonables sin generar falsos positivos. | RN05: el beat corre cada 5 min y solo actúa sobre citas `confirmada` con 15+ min de retraso — margen calibrado a tráfico/parking real en Lima. |
-| RNF-13 | Un proceso automático o un webhook reintentado no debe duplicar sus efectos. | `ON CONFLICT DO NOTHING` al generar el descuento premio de un reto (RN15); actualización idempotente de `PedidoCatalogo.estado` planeada para el webhook de Culqi (RN23). |
+| RNF-12 | El marcado automático de inasistencia debe tolerar demoras razonables sin generar falsos positivos. | RN04: el beat corre cada 5 min y solo actúa sobre citas `confirmada` con 15+ min de retraso — margen calibrado a tráfico/parking real en Lima. |
+| RNF-13 | Un proceso automático o un webhook reintentado no debe duplicar sus efectos. | `ON CONFLICT DO NOTHING` al generar el descuento premio de un reto (RT05); actualización idempotente de `PedidoCatalogo.estado` planeada para el webhook de Culqi (RN17). |
 | RNF-14 | La conexión a base de datos debe sobrevivir al modo transacción del pooler de Supabase. | `connect_args={"statement_cache_size": 0}` obligatorio en todo engine asyncpg detrás de PgBouncer (`core/database.py`, `tasks/db.py`, `alembic/env.py`, y el engine de tests). |
-| RNF-15 | Toda fecha/hora persistida y comparada usa una única zona horaria consistente. | `datetime` siempre *aware* en `America/Lima` (nunca naive), vía `ahora_lima()`/`a_lima()` — crítico para RN01/RN02 (cálculo de horas restantes) y RN05. |
+| RNF-15 | Toda fecha/hora persistida y comparada usa una única zona horaria consistente. | `datetime` siempre *aware* en `America/Lima` (nunca naive), vía `ahora_lima()`/`a_lima()` — crítico para RN01/RN02 (cálculo de horas restantes) y RN04. |
 
 ### 2.4 Usabilidad y Accesibilidad
 
@@ -108,14 +108,14 @@ el mecanismo real que lo cumple.
 |---|---|---|
 | RNF-16 | La interfaz cumple WCAG 2.1 AA. | Contraste mínimo 4.5:1 (texto de cuerpo) y 3:1 (texto grande/UI), navegación por teclado, soporte a `prefers-reduced-motion` (`docs/PRODUCT.md`, `docs/DESIGN.md`). |
 | RNF-17 | Las acciones del Trabajador requieren el mínimo de pasos posible. | Diseñado para uso con las manos frecuentemente ocupadas entre tratamientos — registrar llegada/avanzar estado es una acción, no un formulario. |
-| RNF-18 | El usuario nunca queda en duda sobre qué acaba de pasar. | Confirmaciones, errores, estados de carga y mensajes vacíos son parte del diseño (Principio de producto #6), no un *afterthought* — incluye la alerta explícita de ficha crítica (RN09). |
+| RNF-18 | El usuario nunca queda en duda sobre qué acaba de pasar. | Confirmaciones, errores, estados de carga y mensajes vacíos son parte del diseño (Principio de producto #6), no un *afterthought* — incluye la alerta explícita de ficha crítica (RT01). |
 | RNF-19 | El flujo del Cliente se diseña primero para móvil. | Reserva y cancelación ocurren típicamente fuera del salón, desde el celular — mobile-first, no una adaptación responsive tardía. |
 
 ### 2.5 Mantenibilidad y Portabilidad
 
 | ID | Requerimiento | Cómo se cumple hoy |
 |---|---|---|
-| RNF-20 | La lógica de negocio vive en un único lugar, independiente del transporte HTTP. | Arquitectura en capas estricta: `routers/` solo enrutan, `services/` concentra las reglas (RN01–RN24), el acceso a datos siempre pasa por SQLAlchemy. |
+| RNF-20 | La lógica de negocio vive en un único lugar, independiente del transporte HTTP. | Arquitectura en capas estricta: `routers/` solo enrutan, `services/` concentra las reglas (RN01–RN18), el acceso a datos siempre pasa por SQLAlchemy. |
 | RNF-21 | Todo cambio de esquema queda versionado y es reproducible. | Alembic (`alembic revision --autogenerate`) — nunca una alteración manual directa contra Supabase; `env.py` toma `DATABASE_URL` de `settings`, nunca hardcodeada. |
 | RNF-22 | Los parámetros de negocio son configurables por entidad, no constantes globales. | `servicio.horas_cancelacion_sin_penalidad` y `servicio.monto_deposito` siempre se leen del servicio específico — nunca un valor fijo en código (regla explícita del proyecto). |
 
@@ -140,7 +140,7 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
   nuevo.
 - **RF**: RF-001 (solicitar acceso), RF-002 (verificar magic link)
 - **RNF**: RNF-04, RNF-05
-- **RN**: ninguna con ID propio
+- **RN**: RN09 (validez 1h, uso único)
 
 #### CUS02 — Consultar y actualizar perfil
 
@@ -166,7 +166,7 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **RF**: RF-008 (listar servicios), RF-009 (listar categorías), RF-010 (disponibilidad),
   RF-015 (crear cita)
 - **RNF**: RNF-01, RNF-15, RNF-18, RNF-19
-- **RN**: RN08, RN11, RN13
+- **RN**: RN06 (sin depósito, no garantiza atención), RN07, RT02, RT03
 
 #### CUS04 — Realizar pago de cita
 
@@ -179,7 +179,7 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **RF**: ninguno propio — es un proceso fuera del sistema; el registro y confirmación del lado
   del admin están en RF-025/RF-027 (origen en CUS18)
 - **RNF**: RNF-22 (el monto siempre se lee de `servicio.monto_deposito`)
-- **RN**: ninguna con ID propio
+- **RN**: RN06 (este pago es lo que convierte la reserva en atención garantizada)
 
 #### CUS05 — Consultar citas
 
@@ -206,7 +206,7 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
   confirmado.
 - **RF**: ninguno todavía
 - **RNF**: ninguno todavía
-- **RN**: ninguna todavía — candidatas: RN01 (techo de anticipación), RN13 (nueva franja)
+- **RN**: ninguna todavía — candidatas: RN01 (techo de anticipación), RT03 (nueva franja)
 
 #### CUS07 — Consultar historial de servicios
 
@@ -245,7 +245,7 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **RF**: RF-052 (consultar mis retos), RF-053 (consultar mis descuentos), RF-054 (aplicar
   descuento), RF-059 (verificar retos completados)
 - **RNF**: RNF-01, RNF-10, RNF-13, RNF-15, RNF-20
-- **RN**: RN14, RN15
+- **RN**: RT04, RT05
 
 ### 3.2 Trabajador / Especialista
 
@@ -270,14 +270,16 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
   cita, pasa a `en_curso` al llegar la clienta y a `completada` al terminar (dispara CUS09).
   Transición no permitida → 422. **Ficha crítica**: al pasar a `en_curso`, si la clienta tiene
   una `FichaSalud` con `severidad='critica'`, el sistema responde 422 con su detalle; la
-  especialista lo revisa (ver CUS12) y reenvía con `confirmar_ficha_critica: true`. **Rama
-  automática**: `Cita` en `confirmada` con `programada_en + 15min < now()` y sin
-  `hora_llegada_real` → Celery Beat la marca `no_show` cada 5 minutos, con la misma pérdida de
-  depósito; las citas `pendiente` nunca se ven afectadas.
+  especialista lo revisa (ver CUS12) y reenvía con `confirmar_ficha_critica: true`. **No-show
+  manual**: la especialista/admin pasa la cita a `no_show` directamente al constatar la ausencia.
+  **Rama automática**: `Cita` en `confirmada` con `programada_en + 15min < now()` y sin
+  `hora_llegada_real` → Celery Beat la marca `no_show` cada 5 minutos aplicando el margen de
+  tolerancia; ambas ramas pierden el depósito por igual; las citas `pendiente` nunca se ven
+  afectadas.
 - **RF**: RF-018 (cambiar estado), RF-019 (registrar llegada), RF-024 (verificar no-show
   automático)
 - **RNF**: RNF-02, RNF-12, RNF-15, RNF-17, RNF-18, RNF-20
-- **RN**: RN05, RN09, RN15
+- **RN**: RN03, RN04, RT01, RT05
 
 #### CUS12 — Consultar alertas de salud de la clienta «brecha de permisos»
 
@@ -292,7 +294,7 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **RF**: ninguno propio hoy — candidato: ampliar RF-041 a `admin`+`trabajador`
 - **RNF**: RNF-02 (una vez ampliado el guard de rol, sigue cumpliéndose: sigue siendo acceso
   restringido por rol, solo que a un rol más)
-- **RN**: RN08, RN09
+- **RN**: RN07, RT01
 
 #### CUS13 — Gestionar cuenta personal
 
@@ -337,7 +339,7 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **RF**: RF-030–RF-035 (CRUD de personal y disponibilidad), RF-045–RF-051 (crear/listar/
   consultar/editar usuario, cambiar correo, resetear contraseña, cambiar estado)
 - **RNF**: RNF-02, RNF-03, RNF-20, RNF-21, RNF-22
-- **RN**: RN13
+- **RN**: RT03
 
 #### CUS16 — Gestionar citas
 
@@ -349,7 +351,8 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
   mismos endpoints que CUS11/CUS08, sin restricción de "solo mis citas".
 - **RF**: RF-021 (listar todas las citas), RF-022 (crear cita para un cliente)
 - **RNF**: RNF-02, RNF-08, RNF-20
-- **RN**: RN08, RN11, RN13 (compartidas con CUS03, no se redocumentan aparte)
+- **RN**: RN05 (prioriza manualmente al depósito confirmado), RN06, RN07, RT02, RT03 (compartidas
+  con CUS03, no se redocumentan aparte)
 
 #### CUS17 — Gestionar clientes
 
@@ -364,7 +367,7 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
   ver la brecha de permisos de CUS12), RF-042 (registrar ficha de salud), RF-043 (bloquear),
   RF-044 (desbloquear)
 - **RNF**: RNF-02, RNF-20
-- **RN**: RN08, RN11
+- **RN**: RN07, RT02
 
 #### CUS18 — Gestionar pagos y reembolsos
 
@@ -390,7 +393,7 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
   actual: solo crear y listar — sin edición ni borrado (ver `docs/FASES.md`, Fase 3).
 - **RF**: RF-055–RF-058 (listar/crear descuentos y retos)
 - **RNF**: RNF-02, RNF-20
-- **RN**: RN14 (los límites configurados aquí son los que valida el canje de CUS09)
+- **RN**: RT04 (los límites configurados aquí son los que valida el canje de CUS09)
 
 #### CUS20 — Consultar dashboard
 
@@ -410,12 +413,12 @@ postcondición, condensado), **RF relacionados**, **RNF relacionados**, **RN rel
 - **Tipo**: primario · **Prioridad**: alta · **Precede a**: CUS16
 - **Descripción**: crea y edita `Categoria`s y `Servicio`s, incluyendo los campos que otros
   casos de uso leen en vez de un valor fijo: duración, precio, depósito (CUS04),
-  `requiere_ficha_salud` (RN08), y `horas_cancelacion_sin_penalidad` (RN01/RN02). La lectura
+  `requiere_ficha_salud` (RN07), y `horas_cancelacion_sin_penalidad` (RN01/RN02). La lectura
   pública del catálogo la usa CUS03/CUS16.
 - **RF**: RF-011 (crear categoría), RF-012 (editar categoría), RF-013 (crear servicio), RF-014
   (editar servicio)
 - **RNF**: RNF-02, RNF-22
-- **RN**: ninguna con ID propio — es el punto de configuración de RN01/RN02/RN08
+- **RN**: ninguna con ID propio — es el punto de configuración de RN01/RN02/RN07
 
 ### 3.4 Apéndice — Módulos planeados (fuera del alcance de TP1–TP4)
 
@@ -435,7 +438,7 @@ ficha con RF/RNF/RN para no romper la consolidación de este documento.
 - **RF**: RF-060 (analizar imagen), RF-061 (consultar catálogo de estilos), RF-062 (enviar
   selección)
 - **RNF**: RNF-01, RNF-07
-- **RN**: RN16, RN17, RN18, RN19
+- **RN**: RN10, RN11, RN12, RN13
 
 #### CUS23 — Marcar un estilo como favorito sin cámara *(planeado)*
 
@@ -458,7 +461,7 @@ ficha con RF/RNF/RN para no romper la consolidación de este documento.
   uso de solo consulta.
 - **RF**: RF-069 (consultar niveles), RF-071 (consultar mi nivel y progreso)
 - **RNF**: RNF-01
-- **RN**: RN20
+- **RN**: RN14
 
 #### CUS25 — Comprar en el catálogo exclusivo *(planeado)*
 
@@ -472,7 +475,7 @@ ficha con RF/RNF/RN para no romper la consolidación de este documento.
   pago rechazado → `cancelado`, sin efecto en el nivel.
 - **RF**: RF-072 (consultar catálogo), RF-074 (comprar), RF-075 (confirmar pago vía webhook)
 - **RNF**: RNF-06, RNF-13, RNF-01
-- **RN**: RN20, RN21, RN22, RN23, RN24
+- **RN**: RN14, RN15, RN16, RN17, RN18
 
 #### CUS26 — Consulta de estilo en vivo durante la atención *(planeado)*
 
@@ -482,7 +485,7 @@ ficha con RF/RNF/RN para no romper la consolidación de este documento.
   presencial; el resultado queda ligado a `personal_id` además de a la cita.
 - **RF**: RF-060 (analizar imagen), RF-062 (enviar selección)
 - **RNF**: RNF-07, RNF-17
-- **RN**: RN16, RN17, RN18, RN19
+- **RN**: RN10, RN11, RN12, RN13
 
 #### CUS27 — Consultar historial de estilos de una clienta recurrente *(planeado)*
 
@@ -493,7 +496,7 @@ ficha con RF/RNF/RN para no romper la consolidación de este documento.
   volver a analizar ninguna foto.
 - **RF**: RF-063 (consultar historial de estilos)
 - **RNF**: RNF-02
-- **RN**: RN19
+- **RN**: RN13
 
 #### CUS28 — Registrar feedback de estilo *(planeado)*
 
@@ -515,7 +518,7 @@ ficha con RF/RNF/RN para no romper la consolidación de este documento.
   por cada consulta de cliente.
 - **RF**: RF-066 (gestionar catálogo de estilos)
 - **RNF**: RNF-02, RNF-07
-- **RN**: RN16, RN17, RN18, RN19
+- **RN**: RN10, RN11, RN12, RN13
 
 #### CUS30 — Revisar métricas de confianza del catálogo de estilos *(planeado)*
 
@@ -536,7 +539,7 @@ ficha con RF/RNF/RN para no romper la consolidación de este documento.
   la siguiente consulta (CUS22/CUS26).
 - **RF**: RF-067 (configurar módulo de IA)
 - **RNF**: RNF-02, RNF-07
-- **RN**: RN18
+- **RN**: RN12
 
 #### CUS32 — Configurar niveles de fidelización y catálogo exclusivo *(planeado)*
 
@@ -546,7 +549,7 @@ ficha con RF/RNF/RN para no romper la consolidación de este documento.
   `ProductoCatalogoExclusivo` con su `nivel_minimo`, consulta pedidos.
 - **RF**: RF-070 (gestionar niveles), RF-073 (gestionar catálogo exclusivo)
 - **RNF**: RNF-02, RNF-21
-- **RN**: RN20, RN21, RN22, RN23, RN24
+- **RN**: RN14, RN15, RN16, RN17, RN18
 
 #### CUS33 — Gestionar pedidos del catálogo exclusivo *(planeado)*
 
@@ -557,7 +560,7 @@ ficha con RF/RNF/RN para no romper la consolidación de este documento.
   Marcar entregado un pedido no `pagado` → 422.
 - **RF**: RF-076 (gestionar pedidos del catálogo)
 - **RNF**: RNF-02, RNF-13
-- **RN**: RN23
+- **RN**: RN17
 
 #### CUS34 — Consultar métricas de fidelización *(planeado)*
 
@@ -570,7 +573,7 @@ ficha con RF/RNF/RN para no romper la consolidación de este documento.
   lectura, sin ninguna acción de escritura propia.
 - **RF**: RF-078 (consultar métricas de fidelización)
 - **RNF**: RNF-02
-- **RN**: ninguna nueva — lee el resultado de RN20/RN21 y de las compras de CUS25
+- **RN**: ninguna nueva — lee el resultado de RN14/RN15 y de las compras de CUS25
 
 ---
 
@@ -581,7 +584,7 @@ Dos RF quedan sin un caso de uso propio — deliberadamente, en ambos casos:
 | RF | Nombre | Actor(es) | Motivo |
 |---|---|---|---|
 | RF-020 | Consultar servicios de una cita | Trabajador, Admin | Lectura de detalle que la UI dispara dentro de CUS11/CUS16 (ver el detalle de los servicios ya cobrados de una cita) — no es, por sí sola, un objetivo que el actor persiga de forma independiente |
-| RF-077 | Recalcular niveles de fidelización | Sistema (Celery Beat) | Proceso batch puramente automático (RN20/RN21), sin ningún punto de decisión humana ni consecuencia que un actor deba atender en el momento — se documenta como regla de negocio y en `06_DIAGRAMAS_DE_ACTIVIDAD.md`, no como caso de uso. A diferencia de la rama automática de CUS11 (no-show), que sí tiene una consecuencia visible y accionable por el trabajador |
+| RF-077 | Recalcular niveles de fidelización | Sistema (Celery Beat) | Proceso batch puramente automático (RN14/RN15), sin ningún punto de decisión humana ni consecuencia que un actor deba atender en el momento — se documenta como regla de negocio y en `06_DIAGRAMAS_DE_ACTIVIDAD.md`, no como caso de uso. A diferencia de la rama automática de CUS11 (no-show), que sí tiene una consecuencia visible y accionable por el trabajador |
 
 Adicionalmente, dos casos de uso quedan **sin RF propio todavía** por ser una brecha de permisos
 o estar pendientes de implementar (no son lo mismo que "RF sin CU": aquí es al revés, "CU sin
@@ -600,4 +603,60 @@ Ver §3 para el detalle de cada uno.
 | Casos de uso | 34 (`CUS01`–`CUS34`) — 21 oficiales (9 Cliente, 5 Trabajador, 7 Admin: 19 con endpoint implementado, `CUS06` pendiente, `CUS12`/`CUS14` con brecha de permisos) + 13 planeados (4 Cliente, 3 Trabajador, 6 Admin) |
 | Requerimientos funcionales (RF) | 78 (59 implementados, 19 planeados) — 76 cubiertos por un caso de uso, 2 de apoyo sin CU propio (§4) |
 | Requerimientos no funcionales (RNF) | 22 (5 categorías: Seguridad, Rendimiento/Concurrencia, Disponibilidad/Confiabilidad, Usabilidad/Accesibilidad, Mantenibilidad/Portabilidad) |
-| Reglas de negocio (RN) | 19 (10 implementadas, 9 planeadas) — numeración con huecos intencionales en RN04, RN06, RN07, RN10, RN12 (ver `docs/REGLAS_DE_NEGOCIO.md`); el ID más alto es RN24 |
+| Reglas de negocio oficiales (RN) | 9 (`RN01`–`RN09`), el catálogo de negocio validado de Eunoia — 8 implementadas, 1 planeada (RN08, reclamos) |
+| Reglas técnicas del sistema (RT) | 5 (`RT01`–`RT05`), mecanismos ya implementados que no pertenecen al catálogo de negocio oficial |
+| Reglas de negocio planeadas (RN) | 9 (`RN10`–`RN18`), política de los dos módulos futuros (IA, fidelización avanzada) — ver `docs/REGLAS_DE_NEGOCIO.md` |
+
+---
+
+## 6. Matriz de trazabilidad RN/RT ↔ CUS ↔ RF
+
+Vista generalizada por caso de uso (fila) — complementa la matriz por regla de
+`docs/REGLAS_DE_NEGOCIO.md#matriz-de-trazabilidad-rnrt--cus--rf`. Los RF se agrupan por rango
+donde corresponde (p. ej. `RF-030–RF-035`) en vez de listar cada uno por separado, para que la
+matriz se lea como trazabilidad de alto nivel; el detalle línea por línea de cada RF individual
+vive en `11_REQUERIMIENTOS_FUNCIONALES.md`.
+
+### Catálogo oficial (CUS01–CUS21)
+
+| CUS | RN/RT relacionadas | RF (generalizado) |
+|---|---|---|
+| CUS01 — Solicitar y verificar acceso | RN09 | RF-001, RF-002 |
+| CUS02 — Consultar/actualizar perfil | — | RF-005, RF-006 |
+| CUS03 — Reservar cita | RN06, RN07, RT02, RT03 | RF-008–RF-010, RF-015 |
+| CUS04 — Realizar pago de cita | RN06 | — (proceso fuera del sistema; el lado admin está en CUS18) |
+| CUS05 — Consultar citas | — | RF-016 |
+| CUS06 — Reprogramar cita *(pendiente)* | RN01, RT03 (candidatas) | — (sin endpoint todavía) |
+| CUS07 — Consultar historial de servicios | — | RF-016 (reutilizado de CUS05) |
+| CUS08 — Cancelar cita | RN01, RN02 | RF-017 |
+| CUS09 — Consultar y canjear beneficios | RT04, RT05 | RF-052–RF-054 |
+| CUS10 — Consultar agenda del día | — | RF-036 |
+| CUS11 — Actualizar estado de la cita | RN03, RN04, RT01, RT05 | RF-018, RF-019, RF-024 |
+| CUS12 — Consultar alertas de salud *(brecha)* | RN07, RT01 | — (candidato: ampliar RF-041) |
+| CUS13 — Gestionar cuenta personal | — | RF-003–RF-007 |
+| CUS14 — Consultar historial de cliente *(brecha)* | — | — (candidato: ampliar RF-040) |
+| CUS15 — Gestionar personal | RT03 | RF-030–RF-035, RF-045–RF-051 |
+| CUS16 — Gestionar citas | RN05, RN06, RN07, RT02, RT03 | RF-021, RF-022 |
+| CUS17 — Gestionar clientes | RN07, RT02 | RF-037–RF-044 |
+| CUS18 — Gestionar pagos y reembolsos | RN01, RN02 (ejecuta la parte administrativa) | RF-023, RF-025–RF-029 |
+| CUS19 — Gestionar beneficios | RT04 | RF-055–RF-058 |
+| CUS20 — Consultar dashboard | — | — (reutiliza RF-021 de CUS16 y RF-026 de CUS18) |
+| CUS21 — Gestionar catálogo de servicios | RN01, RN02, RN07 (punto de configuración) | RF-011–RF-014 |
+
+### Apéndice planeado (CUS22–CUS34)
+
+| CUS | RN relacionadas | RF (generalizado) |
+|---|---|---|
+| CUS22 — Consulta de asesoría de estilo con IA | RN10–RN13 | RF-060–RF-062 |
+| CUS23 — Marcar estilo favorito sin cámara | — | RF-065 |
+| CUS24 — Consultar mi nivel y progreso | RN14 | RF-069, RF-071 |
+| CUS25 — Comprar en el catálogo exclusivo | RN14–RN18 | RF-072, RF-074, RF-075 |
+| CUS26 — Consulta de estilo durante la atención | RN10–RN13 | RF-060, RF-062 |
+| CUS27 — Consultar historial de estilos de cliente | RN13 | RF-063 |
+| CUS28 — Registrar feedback de estilo | — | RF-064 |
+| CUS29 — Gestionar catálogo de estilos | RN10–RN13 | RF-066 |
+| CUS30 — Revisar métricas de confianza del catálogo | — | RF-068 |
+| CUS31 — Configurar módulo de asesoría IA | RN12 | RF-067 |
+| CUS32 — Configurar niveles y catálogo exclusivo | RN14–RN18 | RF-070, RF-073 |
+| CUS33 — Gestionar pedidos del catálogo exclusivo | RN17 | RF-076 |
+| CUS34 — Consultar métricas de fidelización | — (lee RN14/RN15) | RF-078 |

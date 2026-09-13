@@ -14,6 +14,7 @@ Sistema web fullstack para gestión de citas de **Eunoia Beauty Salon** (Lima, P
 |------|-----------|
 | Backend | FastAPI (Python 3.11+), SQLAlchemy 2.0 async (asyncpg) + Alembic, Supabase Postgres |
 | Queue | Redis + Celery |
+| Observabilidad | `structlog` (logging estructurado JSON en prod) + `slowapi` (rate limiting respaldado por Redis) |
 | Auth | Clientes: Magic Link vía WhatsApp (UUID, 1h, un solo uso) → JWT. Staff: email + contraseña → JWT |
 | Notificaciones | WhatsApp Business API (Meta Cloud API) |
 | Frontend | React + TypeScript, Zustand, Tailwind CSS, React Router v7 |
@@ -108,13 +109,16 @@ Es un wrapper sobre los comandos de arriba, no un mecanismo distinto — útil e
 
 ```env
 DATABASE_URL=         # postgresql+asyncpg://postgres.<project_ref>:<PASSWORD>@aws-0-<region>.pooler.supabase.com:6543/postgres
-SECRET_KEY=           # openssl rand -hex 32
+SECRET_KEY=           # openssl rand -hex 32 — validado a ≥32 caracteres en core/config.py, el arranque falla si es más corto
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 REDIS_URL=redis://localhost:6379
 WHATSAPP_TOKEN=       # Meta Cloud API token
 WHATSAPP_PHONE_ID=    # ID del número de WhatsApp Business
+WHATSAPP_VERIFY_TOKEN= # Token de verificación del webhook de Meta (declarado; sin endpoint webhook implementado aún)
 APP_URL=              # URL pública del frontend (usada en el magic link enviado por WhatsApp)
-ENVIRONMENT=development
+ENVIRONMENT=development      # "production" oculta /docs,/redoc,/openapi.json y desactiva el regex de CORS de Codespaces
+DB_POOL_SIZE=5                # conexiones persistentes del engine async hacia el pooler de Supabase
+DB_MAX_OVERFLOW=5              # conexiones adicionales permitidas bajo carga puntual
 ```
 
 > **Supabase — conexión vía pooler:** el proyecto de Supabase resuelve por defecto solo IPv6 en la conexión directa (`db.<project_ref>.supabase.co:5432`), lo que falla en entornos sin salida IPv6 como Codespaces (`Network is unreachable`). Usar siempre el **connection pooler** (Dashboard → Project Settings → Database → Connection Pooling), puerto `6543` en modo transacción. Es obligatorio pasar `connect_args={"statement_cache_size": 0}` al crear el engine de asyncpg cuando se conecta vía el pooler (PgBouncer no soporta prepared statements persistentes) — ya configurado en `core/database.py`, `tasks/db.py` y `alembic/env.py`.
@@ -143,19 +147,21 @@ Clientes: magic link via WhatsApp — sin contraseña
 
 ### Backend (`backend/app/`)
 
-- `main.py` — registra routers, verifica conexión a Postgres en el lifespan, configura CORS
-- `core/` — config (Settings desde `.env`, `database_url`), security (JWT + `requerir_rol(*roles)`), database (engine async de SQLAlchemy, `get_session()` como dependencia FastAPI — una sesión por request, commit/rollback automático)
-- `models/` — modelos SQLAlchemy 2.0 declarativos (`Mapped`/`mapped_column`) con UUID como PK; `models/base.py` (`DeclarativeBase`), `models/enums.py` (enums Python compartidos, mapeados a `VARCHAR` + `CHECK` vía `sa.Enum(..., native_enum=False)`, no ENUM nativo de Postgres — más simple de evolucionar con Alembic)
-- `schemas/` — Pydantic schemas separados de los modelos (request vs response)
-  - `schemas/usuario.py` — schemas del perfil propio: `UsuarioResponse`, `ActualizarPerfilRequest` (usados por `GET/PATCH /auth/perfil`)
-  - `schemas/usuarios.py` — schemas de gestión admin: `UsuarioAdminResponse`, `CrearUsuarioRequest`, `ActualizarUsuarioRequest`, `CambiarCorreoRequest`, `ResetearPasswordRequest`, `CambiarEstadoRequest`
-  - `schemas/clientes.py` — `ActualizarClienteRequest` tiene un `model_validator` que rechaza cualquier intento de cambiar `correo` o `password` (esos campos solo se modifican via `/api/v1/admin/usuarios/{id}/correo` o `/password`)
+- `main.py` — registra routers, verifica conexión a Postgres en el lifespan, configura CORS (regex de Codespaces y `/docs`/`/redoc` solo en `ENVIRONMENT != "production"`), logging estructurado + middleware de `request_id`, rate limiting (slowapi), `GZipMiddleware`, exception handlers globales (`IntegrityError`→409, `Exception`→500 con stacktrace logueado)
+- `core/` — config (Settings desde `.env`, `database_url`, valida `secret_key` ≥32 chars), security (JWT + `requerir_rol(*roles)`; `obtener_usuario_actual` revalida `esta_activo`/`esta_bloqueada`/`rol` contra la DB en cada request, no confía ciegamente en el payload del JWT), database (engine async de SQLAlchemy con pool configurable vía `DB_POOL_SIZE`/`DB_MAX_OVERFLOW`, `get_session()` como dependencia FastAPI — una sesión por request, commit/rollback automático), `logging.py` (`configurar_logging()` — structlog, JSON en prod), `ratelimit.py` (`Limiter` de slowapi respaldado por Redis)
+- `models/` — modelos SQLAlchemy 2.0 declarativos (`Mapped`/`mapped_column`) con UUID como PK; `models/base.py` (`DeclarativeBase`), `models/enums.py` (enums Python compartidos, mapeados a `VARCHAR` + `CHECK` vía `sa.Enum(..., native_enum=False)`, no ENUM nativo de Postgres — más simple de evolucionar con Alembic), `models/mixins.py` (`TimestampMixin` — `creado_en`/`actualizado_en` con `server_default`/`onupdate` a nivel de servidor, no `default=` de Python). Ninguna FK queda sin índice — ver `__table_args__` de cada modelo, especialmente el compuesto `(personal_id, programada_en)` en `Cita` (RT03/agenda, el más consultado)
+- `schemas/` — Pydantic schemas separados de los modelos (request vs response); `schemas/_shared.py` (`RechazaCredencialesMixin`, compartido entre `ActualizarClienteRequest` y `ActualizarPersonalRequest`)
+  - `schemas/usuarios.py` — schemas de gestión admin: `UsuarioAdminResponse`, `CrearUsuarioRequest`, `ActualizarUsuarioRequest`, `CambiarCorreoRequest`, `ResetearPasswordRequest`, `CambiarEstadoUsuarioRequest`
+  - `schemas/citas.py` — `CambiarEstadoCitaRequest` (no confundir con `CambiarEstadoUsuarioRequest` de arriba — nombres distintos a propósito, mismo shape conceptual pero dominios distintos)
+  - `schemas/clientes.py` — `ActualizarClienteRequest` usa `RechazaCredencialesMixin` para rechazar cualquier intento de cambiar `correo` o `password` (esos campos solo se modifican via `/api/v1/admin/usuarios/{id}/correo` o `/password`)
 - `routers/` — solo reciben request, llaman al service, devuelven response
   - `routers/admin.py` — citas admin, pagos y personal (montado en `/api/v1/admin`)
   - `routers/usuarios.py` — CRUD de usuarios admin (montado en `/api/v1/admin/usuarios`); archivo separado de `admin.py`
-- `services/` — toda la lógica de negocio aquí (validaciones, reglas RN01–RN15); todas las funciones reciben `session: AsyncSession` como primer parámetro; archivos: `auth_service`, `citas_service`, `clientes_service`, `fidelizacion_service`, `pagos_service`, `personal_service` (CRUD de personal + disponibilidad), `servicios_service`, `usuarios_service` (gestión de usuarios admin)
-- `tasks/` — Celery app en `__init__.py` (incluye configuración del beat schedule); `db.py` expone un sessionmaker async perezoso (creado tras el fork de los workers, no a import-time); `no_show.py` corre cada 5min via beat; `recordatorios.py` envía WhatsApp 24h y 2h antes
-- `utils/` — `timezone.py` (helpers `ahora_lima()`, `a_lima()`), `whatsapp.py` (cliente Meta Cloud API), `horarios.py` (`parse_hhmm`/`hhmm` — conversión `time` nativo ↔ string "HH:MM" en el borde service↔schema para `DisponibilidadPersonal`)
+  - Listados admin (`GET /admin/citas`, `/clientes`, `/admin/usuarios`, `/admin/personal`, `/fidelizacion/descuentos`, `/fidelizacion/retos`) aceptan `limit`/`offset` (`Query`, default 50/0, máximo 200)
+  - `POST /auth/login` (5/min) y `POST /auth/solicitar-acceso` (3/min) tienen rate limiting por IP (`@limiter.limit(...)`)
+- `services/` — toda la lógica de negocio aquí (validaciones, reglas RN01–RT05); todas las funciones reciben `session: AsyncSession` como primer parámetro; archivos: `auth_service`, `citas_service`, `clientes_service`, `fidelizacion_service`, `pagos_service`, `personal_service` (CRUD de personal + disponibilidad), `servicios_service`, `usuarios_service` (gestión de usuarios admin); `_comunes.py` (helpers compartidos: `obtener_o_404`, `cliente_por_usuario_id`, `personal_por_usuario_id`, `verificar_correo_disponible`/`verificar_telefono_disponible`, `cita_a_dict`, `resolver_servicios_activos` — no importa de ningún `*_service.py`, para evitar ciclos)
+- `tasks/` — Celery app en `__init__.py` (incluye configuración del beat schedule; llama `configurar_logging()` para que los workers logueen estructurado); `db.py` expone un sessionmaker async perezoso (creado tras el fork de los workers, no a import-time); `_utils.py` (`run_async()` — event loop nuevo por invocación, compartido entre tasks); `no_show.py` corre cada 5min via beat; `recordatorios.py` envía WhatsApp 24h y 2h antes, agendado vía `apply_async(eta=...)` desde `citas_service` al crear la cita (no vía beat); ambas tasks tienen reintentos (`autoretry_for`, `retry_backoff`)
+- `utils/` — `timezone.py` (helpers `ahora_lima()`, `a_lima()`, `LIMA_TZ`), `whatsapp.py` (cliente Meta Cloud API — timeout explícito, maneja errores de red y 429, logging de cada resultado), `horarios.py` (`parse_hhmm`/`hhmm` — conversión `time` nativo ↔ string "HH:MM" en el borde service↔schema para `DisponibilidadPersonal`), `disponibilidad.py` (`se_solapa()` — única fórmula de solapamiento+buffer de RT03, usada tanto en la validación real de `citas_service` como en el cálculo de disponibilidad de `servicios_service`)
 - `alembic/` — migraciones de esquema; `env.py` toma `DATABASE_URL` de `core.config.settings` (nunca hardcodeada en `alembic.ini`) y usa `target_metadata = Base.metadata` para autogenerate
 - `tests/` — corren contra la **misma base de Supabase** de `DATABASE_URL` (no hay una BD de test separada): `conftest.py` abre una conexión, arranca una transacción externa y le une una `AsyncSession` vía savepoints (`join_transaction_mode="create_savepoint"`); todo lo que haga el test (incluidos los `commit()` internos de `get_session`, sobreescrito por la fixture `client`) se revierte con `rollback()` al final, así que nunca ensucia lo sembrado por `seed.py`. El engine de test usa `NullPool` a propósito: `pytest-asyncio` en modo `strict` (`pytest.ini`) crea un event loop nuevo por test, y un pool con conexiones recicladas cruzaría loops ya cerrados.
 
@@ -318,13 +324,14 @@ MagicLink     id, usuario_id→Usuario, token(UUID único), expira_en(now+1h), u
 | RN01 | Cancela con ≥ N horas (N = `servicio.horas_cancelacion_sin_penalidad`) | Estado → `cancelada`, reembolso completo |
 | RN02 | Cancela con < N horas | Estado → `cancelada_tardia`, pierde depósito, `penalizacion_aplicada=true` |
 | RN03 | No-show | Estado → `no_show`, pierde depósito, `penalizacion_aplicada=true` |
-| RN05 | Cita en estado `confirmada` con `programada_en + 15min < now()` sin `hora_llegada_real` | Celery beat (cada 5min) marca `no_show` automáticamente. Las citas en estado `pendiente` no son afectadas |
-| RN08 | `servicio.requiere_ficha_salud=true` | No confirmar cita sin ficha registrada |
-| RN09 | Ficha con `severidad='critica'` al iniciar cita | API devuelve 422 con `codigo: "FICHA_CRITICA"` y lista de fichas; el caller debe reenviar con `confirmar_ficha_critica: true` para proceder |
-| RN11 | `cliente.esta_bloqueada=true` | Rechazar reserva con mensaje genérico |
-| RN13 | Buffer entre citas | Disponibilidad: `termina_en + personal.minutos_buffer` |
-| RN14 | `max_usos_por_cliente=1` (default) | Validar uso previo antes de aplicar descuento |
-| RN15 | Al completar cita | `fidelizacion_service.verificar_retos_completados` se llama automáticamente desde `cambiar_estado` |
+| RN04 | Cita en estado `confirmada` con `programada_en + 15min < now()` sin `hora_llegada_real` | Celery beat (cada 5min) marca `no_show` automáticamente. Las citas en estado `pendiente` no son afectadas |
+| RN07 | `servicio.requiere_ficha_salud=true` | No confirmar cita sin ficha registrada |
+| RN09 | Acceso de cliente vía `MagicLink` | Token UUID válido 1h, un solo uso; se marca `usado=true` atómicamente al verificar, nunca se reutiliza |
+| RT01 | Ficha con `severidad='critica'` al iniciar cita | API devuelve 422 con `codigo: "FICHA_CRITICA"` y lista de fichas; el caller debe reenviar con `confirmar_ficha_critica: true` para proceder |
+| RT02 | `cliente.esta_bloqueada=true` | Rechazar reserva con mensaje genérico |
+| RT03 | Buffer entre citas | Disponibilidad: `termina_en + personal.minutos_buffer` |
+| RT04 | `max_usos_por_cliente=1` (default) | Validar uso previo antes de aplicar descuento |
+| RT05 | Al completar cita | `fidelizacion_service.verificar_retos_completados` se llama automáticamente desde `cambiar_estado` |
 
 **N horas cancelación:** siempre leer `servicio.horas_cancelacion_sin_penalidad` — nunca hardcodear 5h.
 **Depósito:** siempre leer `servicio.monto_deposito` — nunca usar valor global fijo.
@@ -439,14 +446,18 @@ chore: actualizar dependencias
 
 ## Notas para el Agente
 
-- Validar solapamiento de citas en backend antes de crear (`programada_en` vs `termina_en + buffer`)
+- Validar solapamiento de citas en backend antes de crear (`programada_en` vs `termina_en + buffer`) — usar siempre `utils/disponibilidad.py::se_solapa()`, única fuente de verdad de RT03; nunca reimplementar la fórmula en un service nuevo.
 - WhatsApp: enviar solo si `usuario.acepta_whatsapp = true`
 - Magic link: marcar como `usado=true` al verificar; nunca reutilizar tokens
 - Rol del trabajador: no exponer datos financieros ni citas de otras especialistas
-- Comisión (RN15): solo registrar al completar cita, no implementar pago
+- Comisión (RT05): solo registrar al completar cita, no implementar pago
+- **RN07 (ficha de salud):** aplica por igual a `citas_service.crear` (reserva de cliente) y `crear_para_admin` — no agregar un flujo de creación de citas nuevo sin pasar por `_validar_ficha_salud_requerida()`. `crear_para_admin` sí acepta `permitir_fecha_pasada: bool` para backfill administrativo (walk-ins ya ocurridos); `crear` nunca lo acepta.
+- **Recordatorios de WhatsApp:** se agendan automáticamente al crear una cita (`citas_service._programar_recordatorios`, vía Celery `apply_async(eta=...)`), no en `cambiar_estado` — si se agrega un tercer punto de creación de citas, hay que llamar a este helper ahí también o el cliente no recibirá recordatorios.
+- **Seguridad de sesión:** `core/security.py::obtener_usuario_actual` ya revalida `esta_activo`/`esta_bloqueada`/`rol` contra la DB — no asumir que basta con decodificar el JWT en un flujo nuevo; usar siempre esa dependencia (o `requerir_rol`) en vez de leer el payload del token directamente.
 - **Citas — respuestas enriquecidas:** toda mutación de `Cita` (crear, cancelar, cambiar estado, registrar llegada) debe retornar `CitaResponse.model_validate(await citas_service.enriquecer_cita(session, cita))` — nunca pasar el objeto ORM directo cuando falta enriquecer. `enriquecer_cita()` resuelve `nombre_cliente`, `nombre_especialista` y `nombre_servicio` en tres queries secuenciales (una `AsyncSession` no admite ejecutarlas en paralelo).
 - **Usuario `rol=cliente`:** `usuarios_service.crear()` inserta el `Usuario` **y** crea automáticamente el documento `Cliente` vinculado. Nunca crear uno sin el otro.
-- **Batch queries SQLAlchemy:** usar `Modelo.columna.in_(lista_de_ids)` para cargar filas por lista de IDs en una sola query (evita N+1). Ver patrón en `citas_service.listar_todas_con_nombres`. **Una `AsyncSession` no admite ejecutar statements concurrentemente** (a diferencia de Motor/Beanie) — nunca usar `asyncio.gather` sobre varios `session.execute(...)` de la misma sesión; ejecutar siempre secuencialmente.
+- **Batch queries SQLAlchemy:** usar `Modelo.columna.in_(lista_de_ids)` para cargar filas por lista de IDs en una sola query (evita N+1). Ver patrón en `citas_service.listar_todas_con_nombres` y `servicios_service.calcular_disponibilidad`. **Una `AsyncSession` no admite ejecutar statements concurrentemente** (a diferencia de Motor/Beanie) — nunca usar `asyncio.gather` sobre varios `session.execute(...)` de la misma sesión; ejecutar siempre secuencialmente.
+- **Helpers compartidos de services:** antes de escribir un `get-or-404`, un lookup de `Cliente`/`Personal` por `usuario_id`, o un chequeo de unicidad de correo/teléfono, revisar si ya existe en `services/_comunes.py` — evita reintroducir la duplicación que esa extracción resolvió.
 - **Crear Personal:** `personal.service.ts:crearCompleto()` es un flujo de dos pasos — primero `POST /api/v1/admin/usuarios` (crea el `Usuario` con `rol=trabajador`), luego `POST /api/v1/admin/personal` con el `usuario_id` devuelto. El campo `correo_verificado` se resetea a `false` cada vez que se cambia el correo via `cambiar_correo()`.
 - **Editar credenciales de cliente:** `PATCH /api/v1/clientes/{id}` rechaza explícitamente campos `correo` y `password`; usar `PATCH /api/v1/admin/usuarios/{id}/correo` y `/password` en su lugar.
 - Frontend: usar siempre las CSS variables del sistema de diseño (`var(--accent)`, `var(--surface-sidebar)`, etc.) — no valores de color hardcodeados
@@ -466,3 +477,4 @@ Este archivo cubre lo operativo (comandos, arquitectura de código, convenciones
 - [`docs/FASES.md`](./docs/FASES.md) — roadmap: qué está hecho y qué es futuro
 - [`docs/MODULO_ASESORIA_IA.md`](./docs/MODULO_ASESORIA_IA.md) y [`docs/MODULO_FIDELIZACION_AVANZADA.md`](./docs/MODULO_FIDELIZACION_AVANZADA.md) — especificación de los dos módulos nuevos planeados (no implementados aún)
 - [`docs/DEPENDENCIAS.md`](./docs/DEPENDENCIAS.md) — estado y verificación de dependencias
+- [`docs/tesis/`](./docs/tesis/README.md) — la misma información de `docs/` (casos de uso, reglas de negocio, roles) reexpresada en notación UML/formal para la tesis; los identificadores (CU-XX, RNXX) deben mantenerse sincronizados entre ambos lados

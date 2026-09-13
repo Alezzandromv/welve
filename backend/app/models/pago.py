@@ -7,10 +7,16 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
 from app.models.enums import EstadoPago, MetodoPago, TipoPago
+from app.models.mixins import TimestampMixin
 
 
-class Pago(Base):
+class Pago(TimestampMixin, Base):
     __tablename__ = "pagos"
+    __table_args__ = (
+        sa.Index("ix_pagos_cita_id", "cita_id"),
+        sa.Index("ix_pagos_cliente_id", "cliente_id"),
+        sa.Index("ix_pagos_confirmado_por", "confirmado_por"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     cita_id: Mapped[uuid.UUID] = mapped_column(

@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+from app.models.enums import EstadoCita
+
 
 class CrearCitaRequest(BaseModel):
     personal_id: UUID
@@ -17,14 +19,17 @@ class CrearCitaAdminRequest(BaseModel):
     servicio_ids: list[UUID]
     programada_en: datetime
     notas_cliente: str | None = None
+    # Backfill administrativo (ej. registrar una cita walk-in ya ocurrida) — sin este flag
+    # explícito, crear_para_admin exige fecha futura igual que la reserva de cliente.
+    permitir_fecha_pasada: bool = False
 
 
 class CancelarCitaRequest(BaseModel):
     motivo_cancelacion: str | None = None
 
 
-class CambiarEstadoRequest(BaseModel):
-    estado: str
+class CambiarEstadoCitaRequest(BaseModel):
+    estado: EstadoCita
     notas_especialista: str | None = None
     confirmar_ficha_critica: bool = False  # RN09: True cuando el especialista ya fue alertado
 

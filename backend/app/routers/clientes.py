@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
@@ -21,8 +21,13 @@ _admin = Depends(requerir_rol("admin"))
 
 
 @router.get("", response_model=list[ClienteResponse])
-async def listar_clientes(usuario: dict = _admin, session: AsyncSession = Depends(get_session)) -> list[ClienteResponse]:
-    clientes = await clientes_service.listar_todos_con_usuario(session)
+async def listar_clientes(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    usuario: dict = _admin,
+    session: AsyncSession = Depends(get_session),
+) -> list[ClienteResponse]:
+    clientes = await clientes_service.listar_todos_con_usuario(session, limit, offset)
     return [ClienteResponse.model_validate(c) for c in clientes]
 
 

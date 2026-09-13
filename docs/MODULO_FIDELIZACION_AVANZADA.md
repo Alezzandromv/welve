@@ -2,7 +2,7 @@
 
 **Estado: planeado, no implementado.** Especificación completa para su futura implementación
 (Fase 3 en `docs/FASES.md`). El módulo actual de fidelización (`Descuento`, `Reto`,
-`DescuentoUso` — ver `CLAUDE.md` y `docs/REGLAS_DE_NEGOCIO.md` RN14/RN15) sigue vigente y no se
+`DescuentoUso` — ver `CLAUDE.md` y `docs/REGLAS_DE_NEGOCIO.md` RT04/RT05) sigue vigente y no se
 reemplaza: este módulo se **suma** como una capa de reconocimiento de largo plazo por encima de
 los descuentos/retos puntuales que ya existen.
 
@@ -45,7 +45,7 @@ el admin necesita poder ajustar umbrales y catálogo sobre la marcha sin interve
 
 El nivel no es un campo que se setea manualmente — se **calcula** comparando el comportamiento
 acumulado del cliente contra los umbrales de todos los `NivelFidelizacion` activos, y se le
-asigna el más alto que cumple (RN20). Dos formas de disparar el cálculo, no mutuamente
+asigna el más alto que cumple (RN14). Dos formas de disparar el cálculo, no mutuamente
 excluyentes:
 
 1. **Job periódico** (Celery beat, mismo patrón que `no_show.py`): recalcula el nivel de todos
@@ -57,7 +57,7 @@ excluyentes:
    esperar al batch nocturno tras una cita que lo hizo subir de nivel.
 
 Si el cliente baja de nivel en un recálculo, pierde acceso a productos por encima de su nuevo
-nivel **a partir de ese momento** — nunca retroactivamente sobre pedidos ya hechos (RN21).
+nivel **a partir de ese momento** — nunca retroactivamente sobre pedidos ya hechos (RN15).
 
 ## Pasarela de pago
 
@@ -75,12 +75,12 @@ Flujo de integración:
 3. Culqi notifica el resultado vía **webhook** — el endpoint que lo recibe debe:
    - Verificar la firma del webhook (evitar que cualquiera pueda simular una confirmación de
      pago falsa).
-   - Actualizar `PedidoCatalogo.estado` de forma **idempotente** (RN23) — los webhooks de
+   - Actualizar `PedidoCatalogo.estado` de forma **idempotente** (RN17) — los webhooks de
      pasarelas de pago pueden reintentar la entrega más de una vez; procesar el mismo evento
      dos veces no debe duplicar el efecto (mismo patrón `ON CONFLICT`/chequeo de estado actual
      que ya usa `verificar_retos_completados` en el módulo existente).
 4. Pago rechazado o webhook de fallo → `PedidoCatalogo.estado = cancelado`, sin ningún efecto
-   sobre el nivel de fidelización del cliente (RN24) — un intento fallido de compra no es una
+   sobre el nivel de fidelización del cliente (RN18) — un intento fallido de compra no es una
    señal de comportamiento.
 
 No se reemplaza el modelo `Pago` existente (que sigue siendo para pagos manuales de citas) —
@@ -200,7 +200,7 @@ actual se ven normales y comprables; los de niveles superiores aparecen visualme
 con un teaser ("Disponible desde nivel Oro — te faltan 2 visitas") en vez de ocultarse — esto
 gamifica el progreso dando un motivo concreto para seguir siendo clienta frecuente, en vez de
 esconder la existencia del beneficio. La restricción real de acceso se valida en el backend al
-momento de comprar (RN22) — el bloqueo visual es UX, la seguridad vive en la API.
+momento de comprar (RN16) — el bloqueo visual es UX, la seguridad vive en la API.
 
 ## Roles y visibilidad
 

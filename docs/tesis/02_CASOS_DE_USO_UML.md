@@ -161,8 +161,8 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   canal (limitación conocida, sin canal alternativo implementado).
 - **Postcondición**: sesión de cliente iniciada (JWT emitido); el `MagicLink` queda inutilizado
   para siempre.
-- **RN**: ninguna con ID propio — el TTL de 1 hora y el uso único son el mecanismo central de
-  seguridad de este caso de uso.
+- **RN**: RN09 — el TTL de 1 hora y el uso único son el mecanismo central de seguridad de este
+  caso de uso.
 
 #### CUS02 — Consultar y actualizar mi perfil
 
@@ -184,18 +184,19 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   2. El sistema muestra especialistas disponibles para esos servicios.
   3. El cliente elige especialista y horario dentro de la disponibilidad real (ya descontando
      buffer y citas existentes).
-  4. El sistema valida bloqueo (RN11), ficha de salud si corresponde (RN08) y solapamiento
-     (RN13).
+  4. El sistema valida bloqueo (RT02), ficha de salud si corresponde (RN07) y solapamiento
+     (RT03).
   5. El sistema crea la `Cita` en estado `pendiente` con sus `CitaServicio` asociados.
   6. El sistema confirma la reserva al cliente y muestra el depósito requerido (CUS04).
 - **Flujos alternativos**:
-  - 4a. Cliente bloqueada → el sistema rechaza con mensaje genérico (RN11), fin de caso de uso.
+  - 4a. Cliente bloqueada → el sistema rechaza con mensaje genérico (RT02), fin de caso de uso.
   - 4b. Servicio requiere ficha de salud inexistente → 422, el sistema indica contactar al
     salón.
   - 4c. Horario ya no disponible (carrera con otra reserva) → 409, se refresca la
     disponibilidad y se vuelve al paso 3.
-- **Postcondición**: `Cita` persistida en `pendiente`.
-- **RN**: RN08, RN11, RN13.
+- **Postcondición**: `Cita` persistida en `pendiente` — sin el depósito confirmado (CUS04), no
+  garantiza atención (RN06).
+- **RN**: RN06, RN07, RT02, RT03.
 
 #### CUS04 — Realizar pago de cita
 
@@ -208,9 +209,10 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   comprobante.
 - **Flujos alternativos**: comprobante rechazado por el admin → el cliente debe reenviarlo (ver
   CUS18).
-- **Postcondición**: `Pago` con `tipo=deposito` y `estado=confirmado`.
-- **RN**: ninguna con ID propio — el monto nunca es un valor fijo, siempre
-  `servicio.monto_deposito` (configurado en CUS21).
+- **Postcondición**: `Pago` con `tipo=deposito` y `estado=confirmado` — este pago es lo que
+  convierte la reserva `pendiente` en atención garantizada (RN06).
+- **RN**: RN06 — el monto nunca es un valor fijo, siempre `servicio.monto_deposito` (configurado
+  en CUS21).
 
 #### CUS05 — Consultar citas
 
@@ -232,13 +234,13 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **Precondición (deseada)**: cita propia en `pendiente`/`confirmada`, con al menos las horas de
   anticipación de `servicio.horas_cancelacion_sin_penalidad` (mismo umbral de RN01).
 - **Flujo normal (deseado)**: 1. El cliente elige un nuevo horario/especialista para una cita
-  existente. 2. El sistema revalida disponibilidad (RN13) y ficha de salud (RN08) igual que en
+  existente. 2. El sistema revalida disponibilidad (RT03) y ficha de salud (RN07) igual que en
   CUS03. 3. El sistema actualiza `programada_en`/`termina_en` sin crear una `Cita` nueva ni
   tocar el `Pago` ya confirmado.
 - **Flujos alternativos (deseados)**: fuera de la ventana de anticipación → se ofrece CUS08 en
   su lugar. Nuevo horario no disponible → 409, igual que en CUS03.
 - **Postcondición (deseada)**: `Cita` reprogramada, sin impacto en el depósito ya pagado.
-- **RN**: ninguna todavía — candidatas: RN01 (techo de anticipación mínima), RN13 (nueva franja).
+- **RN**: ninguna todavía — candidatas: RN01 (techo de anticipación mínima), RT03 (nueva franja).
 
 #### CUS07 — Consultar historial de servicios
 
@@ -274,16 +276,16 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **Flujo normal**: 1. El cliente consulta sus retos en curso y sus descuentos disponibles.
   2. Al pagar una cita (CUS04), ingresa un código de descuento. 3. El sistema bloquea la fila
   del descuento (`SELECT ... FOR UPDATE`) para serializar canjes concurrentes. 4. Valida
-  vigencia, `max_usos_global` y `max_usos_por_cliente` (RN14). 5. Registra `DescuentoUso`.
+  vigencia, `max_usos_global` y `max_usos_por_cliente` (RT04). 5. Registra `DescuentoUso`.
 - **Flujo automático (secundario)**: al completarse una cita (CUS11 marca `completada`), el
   sistema evalúa todos los retos activos contra el historial del cliente; si uno se cumple,
-  genera un `Descuento` premio único e idempotente (`ON CONFLICT DO NOTHING`) (RN15), sin que
+  genera un `Descuento` premio único e idempotente (`ON CONFLICT DO NOTHING`) (RT05), sin que
   el cliente reclame nada.
 - **Flujos alternativos**: código inexistente/inactivo → 404. Fuera de vigencia o cupo agotado →
   422.
 - **Postcondición**: `DescuentoUso` persistido, ligado a cita y cliente; o nuevo `Descuento`
   disponible para el cliente sin acción explícita suya.
-- **RN**: RN14, RN15.
+- **RN**: RT04, RT05.
 
 ### Trabajador / Especialista
 
@@ -309,13 +311,15 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   - Transición no permitida por la tabla de estados → 422.
   - Ficha de salud crítica sin confirmar al pasar a `en_curso` → 422 con
     `codigo: FICHA_CRITICA` y el detalle de las fichas (ver CUS12); la especialista reenvía la
-    petición con `confirmar_ficha_critica: true` para proceder (RN09).
+    petición con `confirmar_ficha_critica: true` para proceder (RT01).
+  - **No-show manual**: la especialista o el admin pasa la cita a `no_show` directamente cuando
+    constata la ausencia antes de que corra el margen de tolerancia — pierde el depósito (RN03).
   - **Rama automática**: cita `confirmada` con `programada_en + 15min < now()` y sin
-    `hora_llegada_real` → Celery Beat la marca `no_show` cada 5 minutos, con la misma pérdida de
-    depósito que un no-show marcado manualmente (RN05). Las citas en `pendiente` nunca se ven
-    afectadas.
+    `hora_llegada_real` → Celery Beat la marca `no_show` cada 5 minutos aplicando el margen de
+    tolerancia de RN04, con la misma pérdida de depósito (RN03). Las citas en `pendiente` nunca
+    se ven afectadas.
 - **Postcondición**: estado de cita actualizado.
-- **RN**: RN05, RN09, RN15.
+- **RN**: RN03, RN04, RT01, RT05.
 
 #### CUS12 — Consultar alertas de salud de la clienta «brecha de permisos»
 
@@ -329,7 +333,7 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   2. El sistema muestra las fichas de salud registradas de esa clienta (tipo de restricción,
   descripción, severidad), antes de que la clienta llegue.
 - **Postcondición**: ninguna — caso de uso de solo consulta.
-- **RN**: RN08, RN09.
+- **RN**: RN07, RT01.
 
 #### CUS13 — Gestionar cuenta personal
 
@@ -369,7 +373,7 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   semanal (día/hora/buffer). 5. Administra cuentas de staff existentes: lista/consulta por rol
   y estado, edita nombre/teléfono, cambia correo (resetea `correo_verificado=false`), resetea
   contraseña, activa/desactiva.
-- **RN**: RN13 (el buffer aquí definido es el que se valida en CUS03/CUS16).
+- **RN**: RT03 (el buffer aquí definido es el que se valida en CUS03/CUS16).
 
 #### CUS16 — Gestionar citas
 
@@ -378,8 +382,10 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   diferencia de CUS10). 2. Crea una cita en nombre de un cliente (reserva telefónica o
   presencial), con las mismas validaciones que CUS03. 3. Avanza el estado o cancela cualquier
   cita usando los mismos endpoints que CUS11/CUS08, sin restricción de "solo mis citas".
-- **Flujos alternativos**: los mismos de CUS03 (bloqueo, ficha faltante, solapamiento).
-- **RN**: RN08, RN11, RN13 (compartidas con CUS03).
+- **Flujos alternativos**: los mismos de CUS03 (bloqueo, ficha faltante, solapamiento). Ante dos
+  solicitudes compitiendo por el mismo horario, se prioriza manualmente a la que ya tiene
+  depósito confirmado (RN05).
+- **RN**: RN05, RN06, RN07, RT02, RT03 (compartidas con CUS03).
 
 #### CUS17 — Gestionar clientes
 
@@ -391,10 +397,10 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   o consulta sus fichas de salud (tipo de restricción, descripción, severidad). 5. Si
   corresponde, bloquea a la clienta indicando un motivo, o revierte un bloqueo previo.
 - **Flujos alternativos**: intento de editar `correo` o `password` vía este flujo → 422 (usar
-  CUS15). Cliente ya bloqueada intentando reservar → ver RN11 en CUS03.
+  CUS15). Cliente ya bloqueada intentando reservar → ver RT02 en CUS03.
 - **Postcondición**: `Cliente` actualizado; si aplica, `esta_bloqueada` y `motivo_bloqueo` (o su
   reverso) persistidos; si aplica, nueva `FichaSalud` registrada.
-- **RN**: RN08, RN11.
+- **RN**: RN07, RT02.
 
 #### CUS18 — Gestionar pagos y reembolsos
 
@@ -413,7 +419,7 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
   (visitas, ventana, recompensa) que los clientes consultan y canjean en CUS09.
 - **Limitación actual**: solo crear y listar (ver `docs/FASES.md` para el plan de completar el
   CRUD en la Fase 3).
-- **RN**: RN14 (los límites configurados aquí son los que valida el canje de CUS09).
+- **RN**: RT04 (los límites configurados aquí son los que valida el canje de CUS09).
 
 #### CUS20 — Consultar dashboard
 
@@ -428,11 +434,11 @@ normal** (numerado), **Flujos alternativos**, **Postcondición**, **Reglas de ne
 - **Actor**: Admin. **Tipo**: primario. **Prioridad**: alta. **Precede a**: CUS16.
 - **Flujo normal**: 1. Crea y edita `Categoria`s. 2. Crea y edita `Servicio`s, incluyendo los
   campos que otros casos de uso leen en vez de un valor fijo: `duracion_minutos`, `precio`,
-  `monto_deposito` (CUS04), `requiere_ficha_salud` (RN08), y
+  `monto_deposito` (CUS04), `requiere_ficha_salud` (RN07), y
   `horas_cancelacion_sin_penalidad` (RN01/RN02). La lectura pública del catálogo (sin sesión) la
   usa CUS03/CUS16.
 - **Postcondición**: `Categoria`/`Servicio` creado o actualizado.
-- **RN**: ninguna con ID propio — es el punto de configuración de los umbrales que RN01/RN02/RN08
+- **RN**: ninguna con ID propio — es el punto de configuración de los umbrales que RN01/RN02/RN07
   usan en tiempo de reserva.
 
 ---
@@ -498,16 +504,16 @@ flowchart LR
 - **Actor**: Cliente. **Tipo**: primario. **Prioridad**: media. **Incluye**: uso posterior en
   CUS03 (envío de la selección a la próxima cita).
 - **Precondición**: módulo habilitado; consentimiento aceptado; límite diario no superado
-  (RN18).
+  (RN12).
 - **Flujo normal**: 1. El cliente activa la cámara y captura una foto. 2. El sistema la envía a
   Gemini junto con los atributos del catálogo. 3. Gemini devuelve un ranking de estilos del
-  catálogo existente. 4. El sistema descarta la foto (RN17). 5. El cliente elige uno o más
-  estilos y los envía a su especialista, ligados a su próxima cita (RN19).
-- **Flujos alternativos**: sin consentimiento → la cámara no se activa (RN16). Límite diario
+  catálogo existente. 4. El sistema descarta la foto (RN11). 5. El cliente elige uno o más
+  estilos y los envía a su especialista, ligados a su próxima cita (RN13).
+- **Flujos alternativos**: sin consentimiento → la cámara no se activa (RN10). Límite diario
   alcanzado → mensaje con el tiempo de reseteo. Sin cita futura → selección guardada pero envío
   deshabilitado.
 - **Postcondición**: `ConsultaIA` y, si aplica, `SeleccionEstilo` persistidos — nunca la foto.
-- **RN**: RN16, RN17, RN18, RN19.
+- **RN**: RN10, RN11, RN12, RN13.
 
 #### CUS23 — Marcar un estilo como favorito sin cámara *(planeado)*
 
@@ -527,7 +533,7 @@ flowchart LR
 - **Flujo normal**: 1. El cliente abre la sección de fidelización. 2. El sistema muestra el
   `NivelFidelizacion` actual y qué le falta (visitas o gasto) para alcanzar el siguiente nivel.
 - **Postcondición**: ninguna — caso de uso de solo consulta.
-- **RN**: RN20.
+- **RN**: RN14.
 
 #### CUS25 — Comprar en el catálogo exclusivo *(planeado)*
 
@@ -537,11 +543,11 @@ flowchart LR
 - **Flujo normal**: 1. El cliente ve el catálogo (productos de nivel superior bloqueados con
   teaser). 2. Elige un producto habilitado y paga vía Culqi. 3. El sistema crea `PedidoCatalogo`
   en `pendiente`. 4. Culqi confirma vía webhook. 5. El sistema actualiza el pedido a `pagado`
-  de forma idempotente (RN23).
-- **Flujos alternativos**: nivel insuficiente → 403 también a nivel de API (RN22). Pago
-  rechazado → `cancelado`, sin efecto en el nivel (RN24).
+  de forma idempotente (RN17).
+- **Flujos alternativos**: nivel insuficiente → 403 también a nivel de API (RN16). Pago
+  rechazado → `cancelado`, sin efecto en el nivel (RN18).
 - **Postcondición**: `PedidoCatalogo` en `pagado`.
-- **RN**: RN20–RN24.
+- **RN**: RN14–RN18.
 
 ### Trabajador / Especialista
 
@@ -550,7 +556,7 @@ flowchart LR
 - **Actor**: Trabajador. **Tipo**: primario. **Prioridad**: baja.
 - **Flujo normal**: igual mecánica que CUS22, iniciada por la especialista durante la atención
   presencial; el resultado queda ligado a `personal_id` además de a la cita.
-- **RN**: RN16, RN17, RN18, RN19.
+- **RN**: RN10, RN11, RN12, RN13.
 
 #### CUS27 — Consultar historial de estilos de cliente *(planeado)*
 
@@ -558,7 +564,7 @@ flowchart LR
 - **Precondición**: la clienta tiene `SeleccionEstilo` previas ligadas a citas anteriores.
 - **Flujo normal**: 1. La especialista abre el detalle de una cita agendada. 2. El sistema
   muestra el historial de estilos de esa clienta, sin volver a analizar ninguna foto.
-- **RN**: RN19.
+- **RN**: RN13.
 
 #### CUS28 — Registrar feedback de estilo *(planeado)*
 
@@ -579,7 +585,7 @@ flowchart LR
   media. **Base de**: CUS30.
 - **Flujo normal**: carga estilos de referencia (`EstiloCatalogo`) una sola vez, con imagen y
   atributos — única fuente de imágenes del módulo.
-- **RN**: RN16–RN19.
+- **RN**: RN10–RN13.
 
 #### CUS30 — Revisar métricas de confianza del catálogo de estilos *(planeado)*
 
@@ -597,14 +603,14 @@ flowchart LR
   consultas de IA por cliente.
 - **Postcondición**: configuración persistida, efectiva en la siguiente consulta de
   CUS22/CUS26.
-- **RN**: RN18.
+- **RN**: RN12.
 
 #### CUS32 — Gestionar niveles y catálogo exclusivo *(planeado)*
 
 - **Actor**: Admin. **Tipo**: primario. **Prioridad**: media.
 - **Flujo normal**: define `NivelFidelizacion` (umbral y beneficios), carga
   `ProductoCatalogoExclusivo` con su `nivel_minimo`, consulta pedidos.
-- **RN**: RN20–RN24.
+- **RN**: RN14–RN18.
 
 #### CUS33 — Gestionar pedidos del catálogo exclusivo *(planeado)*
 
@@ -613,7 +619,7 @@ flowchart LR
 - **Flujo normal**: 1. Filtra pedidos por estado/cliente/producto. 2. Abre el detalle. 3. Marca
   como `entregado` tras la entrega física.
 - **Flujos alternativos**: marcar entregado un pedido no `pagado` → 422.
-- **RN**: RN23.
+- **RN**: RN17.
 
 #### CUS34 — Consultar métricas de fidelización *(planeado)*
 
@@ -625,7 +631,7 @@ flowchart LR
   distribución de clientes por nivel de fidelización y los ingresos del catálogo exclusivo del
   mes — agregados de solo lectura.
 - **Postcondición**: ninguna — caso de uso de solo consulta.
-- **RN**: ninguna nueva — lee el resultado de RN20/RN21 y de las compras de CUS25.
+- **RN**: ninguna nueva — lee el resultado de RN14/RN15 y de las compras de CUS25.
 
 ---
 

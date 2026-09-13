@@ -4,19 +4,21 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy import func, select, text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.cita import Cita
-from app.models.cliente import Cliente
 from app.models.enums import ScopeDescuento, TipoDescuento
 from app.models.fidelizacion import Descuento, DescuentoUso, Reto
 from app.schemas.fidelizacion import CrearDescuentoRequest, CrearRetoRequest
+from app.services._comunes import cliente_por_usuario_id
 from app.utils.timezone import ahora_lima
 
 
 async def progreso_retos(session: AsyncSession, usuario_id: UUID) -> list[dict]:
-    cliente = (await session.execute(select(Cliente).where(Cliente.usuario_id == usuario_id))).scalar_one_or_none()
-    if not cliente:
+    try:
+        cliente = await cliente_por_usuario_id(session, usuario_id)
+    except HTTPException:
         return []
 
     ahora = ahora_lima()
@@ -50,8 +52,9 @@ async def progreso_retos(session: AsyncSession, usuario_id: UUID) -> list[dict]:
 
 
 async def descuentos_disponibles(session: AsyncSession, usuario_id: UUID) -> list[Descuento]:
-    cliente = (await session.execute(select(Cliente).where(Cliente.usuario_id == usuario_id))).scalar_one_or_none()
-    if not cliente:
+    try:
+        cliente = await cliente_por_usuario_id(session, usuario_id)
+    except HTTPException:
         return []
 
     ahora = ahora_lima()
@@ -83,9 +86,7 @@ async def descuentos_disponibles(session: AsyncSession, usuario_id: UUID) -> lis
 
 async def aplicar_descuento(session: AsyncSession, codigo: str, cita_id: UUID, usuario_id: UUID) -> DescuentoUso:
     """RN14: valida uso previo y límites antes de registrar el canje."""
-    cliente = (await session.execute(select(Cliente).where(Cliente.usuario_id == usuario_id))).scalar_one_or_none()
-    if not cliente:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Perfil de cliente no encontrado")
+    cliente = await cliente_por_usuario_id(session, usuario_id)
 
     ahora = ahora_lima()
 
@@ -195,7 +196,11 @@ async def crear_descuento(session: AsyncSession, body: CrearDescuentoRequest) ->
 
     descuento = Descuento(**body.model_dump())
     session.add(descuento)
-    await session.flush()
+    try:
+        await session.flush()
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ya existe un descuento con ese código") from None
     return descuento
 
 
@@ -206,9 +211,11 @@ async def crear_reto(session: AsyncSession, body: CrearRetoRequest) -> Reto:
     return reto
 
 
-async def listar_descuentos(session: AsyncSession) -> list[Descuento]:
-    return list((await session.execute(select(Descuento))).scalars().all())
+async def listar_descuentos(session: AsyncSession, limit: int = 50, offset: int = 0) -> list[Descuento]:
+    stmt = select(Descuento).order_by(Descuento.creado_en.desc()).limit(limit).offset(offset)
+    return list((await session.execute(stmt)).scalars().all())
 
 
-async def listar_retos(session: AsyncSession) -> list[Reto]:
-    return list((await session.execute(select(Reto))).scalars().all())
+async def listar_retos(session: AsyncSession, limit: int = 50, offset: int = 0) -> list[Reto]:
+    stmt = select(Reto).order_by(Reto.creado_en.desc()).limit(limit).offset(offset)
+    return list((await session.execute(stmt)).scalars().all())

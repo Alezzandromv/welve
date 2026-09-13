@@ -3,12 +3,14 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.models.enums import RecompensaTipo, ScopeDescuento, TipoDescuento
+
 
 class CrearDescuentoRequest(BaseModel):
     nombre: str
     descripcion: str | None = None
-    tipo: str  # 'porcentaje' | 'monto_fijo'
-    scope: str = "publico"
+    tipo: TipoDescuento
+    scope: ScopeDescuento = ScopeDescuento.publico
     codigo: str | None = None
     valor: float = Field(gt=0)
     monto_minimo: float = 0.0
@@ -45,7 +47,7 @@ class CrearRetoRequest(BaseModel):
     descripcion_visible: str
     visitas_requeridas: int = Field(gt=0)
     dias_ventana: int = Field(gt=0)
-    recompensa_tipo: str  # 'descuento' | 'servicio_gratis' | 'credito'
+    recompensa_tipo: RecompensaTipo
     recompensa_valor: float = Field(gt=0)
     vigente_hasta: datetime | None = None
 

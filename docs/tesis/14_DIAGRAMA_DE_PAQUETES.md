@@ -66,7 +66,7 @@ flowchart TB
 - **`routers` → `schemas`/`services`/`core`**: un router solo enruta — recibe `Depends(core.*)`,
   valida contra un `schema` y delega toda la lógica a un `service` (ver convención en
   `CLAUDE.md`, sección "Convenciones → Python").
-- **`services` → `models`/`schemas`/`utils`**: toda la lógica de negocio y las reglas RN01–RN15
+- **`services` → `models`/`schemas`/`utils`**: toda la lógica de negocio y las reglas RN01–RT05
   viven aquí — es el único paquete que construye/modifica instancias de `models` y el único que
   llama a `utils/whatsapp.py`.
 - **`core` → `models`**: `core/database.py` no depende de un modelo específico (`Base.metadata`

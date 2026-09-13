@@ -32,7 +32,7 @@ class ResetearPasswordRequest(BaseModel):
     password_nueva: str = Field(min_length=8)
 
 
-class CambiarEstadoRequest(BaseModel):
+class CambiarEstadoUsuarioRequest(BaseModel):
     esta_activo: bool
 
 

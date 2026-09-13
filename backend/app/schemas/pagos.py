@@ -3,11 +3,13 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.models.enums import MetodoPago, TipoPago
+
 
 class CrearPagoRequest(BaseModel):
     cita_id: UUID
-    tipo: str  # 'deposito' | 'saldo' | 'total' | 'penalizacion' | 'reembolso'
-    metodo: str  # 'efectivo' | 'transferencia' | 'yape' | 'plin' | 'tarjeta'
+    tipo: TipoPago
+    metodo: MetodoPago
     monto: float = Field(gt=0)
     referencia_externa: str | None = None
 

@@ -1,7 +1,7 @@
 from datetime import date
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
@@ -28,10 +28,12 @@ _admin = Depends(requerir_rol("admin"))
 async def listar_citas(
     fecha: date | None = None,
     estado: str | None = None,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     usuario: dict = _admin,
     session: AsyncSession = Depends(get_session),
 ) -> list[CitaResponse]:
-    citas_data = await citas_service.listar_todas_con_nombres(session, fecha, estado)
+    citas_data = await citas_service.listar_todas_con_nombres(session, fecha, estado, limit, offset)
     return [CitaResponse.model_validate(d) for d in citas_data]
 
 
@@ -101,8 +103,13 @@ async def reembolsar_pago(
 # ── Personal ───────────────────────────────────────────────────────────────────
 
 @router.get("/personal", response_model=list[PersonalResponse])
-async def listar_personal(usuario: dict = _admin, session: AsyncSession = Depends(get_session)) -> list[PersonalResponse]:
-    personal = await personal_service.listar_todos_con_usuario(session)
+async def listar_personal(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    usuario: dict = _admin,
+    session: AsyncSession = Depends(get_session),
+) -> list[PersonalResponse]:
+    personal = await personal_service.listar_todos_con_usuario(session, limit, offset)
     return [PersonalResponse.model_validate(p) for p in personal]
 
 

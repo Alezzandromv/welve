@@ -1,0 +1,1833 @@
+INFO:     Will watch for changes in these directories: ['/workspaces/welve/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [7026] using WatchFiles
+INFO:     Started server process [7028]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:47308 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55818 - "GET /api/health HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55826 - "GET /api/v1/servicios HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55834 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/citas?fecha=2026-09-12 HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/pagos/pendientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/citas?fecha=2026-09-12 HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/pagos/pendientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/citas HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/citas HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/citas HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/citas HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes/e7facea2-3ae8-4f70-8a28-256deb932733/fichas-salud HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes/e7facea2-3ae8-4f70-8a28-256deb932733/historial HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal/5fa9bf35-e29b-4f24-8902-858103a22251/disponibilidad HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal/d67eddef-b17c-497b-80a8-ec314b77e4a9/disponibilidad HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal/4db1eb12-dd31-4bab-8fbc-f3c286fd0ae8/disponibilidad HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal/4db1eb12-dd31-4bab-8fbc-f3c286fd0ae8/disponibilidad HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal/d67eddef-b17c-497b-80a8-ec314b77e4a9/disponibilidad HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal/5fa9bf35-e29b-4f24-8902-858103a22251/disponibilidad HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/usuarios HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/usuarios HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/citas HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/citas HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes/e7facea2-3ae8-4f70-8a28-256deb932733/fichas-salud HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes/e7facea2-3ae8-4f70-8a28-256deb932733/historial HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes/e7facea2-3ae8-4f70-8a28-256deb932733/fichas-salud HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes/e7facea2-3ae8-4f70-8a28-256deb932733/historial HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes/e7facea2-3ae8-4f70-8a28-256deb932733/fichas-salud HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes/e7facea2-3ae8-4f70-8a28-256deb932733/historial HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/pagos/pendientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/citas HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/pagos/pendientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/citas HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/citas HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/admin/citas HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/servicios HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/servicios/categorias HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/servicios HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/clientes HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/servicios/categorias HTTP/1.1" 200 OK
+INFO:     132.191.1.93:0 - "GET /api/v1/servicios/12bb2654-8585-4f07-af27-7f4332f1950c/disponibilidad?fecha=2026-10-17 HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/utils/disponibilidad.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [7028]
+INFO:     Started server process [25080]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/_comunes.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25080]
+INFO:     Started server process [25237]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25237]
+INFO:     Started server process [25306]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25306]
+INFO:     Started server process [25367]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25367]
+INFO:     Started server process [25423]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25423]
+INFO:     Started server process [25512]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25512]
+INFO:     Started server process [25561]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25561]
+INFO:     Started server process [25612]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25612]
+INFO:     Started server process [25728]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25728]
+INFO:     Started server process [25817]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25817]
+INFO:     Started server process [25896]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25896]
+INFO:     Started server process [26113]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26113]
+INFO:     Started server process [26156]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/clientes_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26156]
+INFO:     Started server process [26256]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/clientes_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26256]
+INFO:     Started server process [26317]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/clientes_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26317]
+INFO:     Started server process [26371]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/clientes_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26371]
+INFO:     Started server process [26433]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/personal_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26433]
+INFO:     Started server process [26483]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/personal_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26483]
+INFO:     Started server process [26545]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/servicios_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26545]
+INFO:     Started server process [26595]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/servicios_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26595]
+INFO:     Started server process [26656]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/servicios_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26656]
+INFO:     Started server process [26694]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/fidelizacion_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26694]
+INFO:     Started server process [26767]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/fidelizacion_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26767]
+INFO:     Started server process [26818]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/fidelizacion_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26818]
+INFO:     Started server process [26880]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/fidelizacion_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26880]
+INFO:     Started server process [26968]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/usuarios_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26968]
+INFO:     Started server process [27025]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/usuarios_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [27025]
+INFO:     Started server process [27086]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/usuarios_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [27086]
+INFO:     Started server process [27199]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/auth_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [27199]
+INFO:     Started server process [27257]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/auth_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [27257]
+INFO:     Started server process [27336]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/usuario.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [27336]
+INFO:     Started server process [28240]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/_shared.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [28240]
+INFO:     Started server process [28301]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/clientes.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [28301]
+Process SpawnProcess-35:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 8, in <module>
+    from app.routers import (
+  File "/workspaces/welve/backend/app/routers/clientes.py", line 9, in <module>
+    from app.schemas.clientes import (
+  File "/workspaces/welve/backend/app/schemas/clientes.py", line 41, in <module>
+    class ActualizarClienteRequest(BaseModel):
+  File "/workspaces/welve/backend/app/schemas/clientes.py", line 49, in ActualizarClienteRequest
+    @model_validator(mode="before")
+     ^^^^^^^^^^^^^^^
+NameError: name 'model_validator' is not defined
+WARNING:  WatchFiles detected changes in 'app/schemas/clientes.py'. Reloading...
+INFO:     Started server process [28391]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/personal.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [28391]
+Process SpawnProcess-37:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 8, in <module>
+    from app.routers import (
+  File "/workspaces/welve/backend/app/routers/admin.py", line 11, in <module>
+    from app.schemas.personal import (
+  File "/workspaces/welve/backend/app/schemas/personal.py", line 21, in <module>
+    class ActualizarPersonalRequest(BaseModel):
+  File "/workspaces/welve/backend/app/schemas/personal.py", line 31, in ActualizarPersonalRequest
+    @model_validator(mode="before")
+     ^^^^^^^^^^^^^^^
+NameError: name 'model_validator' is not defined. Did you mean: 'field_validator'?
+WARNING:  WatchFiles detected changes in 'app/schemas/personal.py'. Reloading...
+INFO:     Started server process [28513]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/personal.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [28513]
+INFO:     Started server process [28591]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/citas.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [28591]
+Process SpawnProcess-40:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 8, in <module>
+    from app.routers import (
+  File "/workspaces/welve/backend/app/routers/admin.py", line 9, in <module>
+    from app.schemas.citas import CitaResponse, CrearCitaAdminRequest
+  File "/workspaces/welve/backend/app/schemas/citas.py", line 26, in <module>
+    class CambiarEstadoCitaRequest(BaseModel):
+  File "/workspaces/welve/backend/app/schemas/citas.py", line 27, in CambiarEstadoCitaRequest
+    estado: EstadoCita
+            ^^^^^^^^^^
+NameError: name 'EstadoCita' is not defined
+WARNING:  WatchFiles detected changes in 'app/schemas/citas.py'. Reloading...
+Process SpawnProcess-41:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 8, in <module>
+    from app.routers import (
+  File "/workspaces/welve/backend/app/routers/admin.py", line 18, in <module>
+    from app.services import citas_service, pagos_service, personal_service
+  File "/workspaces/welve/backend/app/services/citas_service.py", line 16, in <module>
+    from app.schemas.citas import (
+ImportError: cannot import name 'CambiarEstadoRequest' from 'app.schemas.citas' (/workspaces/welve/backend/app/schemas/citas.py)
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+Process SpawnProcess-42:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 8, in <module>
+    from app.routers import (
+  File "/workspaces/welve/backend/app/routers/admin.py", line 18, in <module>
+    from app.services import citas_service, pagos_service, personal_service
+  File "/workspaces/welve/backend/app/services/citas_service.py", line 231, in <module>
+    async def cambiar_estado(session: AsyncSession, cita_id: UUID, body: CambiarEstadoRequest, usuario: dict) -> Cita:
+                                                                         ^^^^^^^^^^^^^^^^^^^^
+NameError: name 'CambiarEstadoRequest' is not defined. Did you mean: 'CambiarEstadoCitaRequest'?
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+Process SpawnProcess-43:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 8, in <module>
+    from app.routers import (
+  File "/workspaces/welve/backend/app/routers/citas.py", line 8, in <module>
+    from app.schemas.citas import (
+ImportError: cannot import name 'CambiarEstadoRequest' from 'app.schemas.citas' (/workspaces/welve/backend/app/schemas/citas.py)
+WARNING:  WatchFiles detected changes in 'app/routers/citas.py'. Reloading...
+Process SpawnProcess-44:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 8, in <module>
+    from app.routers import (
+  File "/workspaces/welve/backend/app/routers/citas.py", line 58, in <module>
+    body: CambiarEstadoRequest,
+          ^^^^^^^^^^^^^^^^^^^^
+NameError: name 'CambiarEstadoRequest' is not defined. Did you mean: 'CambiarEstadoCitaRequest'?
+WARNING:  WatchFiles detected changes in 'app/routers/citas.py'. Reloading...
+INFO:     Started server process [29010]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/usuarios.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29010]
+Process SpawnProcess-46:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 8, in <module>
+    from app.routers import (
+  File "/workspaces/welve/backend/app/routers/usuarios.py", line 8, in <module>
+    from app.schemas.usuarios import (
+ImportError: cannot import name 'CambiarEstadoRequest' from 'app.schemas.usuarios' (/workspaces/welve/backend/app/schemas/usuarios.py)
+WARNING:  WatchFiles detected changes in 'app/routers/usuarios.py'. Reloading...
+Process SpawnProcess-47:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 8, in <module>
+    from app.routers import (
+  File "/workspaces/welve/backend/app/routers/usuarios.py", line 88, in <module>
+    body: CambiarEstadoRequest,
+          ^^^^^^^^^^^^^^^^^^^^
+NameError: name 'CambiarEstadoRequest' is not defined. Did you mean: 'CambiarCorreoRequest'?
+WARNING:  WatchFiles detected changes in 'app/routers/usuarios.py'. Reloading...
+INFO:     Started server process [29226]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29226]
+INFO:     Started server process [29350]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29350]
+INFO:     Started server process [29401]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29401]
+INFO:     Started server process [29506]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/pagos.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29506]
+INFO:     Started server process [29593]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/fidelizacion.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29593]
+INFO:     Started server process [29778]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/fidelizacion.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29778]
+INFO:     Started server process [29834]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/core/security.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29834]
+INFO:     Started server process [29953]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/core/security.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29953]
+Process SpawnProcess-56:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 8, in <module>
+    from app.routers import (
+  File "/workspaces/welve/backend/app/routers/admin.py", line 8, in <module>
+    from app.core.security import requerir_rol
+  File "/workspaces/welve/backend/app/core/security.py", line 50, in <module>
+    session: AsyncSession = Depends(get_session),
+                                    ^^^^^^^^^^^
+NameError: name 'get_session' is not defined
+WARNING:  WatchFiles detected changes in 'app/core/security.py'. Reloading...
+INFO:     Started server process [30147]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/core/config.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [30147]
+Process SpawnProcess-58:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 6, in <module>
+    from app.core.config import settings
+  File "/workspaces/welve/backend/app/core/config.py", line 29, in <module>
+    settings = Settings()
+               ^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/pydantic_settings/main.py", line 262, in __init__
+    super().__init__(**__pydantic_self__.__class__._settings_build_values(sources, init_kwargs))
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/pydantic/main.py", line 263, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for Settings
+secret_key
+  Value error, secret_key debe tener al menos 32 caracteres (ej.: `openssl rand -hex 32`) [type=value_error, input_value='7411ca94f3fc1326650d17d7d734bd7', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+WARNING:  WatchFiles detected changes in 'app/core/database.py'. Reloading...
+INFO:     Started server process [30579]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [30579]
+INFO:     Started server process [30670]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/conftest.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [30670]
+INFO:     Started server process [31558]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_citas.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31558]
+INFO:     Started server process [31613]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_citas.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31613]
+INFO:     Started server process [31657]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_citas.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31657]
+INFO:     Started server process [31744]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31744]
+INFO:     Started server process [32547]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [32547]
+INFO:     Started server process [32655]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [32655]
+INFO:     Started server process [32735]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [32735]
+INFO:     Started server process [32768]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:40264 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51584 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51588 - "GET /api/v1/auth/perfil HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51602 - "GET /api/v1/servicios HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50552 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50568 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50580 - "GET /api/v1/admin/personal/4db1eb12-dd31-4bab-8fbc-f3c286fd0ae8/disponibilidad HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50582 - "GET /docs HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/models/mixins.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [32768]
+INFO:     Started server process [34030]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/cliente.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34030]
+INFO:     Started server process [34075]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/cliente.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34075]
+INFO:     Started server process [34137]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/personal.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34137]
+INFO:     Started server process [34182]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/personal.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34182]
+INFO:     Started server process [34244]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/servicio.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34244]
+INFO:     Started server process [34286]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/servicio.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34286]
+INFO:     Started server process [34355]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/pago.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34355]
+INFO:     Started server process [34410]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/fidelizacion.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34410]
+INFO:     Started server process [34473]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/fidelizacion.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34473]
+INFO:     Started server process [34523]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/fidelizacion.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34523]
+INFO:     Started server process [34591]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/fidelizacion.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34591]
+INFO:     Started server process [34670]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/fidelizacion.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34670]
+INFO:     Started server process [34753]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34753]
+INFO:     Started server process [34840]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/cita.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34840]
+Process SpawnProcess-83:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 8, in <module>
+    from app.routers import (
+  File "/workspaces/welve/backend/app/routers/admin.py", line 8, in <module>
+    from app.core.security import requerir_rol
+  File "/workspaces/welve/backend/app/core/security.py", line 13, in <module>
+    from app.models.cliente import Cliente
+  File "/workspaces/welve/backend/app/models/__init__.py", line 2, in <module>
+    from app.models.cita import Cita, CitaServicio
+  File "/workspaces/welve/backend/app/models/cita.py", line 12, in <module>
+    class Cita(Base):
+  File "/workspaces/welve/backend/app/models/cita.py", line 42, in Cita
+    creada_en: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), default=ahora_lima, nullable=False)
+                                                                                    ^^^^^^^^^^
+NameError: name 'ahora_lima' is not defined
+WARNING:  WatchFiles detected changes in 'app/models/cita.py'. Reloading...
+INFO:     Started server process [34984]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/usuario.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34984]
+Process SpawnProcess-85:
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 81, in serve
+    await self._serve(sockets)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/server.py", line 88, in _serve
+    config.load()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 494, in load
+    self.loaded_app = self.load_app()
+                      ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/config.py", line 428, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspaces/welve/backend/app/main.py", line 8, in <module>
+    from app.routers import (
+  File "/workspaces/welve/backend/app/routers/admin.py", line 8, in <module>
+    from app.core.security import requerir_rol
+  File "/workspaces/welve/backend/app/core/security.py", line 13, in <module>
+    from app.models.cliente import Cliente
+  File "/workspaces/welve/backend/app/models/__init__.py", line 8, in <module>
+    from app.models.usuario import Usuario
+  File "/workspaces/welve/backend/app/models/usuario.py", line 12, in <module>
+    class Usuario(Base):
+  File "/workspaces/welve/backend/app/models/usuario.py", line 40, in Usuario
+    fecha_creacion: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), default=ahora_lima, nullable=False)
+                                                                                         ^^^^^^^^^^
+NameError: name 'ahora_lima' is not defined
+WARNING:  WatchFiles detected changes in 'app/models/usuario.py'. Reloading...
+INFO:     Started server process [35131]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/auth_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [35131]
+INFO:     Started server process [35311]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/auth_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [35311]
+INFO:     Started server process [35417]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'alembic/versions/a44c260c7bf6_indices_performance_y_timestamps_.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [35417]
+INFO:     Started server process [35644]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'alembic/versions/a44c260c7bf6_indices_performance_y_timestamps_.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [35644]
+INFO:     Started server process [35836]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'alembic/versions/a44c260c7bf6_indices_performance_y_timestamps_.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [35836]
+INFO:     Started server process [35890]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/servicios_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [35890]
+INFO:     Started server process [37101]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [37101]
+INFO:     Started server process [37272]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [37272]
+INFO:     Started server process [37346]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/usuarios_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [37346]
+INFO:     Started server process [37472]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/usuarios_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [37472]
+INFO:     Started server process [37521]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/personal_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [37521]
+INFO:     Started server process [37839]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/personal_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [37839]
+INFO:     Started server process [37888]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/servicios_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [37888]
+INFO:     Started server process [37925]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/servicios_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [37925]
+INFO:     Started server process [38051]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/fidelizacion_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [38051]
+INFO:     Started server process [38132]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/fidelizacion_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [38132]
+INFO:     Started server process [38187]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/schemas/citas.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [38187]
+INFO:     Started server process [39068]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [39068]
+INFO:     Started server process [39262]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [39262]
+INFO:     Started server process [39335]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [39335]
+INFO:     Started server process [39458]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [39458]
+INFO:     Started server process [40405]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40405]
+INFO:     Started server process [40552]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/admin.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40552]
+INFO:     Started server process [40604]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/admin.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40604]
+INFO:     Started server process [40671]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/personal_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40671]
+INFO:     Started server process [40780]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/admin.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40780]
+INFO:     Started server process [40851]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/clientes_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40851]
+INFO:     Started server process [40941]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/clientes.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40941]
+INFO:     Started server process [40996]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/clientes.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40996]
+INFO:     Started server process [41049]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/usuarios_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [41049]
+INFO:     Started server process [41155]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/usuarios.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [41155]
+INFO:     Started server process [41215]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/usuarios.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [41215]
+INFO:     Started server process [41275]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/fidelizacion_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [41275]
+INFO:     Started server process [41388]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/fidelizacion.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [41388]
+INFO:     Started server process [41415]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/fidelizacion.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [41415]
+INFO:     Started server process [41483]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/fidelizacion.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [41483]
+INFO:     Started server process [41555]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:42176 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52694 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52702 - "GET /api/v1/servicios HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52708 - "GET /api/v1/servicios/4012bd95-c65d-46ef-aab8-820689c4f4fb/disponibilidad?fecha=2026-09-21 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52720 - "GET /api/v1/admin/citas?limit=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44866 - "POST /api/v1/servicios/categorias HTTP/1.1" 201 Created
+INFO:     127.0.0.1:44876 - "POST /api/v1/servicios/categorias HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:34368 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34380 - "GET /api/v1/servicios/categorias HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34390 - "PATCH /api/v1/servicios/categorias/40953465-c7e3-4aa1-80f2-3e4f4cb67273 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59530 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59542 - "GET /api/v1/servicios HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59554 - "GET /api/v1/clientes?limit=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59564 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59574 - "POST /api/v1/admin/citas HTTP/1.1" 201 Created
+INFO:     127.0.0.1:32908 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32922 - "GET /api/v1/clientes/e7facea2-3ae8-4f70-8a28-256deb932733/fichas-salud HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32936 - "GET /api/v1/clientes?limit=50 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57568 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57572 - "GET /api/v1/clientes/29820819-b87d-4440-a156-f0e5f677494b/fichas-salud HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57574 - "GET /api/v1/clientes/114fc5c6-fba0-410b-9192-91bfbdfdb241/fichas-salud HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46000 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46002 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46018 - "POST /api/v1/admin/citas HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:46030 - "GET /api/v1/servicios HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46042 - "POST /api/v1/admin/citas HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:46048 - "POST /api/v1/admin/citas HTTP/1.1" 201 Created
+INFO:     127.0.0.1:49918 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49934 - "PATCH /api/v1/citas/1f993e72-6c46-4f36-b3ca-bbe7289d0a96/cancelar HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49950 - "PATCH /api/v1/citas/a2b16ed1-7603-4604-a7fd-71dbaa2afa53/cancelar HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/core/logging.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [41555]
+INFO:     Started server process [43988]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/core/ratelimit.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [43988]
+INFO:     Started server process [44030]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [44030]
+INFO:     Started server process [44245]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [44245]
+INFO:     Started server process [44330]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [44330]
+INFO:     Started server process [44499]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/conftest.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [44499]
+INFO:     Started server process [45134]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/conftest.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [45134]
+INFO:     Started server process [45249]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [45249]
+INFO:     Started server process [45326]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [45326]
+INFO:     Started server process [45374]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routers/auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [45374]
+INFO:     Started server process [45446]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [45446]
+INFO:     Started server process [46490]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_auth.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [46490]
+INFO:     Started server process [46614]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/utils/whatsapp.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [46614]
+INFO:     Started server process [47925]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/tasks/_utils.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [47925]
+INFO:     Started server process [47981]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/tasks/__init__.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [47981]
+INFO:     Started server process [48038]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/tasks/no_show.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [48038]
+INFO:     Started server process [48119]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/tasks/recordatorios.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [48119]
+INFO:     Started server process [48224]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [48224]
+INFO:     Started server process [48473]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [48473]
+INFO:     Started server process [48596]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/citas_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [48596]
+INFO:     Started server process [48639]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:34280 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34290 - "GET /api/v1/clientes?limit=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34300 - "GET /api/v1/admin/personal HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34312 - "GET /api/v1/servicios HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34324 - "POST /api/v1/admin/citas HTTP/1.1" 201 Created
+INFO:     127.0.0.1:51282 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "PATCH /api/v1/citas/b9bb5481-9b04-49a5-819e-b11a56af3653/cancelar HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34540 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34550 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34564 - "GET /api/v1/admin/citas?limit=50 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34576 - "POST /api/v1/servicios/categorias HTTP/1.1" 201 Created
+INFO:     127.0.0.1:39470 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39486 - "POST /api/v1/servicios/categorias HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:39492 - "GET /api/v1/servicios/categorias HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59702 - "PATCH /api/v1/servicios/categorias/3fb79d65-7aee-47ca-a47d-66c5d47391fb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45346 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45346 - "POST /api/v1/servicios/categorias HTTP/1.1" 201 Created
+INFO:     127.0.0.1:45348 - "POST /api/v1/servicios/categorias HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:41956 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42466 - "GET /api/v1/servicios/categorias HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42478 - "PATCH /api/v1/servicios/categorias/99169445-6383-4d80-b5c1-40f2fafd6c4e HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     127.0.0.1:39446 - "HEAD / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     127.0.0.1:39574 - "GET / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.

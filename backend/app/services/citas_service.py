@@ -14,10 +14,17 @@ from app.models.personal import DisponibilidadPersonal, Personal
 from app.models.servicio import Servicio
 from app.models.usuario import Usuario
 from app.schemas.citas import (
-    CambiarEstadoRequest,
+    CambiarEstadoCitaRequest,
     CrearCitaAdminRequest,
     CrearCitaRequest,
 )
+from app.services._comunes import (
+    cita_a_dict,
+    cliente_por_usuario_id,
+    personal_por_usuario_id,
+    resolver_servicios_activos,
+)
+from app.utils.disponibilidad import se_solapa
 from app.utils.timezone import a_lima, ahora_lima
 
 LIMA_TZ = ZoneInfo("America/Lima")
@@ -36,22 +43,43 @@ _TRANSICIONES_VALIDAS: dict[str, set[str]] = {
 }
 
 
-def _cita_a_dict(cita: Cita) -> dict:
-    return {
-        "id": cita.id,
-        "cliente_id": cita.cliente_id,
-        "personal_id": cita.personal_id,
-        "programada_en": cita.programada_en,
-        "termina_en": cita.termina_en,
-        "estado": cita.estado,
-        "hora_llegada_real": cita.hora_llegada_real,
-        "notas_cliente": cita.notas_cliente,
-        "notas_especialista": cita.notas_especialista,
-        "motivo_cancelacion": cita.motivo_cancelacion,
-        "fecha_cancelacion": cita.fecha_cancelacion,
-        "penalizacion_aplicada": cita.penalizacion_aplicada,
-        "creada_en": cita.creada_en,
-    }
+def _programar_recordatorios(cita: Cita) -> None:
+    """Agenda los recordatorios de WhatsApp 24h/2h antes de la cita vía Celery ETA — import
+    diferido para no acoplar el arranque de la API a la carga del módulo `tasks/` (que
+    inicializa el cliente de Celery). No se agenda si el ETA ya quedó en el pasado (cita
+    creada con menos de 24h/2h de anticipación) — la propia task también es defensiva por
+    si la cita se cancela o su transacción hace rollback después de este punto."""
+    from app.tasks.recordatorios import recordatorio_2h, recordatorio_24h
+
+    ahora = ahora_lima()
+    eta_24h = cita.programada_en - timedelta(hours=24)
+    eta_2h = cita.programada_en - timedelta(hours=2)
+
+    if eta_24h > ahora:
+        recordatorio_24h.apply_async(args=[str(cita.id)], eta=eta_24h)
+    if eta_2h > ahora:
+        recordatorio_2h.apply_async(args=[str(cita.id)], eta=eta_2h)
+
+
+async def _validar_ficha_salud_requerida(session: AsyncSession, cliente_id: UUID, servicios: list) -> None:
+    """RN08: si algún servicio requiere ficha de salud, debe existir una activa. Aplica por
+    igual a la reserva de cliente y a la creación por admin — es una regla de seguridad del
+    cliente, no una conveniencia de agenda que el admin deba poder saltarse en silencio."""
+    if not any(s.requiere_ficha_salud for s in servicios):
+        return
+    ficha = (
+        await session.execute(
+            select(FichaSalud).where(
+                FichaSalud.cliente_id == cliente_id,
+                FichaSalud.esta_activo,
+            ).limit(1)
+        )
+    ).scalar_one_or_none()
+    if not ficha:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Este servicio requiere una ficha de salud registrada. Solicita a la administración que la registre.",
+        )
 
 
 async def _fichas_criticas(session: AsyncSession, cliente_id: UUID) -> list[FichaSalud]:
@@ -75,7 +103,7 @@ async def _validar_solapamiento(session: AsyncSession, personal: Personal, progr
             ).limit(1)
         )
     ).scalar_one_or_none()
-    buffer = timedelta(minutes=disp.minutos_buffer if disp else 10)
+    buffer_minutos = disp.minutos_buffer if disp else 10
 
     ventana_inicio = programada_en - timedelta(days=1)
     ventana_fin = termina_en + timedelta(days=1)
@@ -88,7 +116,7 @@ async def _validar_solapamiento(session: AsyncSession, personal: Personal, progr
     for c in citas_personal:
         if c.estado in _ESTADOS_BLOQUEADOS:
             continue
-        if programada_en < (c.termina_en + buffer) and c.programada_en < (termina_en + buffer):
+        if se_solapa(programada_en, termina_en, c.programada_en, c.termina_en, buffer_minutos):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="El horario seleccionado no está disponible para la especialista",
@@ -97,40 +125,12 @@ async def _validar_solapamiento(session: AsyncSession, personal: Personal, progr
 
 async def crear(session: AsyncSession, body: CrearCitaRequest, usuario_id: UUID) -> Cita:
     # RN11: rechazar si cliente bloqueada
-    cliente = (await session.execute(select(Cliente).where(Cliente.usuario_id == usuario_id))).scalar_one_or_none()
-    if not cliente:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Perfil de cliente no encontrado")
+    cliente = await cliente_por_usuario_id(session, usuario_id)
     if cliente.esta_bloqueada:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No es posible realizar la reserva")
 
-    if not body.servicio_ids:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Debe seleccionar al menos un servicio")
-
-    servicios_map = {
-        s.id: s for s in (await session.execute(select(Servicio).where(Servicio.id.in_(body.servicio_ids)))).scalars().all()
-    }
-    servicios: list[Servicio] = []
-    for sid in body.servicio_ids:
-        s = servicios_map.get(sid)
-        if not s or not s.esta_activo:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Servicio {sid} no encontrado o inactivo")
-        servicios.append(s)
-
-    # RN08: si algún servicio requiere ficha de salud, debe existir una activa
-    if any(s.requiere_ficha_salud for s in servicios):
-        ficha = (
-            await session.execute(
-                select(FichaSalud).where(
-                    FichaSalud.cliente_id == cliente.id,
-                    FichaSalud.esta_activo,
-                ).limit(1)
-            )
-        ).scalar_one_or_none()
-        if not ficha:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail="Este servicio requiere una ficha de salud registrada. Solicita a la administración que la registre.",
-            )
+    servicios = await resolver_servicios_activos(session, body.servicio_ids)
+    await _validar_ficha_salud_requerida(session, cliente.id, servicios)
 
     programada_en = a_lima(body.programada_en)
     if programada_en <= ahora_lima():
@@ -166,6 +166,7 @@ async def crear(session: AsyncSession, body: CrearCitaRequest, usuario_id: UUID)
             duracion_minutos=s.duracion_minutos,
         ))
     await session.flush()
+    _programar_recordatorios(nueva_cita)
 
     return nueva_cita
 
@@ -177,20 +178,16 @@ async def crear_para_admin(session: AsyncSession, body: CrearCitaAdminRequest) -
     if cliente.esta_bloqueada:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="El cliente está bloqueado")
 
-    if not body.servicio_ids:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Debe seleccionar al menos un servicio")
-
-    servicios_map = {
-        s.id: s for s in (await session.execute(select(Servicio).where(Servicio.id.in_(body.servicio_ids)))).scalars().all()
-    }
-    servicios: list[Servicio] = []
-    for sid in body.servicio_ids:
-        s = servicios_map.get(sid)
-        if not s or not s.esta_activo:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Servicio {sid} no encontrado o inactivo")
-        servicios.append(s)
+    servicios = await resolver_servicios_activos(session, body.servicio_ids)
+    await _validar_ficha_salud_requerida(session, cliente.id, servicios)
 
     programada_en = a_lima(body.programada_en)
+    if not body.permitir_fecha_pasada and programada_en <= ahora_lima():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="La fecha y hora de la cita deben ser futuras (o pasar permitir_fecha_pasada=true para backfill)",
+        )
+
     duracion_total = sum(s.duracion_minutos for s in servicios)
     termina_en = programada_en + timedelta(minutes=duracion_total)
 
@@ -218,6 +215,7 @@ async def crear_para_admin(session: AsyncSession, body: CrearCitaAdminRequest) -
             duracion_minutos=s.duracion_minutos,
         ))
     await session.flush()
+    _programar_recordatorios(nueva_cita)
 
     return nueva_cita
 
@@ -263,16 +261,14 @@ async def cancelar(session: AsyncSession, cita_id: UUID, solicitante_id: UUID, m
     return cita
 
 
-async def cambiar_estado(session: AsyncSession, cita_id: UUID, body: CambiarEstadoRequest, usuario: dict) -> Cita:
+async def cambiar_estado(session: AsyncSession, cita_id: UUID, body: CambiarEstadoCitaRequest, usuario: dict) -> Cita:
     cita = await session.get(Cita, cita_id)
     if not cita:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cita no encontrada")
 
     # Trabajador solo puede modificar sus propias citas
     if usuario.get("rol") == "trabajador":
-        personal = (
-            await session.execute(select(Personal).where(Personal.usuario_id == UUID(usuario["sub"])))
-        ).scalar_one_or_none()
+        personal = await personal_por_usuario_id(session, UUID(usuario["sub"]))
         if not personal or cita.personal_id != personal.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes permiso para modificar esta cita")
 
@@ -328,9 +324,7 @@ async def registrar_llegada(session: AsyncSession, cita_id: UUID, hora_llegada: 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cita no encontrada")
 
     if usuario.get("rol") == "trabajador":
-        personal = (
-            await session.execute(select(Personal).where(Personal.usuario_id == UUID(usuario["sub"])))
-        ).scalar_one_or_none()
+        personal = await personal_por_usuario_id(session, UUID(usuario["sub"]))
         if not personal or cita.personal_id != personal.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes permiso para modificar esta cita")
 
@@ -353,7 +347,10 @@ async def listar_por_cliente(session: AsyncSession, usuario_id: UUID) -> list[Ci
     return list((await session.execute(stmt)).scalars().all())
 
 
-async def listar_todas(session: AsyncSession, fecha: date | None = None, estado: str | None = None) -> list[Cita]:
+async def listar_todas(
+    session: AsyncSession, fecha: date | None = None, estado: str | None = None,
+    limit: int = 50, offset: int = 0,
+) -> list[Cita]:
     stmt = select(Cita)
     if fecha:
         inicio = datetime(fecha.year, fecha.month, fecha.day, tzinfo=LIMA_TZ)
@@ -362,7 +359,7 @@ async def listar_todas(session: AsyncSession, fecha: date | None = None, estado:
     if estado:
         stmt = stmt.where(Cita.estado == estado)
 
-    stmt = stmt.order_by(Cita.programada_en.asc() if fecha else Cita.programada_en.desc())
+    stmt = stmt.order_by(Cita.programada_en.asc() if fecha else Cita.programada_en.desc()).limit(limit).offset(offset)
     return list((await session.execute(stmt)).scalars().all())
 
 
@@ -388,10 +385,13 @@ async def servicios_de_cita(session: AsyncSession, cita_id: UUID) -> list[CitaSe
     return list((await session.execute(stmt)).scalars().all())
 
 
-async def listar_todas_con_nombres(session: AsyncSession, fecha: date | None = None, estado: str | None = None) -> list[dict]:
+async def listar_todas_con_nombres(
+    session: AsyncSession, fecha: date | None = None, estado: str | None = None,
+    limit: int = 50, offset: int = 0,
+) -> list[dict]:
     """Igual que listar_todas pero enriquece con nombres para el dashboard admin —
     colapsado a joins en vez de las 5 queries batch + asyncio.gather de la versión Mongo."""
-    citas = await listar_todas(session, fecha, estado)
+    citas = await listar_todas(session, fecha, estado, limit, offset)
     if not citas:
         return []
 
@@ -424,7 +424,7 @@ async def listar_todas_con_nombres(session: AsyncSession, fecha: date | None = N
 
     result = []
     for cita in citas:
-        d = _cita_a_dict(cita)
+        d = cita_a_dict(cita)
 
         cliente = clientes_map.get(cita.cliente_id)
         u_cli = usuarios_map.get(cliente.usuario_id) if cliente else None
@@ -476,7 +476,7 @@ async def enriquecer_cita(session: AsyncSession, cita: Cita) -> dict:
     res_personal = await session.execute(stmt_personal)
     res_servicio = await session.execute(stmt_servicio)
 
-    d = _cita_a_dict(cita)
+    d = cita_a_dict(cita)
     d["nombre_cliente"] = res_cliente.scalar_one_or_none()
     d["nombre_especialista"] = res_personal.scalar_one_or_none()
     d["nombre_servicio"] = res_servicio.scalar_one_or_none()

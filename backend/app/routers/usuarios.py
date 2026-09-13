@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
@@ -8,7 +8,7 @@ from app.core.security import requerir_rol
 from app.schemas.usuarios import (
     ActualizarUsuarioRequest,
     CambiarCorreoRequest,
-    CambiarEstadoRequest,
+    CambiarEstadoUsuarioRequest,
     CrearUsuarioRequest,
     ResetearPasswordRequest,
     UsuarioAdminResponse,
@@ -33,10 +33,12 @@ async def crear_usuario(
 async def listar_usuarios(
     rol: str | None = None,
     esta_activo: bool | None = None,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     _: dict = _admin,
     session: AsyncSession = Depends(get_session),
 ) -> list[UsuarioAdminResponse]:
-    usuarios = await usuarios_service.listar(session, rol, esta_activo)
+    usuarios = await usuarios_service.listar(session, rol, esta_activo, limit, offset)
     return [UsuarioAdminResponse.model_validate(u) for u in usuarios]
 
 
@@ -85,7 +87,7 @@ async def resetear_password(
 @router.patch("/{usuario_id}/estado", response_model=UsuarioAdminResponse)
 async def cambiar_estado(
     usuario_id: UUID,
-    body: CambiarEstadoRequest,
+    body: CambiarEstadoUsuarioRequest,
     usuario: dict = _admin,
     session: AsyncSession = Depends(get_session),
 ) -> UsuarioAdminResponse:

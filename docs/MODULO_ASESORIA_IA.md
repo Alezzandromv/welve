@@ -55,7 +55,7 @@ ConsultaIA
 SeleccionEstilo
   id, consulta_id → ConsultaIA (opcional — null cuando origen=favorito, ver CUS23),
   estilo_catalogo_id → EstiloCatalogo, cliente_id → Cliente,
-  cita_id → Cita (opcional — se llena al presionar "enviar a mi estilista"; RN19 exige que,
+  cita_id → Cita (opcional — se llena al presionar "enviar a mi estilista"; RN13 exige que,
   si se llena, sea una cita futura en estado no terminal del mismo cliente),
   origen (consulta_ia|favorito), seleccionado_por (cliente|trabajador),
   enviado_a_trabajador (bool), fecha_seleccion,
@@ -78,7 +78,7 @@ cualquier revisión de código futura.
 1. **Consentimiento**: antes de activar la cámara, el cliente (o trabajador) acepta un texto de
    consentimiento explícito: *"Tu foto se usa solo para generar sugerencias de estilo y se
    elimina inmediatamente después — no se guarda."* Sin aceptar, la cámara no se activa
-   (RN16).
+   (RN10).
 2. **Captura**: el frontend (móvil del cliente en `Reservar`/`MisCitas`, o tablet del
    trabajador durante la cita) abre la cámara nativa del navegador (`getUserMedia`), captura un
    frame, y lo envía al backend como `multipart/form-data` en un único request — nunca queda
@@ -90,11 +90,11 @@ cualquier revisión de código futura.
    (atributos de cada `EstiloCatalogo`, no las imágenes en sí, para mantener el prompt liviano).
    La IA devuelve una lista rankeada de IDs del catálogo con su score de afinidad.
 4. **Descarte**: apenas se obtiene la respuesta de la IA, el backend libera la imagen recibida
-   — no se escribe a disco ni a ningún bucket de storage en ningún punto del flujo (RN17).
+   — no se escribe a disco ni a ningún bucket de storage en ningún punto del flujo (RN11).
 5. **Selección**: el cliente ve las sugerencias (imágenes ya existentes del catálogo, no
    generadas), elige una o varias, y presiona "enviar a mi especialista".
 6. **Entrega**: se crea `SeleccionEstilo` ligado a la próxima `Cita` del cliente — solo si esa
-   cita existe y está en un estado no terminal (RN19); si el cliente no tiene ninguna cita
+   cita existe y está en un estado no terminal (RN13); si el cliente no tiene ninguna cita
    futura agendada todavía, la consulta queda guardada pero el botón "enviar a mi estilista"
    permanece deshabilitado hasta que reserve una. La especialista ve la selección en su agenda
    (tablet) antes de que la clienta llegue.
@@ -107,7 +107,7 @@ cualquier revisión de código futura.
 ## Configuración por el admin
 
 - Activar/desactivar el módulo globalmente.
-- Límite de consultas por cliente por día (RN18) — control de costo de la API de Gemini.
+- Límite de consultas por cliente por día (RN12) — control de costo de la API de Gemini.
 - Gestión del catálogo de estilos (`EstiloCatalogo`): alta, edición, baja — CUS29.
 - Métricas de uso agregadas (número de consultas, estilos más elegidos) — nunca fotos, porque
   no existen.
@@ -156,7 +156,7 @@ GET    /api/v1/ia/consultas/mis-consultas    # cliente — su propio historial
 GET    /api/v1/ia/consultas/cliente/{id}     # trabajador/admin — historial de un cliente
                                               # (para la especialista que lo va a atender)
 POST   /api/v1/ia/consultas/{id}/seleccion   # cliente o trabajador — registra SeleccionEstilo
-                                              # y la liga a la próxima cita (RN19)
+                                              # y la liga a la próxima cita (RN13)
 POST   /api/v1/ia/consultas/{id}/feedback    # trabajador — feedback post-servicio (CUS28)
 GET    /api/v1/ia/catalogo                   # cualquier rol autenticado — estilos activos
 POST   /api/v1/ia/favoritos                  # cliente — favorito sin pasar por consulta (CUS23)
@@ -182,7 +182,7 @@ Siguiendo la estructura ya establecida (`pages/{admin,worker,client}/`, `service
   `MisCitas.tsx` (si ya tiene una cita próxima confirmada).
 - `components/client/CamaraConsulta.tsx` (nuevo) — encapsula `getUserMedia`, captura un frame a
   `<canvas>`, lo exporta a blob para el `multipart/form-data`; nunca persiste el blob en
-  estado de React más tiempo del necesario para el envío (refleja RN17 también en frontend).
+  estado de React más tiempo del necesario para el envío (refleja RN11 también en frontend).
 - `components/client/GridEstilos.tsx` (nuevo) — grid reutilizable de tarjetas de estilo
   (imagen + nombre + score), reutilizado también en `CatalogoExclusivo` de fidelización si el
   diseño visual coincide.
@@ -234,7 +234,7 @@ arriba) y `types/ia.ts` (`IEstiloCatalogo`, `IConsultaIA`, `ISeleccionEstilo`,
 - Si el catálogo crece mucho (cientos de ítems), evaluar pasar de "todo el catálogo en el
   prompt" a una búsqueda por embeddings previa (reducir a los N candidatos más plausibles antes
   de pedirle a la IA que rankee) — no es necesario para un catálogo pequeño/mediano inicial.
-- El límite diario por cliente (RN18) es la principal palanca de control de costo total.
+- El límite diario por cliente (RN12) es la principal palanca de control de costo total.
 
 ## Roles y visibilidad
 

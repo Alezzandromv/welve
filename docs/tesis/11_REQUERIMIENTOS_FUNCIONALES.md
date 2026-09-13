@@ -25,13 +25,26 @@ requerimientos**, incluyendo los reutilizados de otro CU) vive en
 caso de uso. Numeración CU vigente: `CUS01`–`CUS21` (oficial) + `CUS22`–`CUS34` (planeado) — ver
 `docs/CASOS_DE_USO.md`.
 
-> **Nota de esta revisión**: al resincronizar la columna CU con la numeración `CUS`, se
-> corrigieron ocho filas que en la versión anterior apuntaban al CU equivocado por compartir el
-> antiguo prefijo `CU-A01` sin distinguir submódulo: RF-011–014 (categorías/servicios) pasan de
+> **Nota de esta revisión (12/09/2026)**: al resincronizar la columna CU con la numeración `CUS`,
+> se corrigieron ocho filas que en la versión anterior apuntaban al CU equivocado por compartir
+> el antiguo prefijo `CU-A01` sin distinguir submódulo: RF-011–014 (categorías/servicios) pasan de
 > "Gestionar personal" a **CUS21** (Gestionar catálogo de servicios); RF-022 (crear cita para un
 > cliente) pasa a **CUS16** (Gestionar citas); RF-021 y RF-026 (listar citas/pagos) dejan de
 > apuntar a "Ver dashboard" (`CU-A06`) y pasan a **CUS16**/**CUS18** respectivamente — el
 > dashboard (CUS20) solo consume esos datos, no es su caso de uso de origen.
+>
+> **Nota de esta revisión (13/09/2026)**: la columna **RN** se resincronizó con la renumeración
+> completa de `docs/REGLAS_DE_NEGOCIO.md`, que ahora separa dos espacios de numeración: `RN01`–
+> `RN09` son el catálogo de negocio oficial (exactamente las 9 reglas validadas del negocio,
+> antes `RN01`–`RN24` con huecos); `RT01`–`RT05` son mecanismos técnicos que el sistema ya
+> implementa (ficha crítica, bloqueo, buffer, límite de descuento, fidelización automática) pero
+> que no forman parte del catálogo de negocio oficial; `RN10`–`RN18` son la política de negocio
+> de los dos módulos planeados (antes `RN15`–`RN23`). Además se agregaron referencias que
+> faltaban a reglas que ya regían pero no estaban citadas en ningún RF: RN09 (validez del magic
+> link) en RF-001/RF-002; RN06 (garantía de cita) en RF-015, RF-022 y RF-027; RN05 (prioridad de
+> atención) en RF-022; RN03 (no-show) en RF-018 y RF-024, antes solo citaban el mecanismo de
+> tolerancia (RN04) sin la consecuencia misma. Ver la tabla de mapeo completa en
+> `docs/REGLAS_DE_NEGOCIO.md`.
 
 ---
 
@@ -68,8 +81,8 @@ flowchart LR
 
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
-| RF-001 | Solicitar acceso por magic link | Entrada: teléfono. Proceso: busca o crea `Usuario`+`Cliente`, genera `MagicLink` (TTL 1h), envía enlace por WhatsApp si `acepta_whatsapp=true`. Salida: confirmación de envío. | Cliente | Alta | CUS01 | — |
-| RF-002 | Verificar magic link | Entrada: token UUID. Proceso: valida no usado/no expirado, `UPDATE` atómico `usado=true`, emite JWT. Salida: `access_token`, rol, nombre. | Cliente | Alta | CUS01 | — |
+| RF-001 | Solicitar acceso por magic link | Entrada: teléfono. Proceso: busca o crea `Usuario`+`Cliente`, genera `MagicLink` (TTL 1h), envía enlace por WhatsApp si `acepta_whatsapp=true`. Salida: confirmación de envío. | Cliente | Alta | CUS01 | RN09 |
+| RF-002 | Verificar magic link | Entrada: token UUID. Proceso: valida no usado/no expirado, `UPDATE` atómico `usado=true`, emite JWT. Salida: `access_token`, rol, nombre. | Cliente | Alta | CUS01 | RN09 |
 | RF-003 | Registrar personal (staff) | Entrada: nombre, correo, contraseña, rol (`admin`\|`trabajador`). Proceso: valida correo único, hashea contraseña, crea `Usuario`. Salida: JWT. | Admin/Trabajador (auto-registro) | Media | CUS13 | — |
 | RF-004 | Iniciar sesión staff | Entrada: correo, contraseña. Proceso: valida credenciales y `esta_activo`. Salida: JWT. | Trabajador, Admin | Alta | CUS13 | — |
 | RF-005 | Consultar perfil propio | Entrada: JWT. Salida: datos del `Usuario` autenticado. Reutilizado también por CUS13 (mismo endpoint, actor staff). | Cliente, Trabajador, Admin | Media | CUS02 | — |
@@ -111,10 +124,10 @@ flowchart LR
 |---|---|---|---|---|---|---|
 | RF-008 | Listar servicios | Salida: catálogo de `Servicio` activos, sin autenticación. | Público | Alta | CUS03 | — |
 | RF-009 | Listar categorías | Salida: `Categoria` ordenadas por `orden_visualizacion`. | Público | Media | CUS03 | — |
-| RF-010 | Consultar disponibilidad de un servicio | Entrada: `servicio_id`. Salida: horarios libres considerando duración, buffer y citas existentes. | Público | Alta | CUS03 | RN13 |
+| RF-010 | Consultar disponibilidad de un servicio | Entrada: `servicio_id`. Salida: horarios libres considerando duración, buffer y citas existentes. | Público | Alta | CUS03 | RT03 |
 | RF-011 | Crear categoría | Entrada: nombre, ícono, color, orden. Salida: `Categoria` creada. | Admin | Media | CUS21 | — |
 | RF-012 | Editar categoría | Entrada: campos parciales. Salida: `Categoria` actualizada. | Admin | Baja | CUS21 | — |
-| RF-013 | Crear servicio | Entrada: nombre, duración, precio, depósito, `requiere_ficha_salud`, `horas_cancelacion_sin_penalidad`. Salida: `Servicio` creado. | Admin | Alta | CUS21 | RN01, RN02, RN08 |
+| RF-013 | Crear servicio | Entrada: nombre, duración, precio, depósito, `requiere_ficha_salud`, `horas_cancelacion_sin_penalidad`. Salida: `Servicio` creado. | Admin | Alta | CUS21 | RN01, RN02, RN07 |
 | RF-014 | Editar servicio | Entrada: campos parciales. Salida: `Servicio` actualizado. | Admin | Media | CUS21 | — |
 
 ---
@@ -160,16 +173,16 @@ flowchart LR
 
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
-| RF-015 | Crear cita | Entrada: servicios, especialista, horario, notas. Proceso: valida bloqueo, ficha de salud, solapamiento. Salida: `Cita` en `pendiente`. | Cliente | Alta | CUS03 | RN08, RN11, RN13 |
+| RF-015 | Crear cita | Entrada: servicios, especialista, horario, notas. Proceso: valida bloqueo, ficha de salud, solapamiento. Salida: `Cita` en `pendiente` — no garantiza atención hasta que se confirme el depósito (RF-025/RF-027, CUS04). | Cliente | Alta | CUS03 | RN06, RN07, RT02, RT03 |
 | RF-016 | Listar mis citas | Salida: citas del cliente autenticado, ordenadas por fecha descendente. Reutilizado también por CUS07 (mismo endpoint, filtrado del lado del cliente a estados terminales). | Cliente | Alta | CUS05 | — |
 | RF-017 | Cancelar cita | Entrada: motivo opcional. Proceso: calcula horas restantes vs. umbral del servicio. Salida: `cancelada` o `cancelada_tardia`, según la rama (RN01/RN02) — un solo RF, dos ramas del mismo CU. | Cliente | Alta | CUS08 | RN01, RN02 |
-| RF-018 | Cambiar estado de cita | Entrada: nuevo estado, `confirmar_ficha_critica` opcional. Proceso: valida transición y ficha crítica. Salida: `Cita` actualizada, o 422 con `codigo: FICHA_CRITICA` si corresponde (RN09) — un solo RF, dos ramas del mismo CU. | Trabajador, Admin | Alta | CUS11 | RN09, RN15 |
+| RF-018 | Cambiar estado de cita | Entrada: nuevo estado, `confirmar_ficha_critica` opcional. Proceso: valida transición y ficha crítica. Salida: `Cita` actualizada, o 422 con `codigo: FICHA_CRITICA` si corresponde (RT01) — un solo RF, incluye la transición manual a `no_show` (RN03). | Trabajador, Admin | Alta | CUS11 | RN03, RT01, RT05 |
 | RF-019 | Registrar llegada | Entrada: hora de llegada. Salida: `hora_llegada_real` registrada, sin cambiar estado. | Trabajador, Admin | Media | CUS11 | — |
 | RF-020 | Consultar servicios de una cita | Salida: lista de `CitaServicio` con precio y duración congelados al momento de la reserva. | Trabajador, Admin | Baja | — | — |
 | RF-021 | Listar todas las citas | Entrada: filtros opcionales (fecha, estado). Salida: citas enriquecidas con nombres de cliente/especialista/servicio. | Admin | Alta | CUS16 | — |
-| RF-022 | Crear cita para un cliente | Igual que RF-015 pero iniciado por el admin en nombre de un cliente, sin restricción de anticipación mínima. | Admin | Media | CUS16 | RN13 |
+| RF-022 | Crear cita para un cliente | Igual que RF-015 pero iniciado por el admin en nombre de un cliente, sin restricción de anticipación mínima. | Admin | Media | CUS16 | RN05, RN06, RT03 |
 | RF-023 | Consultar pagos de una cita | Salida: historial de `Pago` asociados a la cita. | Admin | Media | CUS18 | — |
-| RF-024 | Verificar no-show automático | Proceso batch (cada 5 min): marca `no_show` las citas `confirmada` con 15+ min de retraso sin llegada registrada. | Sistema (Celery Beat) | Alta | CUS11 | RN05 |
+| RF-024 | Verificar no-show automático | Proceso batch (cada 5 min): marca `no_show` las citas `confirmada` con 15+ min de retraso sin llegada registrada. | Sistema (Celery Beat) | Alta | CUS11 | RN03, RN04 |
 
 ---
 
@@ -203,7 +216,7 @@ flowchart LR
 |---|---|---|---|---|---|---|
 | RF-025 | Registrar pago | Entrada: cita, tipo, método, monto. Salida: `Pago` en `pendiente`. | Admin | Alta | CUS18 | — |
 | RF-026 | Listar pagos pendientes | Salida: `Pago` con `estado=pendiente`, para conciliación diaria. También alimenta el widget de pagos pendientes de CUS20. | Admin | Alta | CUS18 | — |
-| RF-027 | Confirmar pago | Proceso: registra `confirmado_por` y `fecha_confirmacion`. Salida: `Pago.estado=confirmado`. | Admin | Alta | CUS18 | — |
+| RF-027 | Confirmar pago | Proceso: registra `confirmado_por` y `fecha_confirmacion`. Salida: `Pago.estado=confirmado` — para un depósito, es lo que convierte la cita `pendiente` en atención garantizada (RN06). | Admin | Alta | CUS18 | RN06 |
 | RF-028 | Rechazar pago | Salida: `Pago.estado=rechazado`. | Admin | Media | CUS18 | — |
 | RF-029 | Reembolsar pago | Salida: `Pago.estado=reembolsado` (proceso manual, sin integración automática). | Admin | Media | CUS18 | RN01 |
 
@@ -245,8 +258,8 @@ flowchart LR
 | RF-030 | Listar personal | Salida: especialistas con especialidad, comisión, estado. | Admin | Media | CUS15 | — |
 | RF-031 | Crear personal | Entrada: `usuario_id` (creado previamente como `Usuario` rol `trabajador`), especialidad, comisión, tipo de contrato. Salida: `Personal` creado. | Admin | Alta | CUS15 | — |
 | RF-032 | Editar personal | Entrada: campos parciales. Salida: `Personal` actualizado. | Admin | Media | CUS15 | — |
-| RF-033 | Consultar disponibilidad de un personal | Salida: franjas semanales (`DisponibilidadPersonal`). | Admin | Media | CUS15 | RN13 |
-| RF-034 | Registrar disponibilidad | Entrada: día, hora inicio/fin, buffer. Salida: franja creada. | Admin | Alta | CUS15 | RN13 |
+| RF-033 | Consultar disponibilidad de un personal | Salida: franjas semanales (`DisponibilidadPersonal`). | Admin | Media | CUS15 | RT03 |
+| RF-034 | Registrar disponibilidad | Entrada: día, hora inicio/fin, buffer. Salida: franja creada. | Admin | Alta | CUS15 | RT03 |
 | RF-035 | Eliminar franja de disponibilidad | Salida: franja eliminada/desactivada. | Admin | Baja | CUS15 | — |
 | RF-036 | Consultar agenda propia | Salida: citas del día de la especialista autenticada, sin datos financieros ni de otras especialistas. | Trabajador | Alta | CUS10 | — |
 
@@ -288,10 +301,10 @@ flowchart LR
 | RF-038 | Consultar cliente | Salida: perfil completo de un `Cliente`. | Admin | Media | CUS17 | — |
 | RF-039 | Editar cliente | Entrada: etiquetas, notas internas (nunca `correo`/`password`, rechazados explícitamente). Salida: `Cliente` actualizado. | Admin | Media | CUS17 | — |
 | RF-040 | Consultar historial de citas | Salida: lista de `Cita` pasadas del cliente. | Admin | Media | CUS17 | — |
-| RF-041 | Listar fichas de salud | Salida: `FichaSalud` del cliente, con severidad. No confundir con la alerta de CUS11: esa viaja embebida en la respuesta 422 de RF-018, sin invocar este RF por separado. | Admin | Alta | CUS17 | RN08 |
-| RF-042 | Registrar ficha de salud | Entrada: tipo de restricción, descripción, severidad. Salida: `FichaSalud` creada. | Admin | Alta | CUS17 | RN08, RN09 |
-| RF-043 | Bloquear cliente | Entrada: motivo. Salida: `esta_bloqueada=true`, `fecha_bloqueo` registrada. | Admin | Media | CUS17 | RN11 |
-| RF-044 | Desbloquear cliente | Salida: `esta_bloqueada=false`. | Admin | Baja | CUS17 | RN11 |
+| RF-041 | Listar fichas de salud | Salida: `FichaSalud` del cliente, con severidad. No confundir con la alerta de CUS11: esa viaja embebida en la respuesta 422 de RF-018, sin invocar este RF por separado. | Admin | Alta | CUS17 | RN07 |
+| RF-042 | Registrar ficha de salud | Entrada: tipo de restricción, descripción, severidad. Salida: `FichaSalud` creada. | Admin | Alta | CUS17 | RN07, RT01 |
+| RF-043 | Bloquear cliente | Entrada: motivo. Salida: `esta_bloqueada=true`, `fecha_bloqueo` registrada. | Admin | Media | CUS17 | RT02 |
+| RF-044 | Desbloquear cliente | Salida: `esta_bloqueada=false`. | Admin | Baja | CUS17 | RT02 |
 
 ---
 
@@ -371,14 +384,14 @@ flowchart LR
 
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
-| RF-052 | Consultar mis retos | Salida: progreso de cada `Reto` activo (visitas completadas / requeridas). | Cliente | Media | CUS09 | RN15 |
-| RF-053 | Consultar mis descuentos disponibles | Salida: `Descuento` vigentes que el cliente aún puede canjear. | Cliente | Media | CUS09 | RN14 |
-| RF-054 | Aplicar descuento | Entrada: código, cita. Proceso: bloqueo optimista, valida vigencia y límites de uso. Salida: `DescuentoUso` registrado. | Cliente | Alta | CUS09 | RN14 |
+| RF-052 | Consultar mis retos | Salida: progreso de cada `Reto` activo (visitas completadas / requeridas). | Cliente | Media | CUS09 | RT05 |
+| RF-053 | Consultar mis descuentos disponibles | Salida: `Descuento` vigentes que el cliente aún puede canjear. | Cliente | Media | CUS09 | RT04 |
+| RF-054 | Aplicar descuento | Entrada: código, cita. Proceso: bloqueo optimista, valida vigencia y límites de uso. Salida: `DescuentoUso` registrado. | Cliente | Alta | CUS09 | RT04 |
 | RF-055 | Listar descuentos | Salida: todos los `Descuento` (admin). | Admin | Baja | CUS19 | — |
 | RF-056 | Crear descuento | Entrada: tipo, scope, código, valor, límites, vigencia. Salida: `Descuento` creado. | Admin | Media | CUS19 | — |
 | RF-057 | Listar retos | Salida: todos los `Reto` (admin). | Admin | Baja | CUS19 | — |
 | RF-058 | Crear reto | Entrada: visitas requeridas, ventana de días, recompensa. Salida: `Reto` creado. | Admin | Media | CUS19 | — |
-| RF-059 | Verificar retos completados | Proceso automático al completar una cita: evalúa todos los retos activos, genera descuento premio idempotente. | Sistema (interno) | Alta | CUS09 | RN15 |
+| RF-059 | Verificar retos completados | Proceso automático al completar una cita: evalúa todos los retos activos, genera descuento premio idempotente. | Sistema (interno) | Alta | CUS09 | RT05 |
 
 ---
 
@@ -427,14 +440,14 @@ flowchart LR
 
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
-| RF-060 | Analizar imagen y sugerir estilos | Entrada: foto capturada (efímera). Proceso: envío a Gemini + catálogo, descarte inmediato de la foto. Salida: ranking de `EstiloCatalogo`, nunca la imagen. Reutilizado también por CUS26 (mismo endpoint, iniciado por la especialista). | Cliente, Trabajador | Alta | CUS22 | RN16, RN17, RN18 |
+| RF-060 | Analizar imagen y sugerir estilos | Entrada: foto capturada (efímera). Proceso: envío a Gemini + catálogo, descarte inmediato de la foto. Salida: ranking de `EstiloCatalogo`, nunca la imagen. Reutilizado también por CUS26 (mismo endpoint, iniciado por la especialista). | Cliente, Trabajador | Alta | CUS22 | RN10, RN11, RN12 |
 | RF-061 | Consultar catálogo de estilos | Salida: `EstiloCatalogo` activos con atributos. | Cualquier rol autenticado | Media | CUS22 | — |
-| RF-062 | Enviar selección a especialista | Entrada: estilo elegido. Proceso: liga a la próxima `Cita` no terminal. Salida: `SeleccionEstilo` creada. Reutilizado también por CUS26. | Cliente, Trabajador | Alta | CUS22 | RN19 |
-| RF-063 | Consultar historial de estilos de un cliente | Salida: `SeleccionEstilo` previas de ese cliente, sin reanálisis. | Trabajador, Admin | Media | CUS27 | RN19 |
+| RF-062 | Enviar selección a especialista | Entrada: estilo elegido. Proceso: liga a la próxima `Cita` no terminal. Salida: `SeleccionEstilo` creada. Reutilizado también por CUS26. | Cliente, Trabajador | Alta | CUS22 | RN13 |
+| RF-063 | Consultar historial de estilos de un cliente | Salida: `SeleccionEstilo` previas de ese cliente, sin reanálisis. | Trabajador, Admin | Media | CUS27 | RN13 |
 | RF-064 | Registrar feedback de estilo | Entrada: coincidió sí/no + nota. Salida: `SeleccionEstilo.feedback_coincidio` actualizado. | Trabajador | Baja | CUS28 | — |
 | RF-065 | Marcar estilo como favorito | Entrada: estilo elegido sin cámara. Salida: `SeleccionEstilo` con `origen=favorito`. | Cliente | Baja | CUS23 | — |
-| RF-066 | Gestionar catálogo de estilos | CRUD completo de `EstiloCatalogo` (alta, edición, baja lógica). | Admin | Media | CUS29 | RN16–RN19 |
-| RF-067 | Configurar módulo de IA | Entrada: activar/desactivar, límite diario de consultas. Salida: configuración persistida. | Admin | Media | CUS31 | RN18 |
+| RF-066 | Gestionar catálogo de estilos | CRUD completo de `EstiloCatalogo` (alta, edición, baja lógica). | Admin | Media | CUS29 | RN10–RN13 |
+| RF-067 | Configurar módulo de IA | Entrada: activar/desactivar, límite diario de consultas. Salida: configuración persistida. | Admin | Media | CUS31 | RN12 |
 | RF-068 | Consultar métricas de uso de IA | Salida: consultas totales, estilos más elegidos, % de feedback positivo — nunca fotos. | Admin | Baja | CUS30 | — |
 
 ---
@@ -485,14 +498,14 @@ flowchart LR
 | Código | Nombre | Descripción | Actor(es) | Prioridad | CU | RN |
 |---|---|---|---|---|---|---|
 | RF-069 | Consultar niveles de fidelización | Salida: `NivelFidelizacion` activos con sus beneficios visibles. | Cualquier rol autenticado | Media | CUS24 | — |
-| RF-070 | Gestionar niveles de fidelización | CRUD completo: nombre, orden, tipo/valor de umbral, beneficios. | Admin | Alta | CUS32 | RN20 |
-| RF-071 | Consultar mi nivel y progreso | Salida: nivel actual del cliente + qué falta para el siguiente. | Cliente | Media | CUS24 | RN20 |
-| RF-072 | Consultar catálogo exclusivo | Salida: `ProductoCatalogoExclusivo`, con los de nivel superior marcados `bloqueado`. | Cliente | Media | CUS25 | RN22 |
+| RF-070 | Gestionar niveles de fidelización | CRUD completo: nombre, orden, tipo/valor de umbral, beneficios. | Admin | Alta | CUS32 | RN14 |
+| RF-071 | Consultar mi nivel y progreso | Salida: nivel actual del cliente + qué falta para el siguiente. | Cliente | Media | CUS24 | RN14 |
+| RF-072 | Consultar catálogo exclusivo | Salida: `ProductoCatalogoExclusivo`, con los de nivel superior marcados `bloqueado`. | Cliente | Media | CUS25 | RN16 |
 | RF-073 | Gestionar catálogo exclusivo | CRUD completo de productos (nombre, precio, imagen, nivel mínimo, stock). | Admin | Alta | CUS32 | — |
-| RF-074 | Comprar producto del catálogo | Entrada: producto elegido. Proceso: valida nivel, crea `PedidoCatalogo` pendiente, inicia checkout Culqi. Salida: token de pago. | Cliente | Alta | CUS25 | RN22 |
-| RF-075 | Confirmar pago vía webhook | Entrada: evento firmado de Culqi. Proceso: verifica firma, actualiza estado de forma idempotente. Salida: `PedidoCatalogo` en `pagado`/`cancelado`. | Sistema (Culqi) | Alta | CUS25 | RN23, RN24 |
-| RF-076 | Gestionar pedidos del catálogo | Entrada: filtros estado/cliente/producto. Proceso: marcar `entregado`. Salida: pedidos actualizados. | Admin | Media | CUS33 | RN23 |
-| RF-077 | Recalcular niveles de fidelización | Proceso batch periódico: recalcula el nivel de cada cliente contra los umbrales activos. Sin caso de uso propio — no tiene ningún punto de decisión humana (ver `12_CASOS_DE_USO_RF_RNF.md` §4). | Sistema (Celery Beat) | Alta | — | RN20, RN21 |
+| RF-074 | Comprar producto del catálogo | Entrada: producto elegido. Proceso: valida nivel, crea `PedidoCatalogo` pendiente, inicia checkout Culqi. Salida: token de pago. | Cliente | Alta | CUS25 | RN16 |
+| RF-075 | Confirmar pago vía webhook | Entrada: evento firmado de Culqi. Proceso: verifica firma, actualiza estado de forma idempotente. Salida: `PedidoCatalogo` en `pagado`/`cancelado`. | Sistema (Culqi) | Alta | CUS25 | RN17, RN18 |
+| RF-076 | Gestionar pedidos del catálogo | Entrada: filtros estado/cliente/producto. Proceso: marcar `entregado`. Salida: pedidos actualizados. | Admin | Media | CUS33 | RN17 |
+| RF-077 | Recalcular niveles de fidelización | Proceso batch periódico: recalcula el nivel de cada cliente contra los umbrales activos. Sin caso de uso propio — no tiene ningún punto de decisión humana (ver `12_CASOS_DE_USO_RF_RNF.md` §4). | Sistema (Celery Beat) | Alta | — | RN14, RN15 |
 | RF-078 | Consultar métricas de fidelización | Salida: distribución de clientes por nivel de fidelización + ingresos del catálogo exclusivo del mes, agregados de solo lectura. | Admin | Baja | CUS34 | — |
 
 ---

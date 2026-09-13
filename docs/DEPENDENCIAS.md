@@ -29,6 +29,8 @@ confirmada contra la suite de tests real:
 | python-dotenv | 1.2.3 |
 | ruff | 0.16.5 |
 | pytest / pytest-asyncio | 9.1.1 / 1.4.0 |
+| structlog | 26.1.0 |
+| slowapi | 0.1.10 |
 
 **Verificación realizada** (no solo "instala sin error" — ejecución real de principio a fin):
 
@@ -40,10 +42,10 @@ confirmada contra la suite de tests real:
    sembrado), `GET /servicios`, `GET /admin/citas` con JWT — incluyendo verificación de que
    `enriquecer_cita()` resuelve nombres correctamente contra Postgres real.
 5. Suite de tests nueva (`backend/tests/`, antes vacía) — 11/11 en verde, cubriendo auth
-   (login, magic link con rechazo de reuso) y reglas de negocio RN01/RN02/RN09/RN13/RN14/RN15.
+   (login, magic link con rechazo de reuso) y reglas de negocio RN01/RN02/RT01/RT03/RT04/RT05.
    Los tests corren en transacciones que se revierten al final (no ensucian los datos de seed).
 6. Redis levantado (`docker compose up -d redis`) y la tarea de Celery `verificar_no_show`
-   (RN05) ejecutada directamente sin excepciones.
+   (RN04) ejecutada directamente sin excepciones.
 7. `ruff check app/` limpio — se agregó `backend/pyproject.toml` (no existía configuración de
    ruff antes) con dos ajustes deliberados, no arbitrarios:
    - `extend-immutable-calls` para `Depends`/`Query`/etc. de FastAPI — sin esto, ruff marca
@@ -64,6 +66,35 @@ confirmada contra la suite de tests real:
      el test `test_magic_link_flujo_completo` antes de aceptar el resto del auto-fix. Los otros
      16 hallazgos del mismo tipo (`Columna == True` → `Columna` a secas) sí eran seguros y se
      mantienen.
+
+## Ronda de optimización del backend (2026-09-12)
+
+Se agregaron dos dependencias nuevas al backend (mismas versiones que la tabla de arriba),
+como parte de una ronda de hardening/performance/observabilidad — no solo verificadas contra
+`pytest`, sino ejercitadas de punta a punta:
+
+- **`structlog`**: `core/logging.py` configura JSON en `ENVIRONMENT=production` y consola
+  legible en desarrollo; se probó imprimiendo un evento real con `configurar_logging("production")`
+  y confirmando una línea JSON válida (`{"usuario_id": ..., "event": ..., "level": ...,
+  "timestamp": ...}`). El middleware `RequestIDMiddleware` en `main.py` liga cada request a un
+  `request_id` propagado a los logs vía contextvars, devuelto también en el header
+  `X-Request-ID` — verificado con `curl -D -`.
+- **`slowapi`**: rate limiting en `POST /auth/login` (5/min) y `POST /auth/solicitar-acceso`
+  (3/min), respaldado por el mismo Redis que ya usa Celery (`storage_uri=settings.redis_url`,
+  no memoria local — así el límite se comparte entre workers/procesos uvicorn). Verificado con
+  un test real (`tests/test_auth.py::test_rate_limit_login`, que reactiva el limiter fuera de
+  la fixture `client` — la fixture lo desactiva por default para no romper el resto de la
+  suite bajo el mismo contador de Redis) y manualmente con 6 requests seguidas → la 6ª devuelve
+  429.
+
+Otros cambios de esta ronda, verificados de punta a punta contra Supabase real (no solo con
+mocks): índice compuesto `(personal_id, programada_en)` en `citas` confirmado con `EXPLAIN`
+(pasó de *Seq Scan* a *Index Scan*); N+1 resuelto en `calcular_disponibilidad` (de 2 queries
+por especialista a 2 queries totales, mismo resultado antes/después); exception handler global
+de `IntegrityError`→409 probado con 2 requests concurrentes reales (`asyncio.gather`) sin dar
+500; recordatorios de WhatsApp activados vía Celery `apply_async(eta=...)` y confirmados con
+`celery -A app.tasks inspect scheduled` mostrando el ETA correcto en hora Lima. Detalle completo
+en `CLAUDE.md` (arquitectura) y `docs/FASES.md`.
 
 ## Frontend (`frontend/package.json`)
 

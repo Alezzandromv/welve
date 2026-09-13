@@ -11,6 +11,7 @@ from app.models.personal import Personal
 from app.models.servicio import Servicio
 from app.models.usuario import Usuario
 from app.schemas.clientes import ActualizarClienteRequest, FichaSaludRequest
+from app.services._comunes import aplicar_campos, cita_a_dict, extraer_campos_usuario
 from app.utils.timezone import ahora_lima
 
 
@@ -34,8 +35,13 @@ async def listar_todos(session: AsyncSession) -> list[Cliente]:
     return list((await session.execute(select(Cliente))).scalars().all())
 
 
-async def listar_todos_con_usuario(session: AsyncSession) -> list[dict]:
-    stmt = select(Cliente, Usuario).join(Usuario, Cliente.usuario_id == Usuario.id)
+async def listar_todos_con_usuario(session: AsyncSession, limit: int = 50, offset: int = 0) -> list[dict]:
+    stmt = (
+        select(Cliente, Usuario)
+        .join(Usuario, Cliente.usuario_id == Usuario.id)
+        .order_by(Usuario.nombre_completo.asc())
+        .limit(limit).offset(offset)
+    )
     filas = (await session.execute(stmt)).all()
     return [_cliente_a_dict(cliente, usuario) for cliente, usuario in filas]
 
@@ -83,7 +89,7 @@ async def historial(session: AsyncSession, cliente_id: UUID) -> list[dict]:
 
     result = []
     for cita in citas:
-        d = _cita_a_dict(cita)
+        d = cita_a_dict(cita)
 
         personal = personal_map.get(cita.personal_id)
         u_per = usuarios_map.get(personal.usuario_id) if personal else None
@@ -98,24 +104,6 @@ async def historial(session: AsyncSession, cliente_id: UUID) -> list[dict]:
         result.append(d)
 
     return result
-
-
-def _cita_a_dict(cita: Cita) -> dict:
-    return {
-        "id": cita.id,
-        "cliente_id": cita.cliente_id,
-        "personal_id": cita.personal_id,
-        "programada_en": cita.programada_en,
-        "termina_en": cita.termina_en,
-        "estado": cita.estado,
-        "hora_llegada_real": cita.hora_llegada_real,
-        "notas_cliente": cita.notas_cliente,
-        "notas_especialista": cita.notas_especialista,
-        "motivo_cancelacion": cita.motivo_cancelacion,
-        "fecha_cancelacion": cita.fecha_cancelacion,
-        "penalizacion_aplicada": cita.penalizacion_aplicada,
-        "creada_en": cita.creada_en,
-    }
 
 
 async def listar_fichas(session: AsyncSession, cliente_id: UUID) -> list[FichaSalud]:
@@ -148,15 +136,13 @@ async def actualizar(session: AsyncSession, cliente_id: UUID, body: ActualizarCl
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrada")
 
     datos = body.model_dump(exclude_none=True)
-    campos_usuario = {c: datos.pop(c) for c in ("nombre_completo", "telefono") if c in datos}
+    campos_usuario = extraer_campos_usuario(datos)
 
     usuario = await session.get(Usuario, cliente.usuario_id)
     if campos_usuario and usuario:
-        for campo, valor in campos_usuario.items():
-            setattr(usuario, campo, valor)
+        aplicar_campos(usuario, campos_usuario)
 
-    for campo, valor in datos.items():
-        setattr(cliente, campo, valor)
+    aplicar_campos(cliente, datos)
     await session.flush()
 
     return _cliente_a_dict(cliente, usuario)

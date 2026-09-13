@@ -1,7 +1,9 @@
 from datetime import date
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict
+
+from app.schemas._shared import RechazaCredencialesMixin
 
 
 class FichaSaludRequest(BaseModel):
@@ -36,22 +38,13 @@ class ClienteResponse(BaseModel):
     telefono: str | None = None
 
 
-class ActualizarClienteRequest(BaseModel):
+class ActualizarClienteRequest(RechazaCredencialesMixin, BaseModel):
     fecha_nacimiento: date | None = None
     canal_captacion: str | None = None
     etiquetas: list[str] | None = None
     notas_internas: str | None = None
     nombre_completo: str | None = None
     telefono: str | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def rechazar_credenciales(cls, v: object) -> object:
-        if isinstance(v, dict) and ("correo" in v or "password" in v or "contrasena" in v):
-            raise ValueError(
-                "Los campos correo y contraseña solo se modifican desde /api/v1/admin/usuarios"
-            )
-        return v
 
 
 class BloquearClienteRequest(BaseModel):

@@ -18,6 +18,7 @@ from sqlalchemy.pool import NullPool
 
 from app.core.config import settings
 from app.core.database import get_session
+from app.core.ratelimit import limiter
 from app.core.security import crear_access_token
 from app.main import app
 from app.models.cliente import Cliente
@@ -50,6 +51,12 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
 
 @pytest_asyncio.fixture
 async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
+    # El rate limiting (slowapi, backend Redis) es real entre invocaciones de test — se
+    # desactiva aquí para que la suite no dependa de cuántas veces se llamó /login o
+    # /solicitar-acceso antes en la misma ventana de tiempo (incluidos runs previos de la
+    # propia suite, ya que el contador vive en Redis, no en memoria del proceso).
+    limiter.enabled = False
+
     async def _override_get_session() -> AsyncGenerator[AsyncSession, None]:
         # Replica el commit/rollback por request de `get_session` real, pero sobre la
         # misma sesión de la fixture (unida por savepoints) para que todo quede dentro
@@ -82,6 +89,20 @@ async def crear_usuario_cliente(session: AsyncSession, telefono: str, nombre: st
     session.add(cliente)
     await session.flush()
     return cliente
+
+
+async def crear_usuario_admin(session: AsyncSession, nombre: str = "Admin Test") -> Usuario:
+    """`obtener_usuario_actual` revalida el usuario contra la DB en cada request, así que un
+    token de prueba con un `sub` inventado (UUID al azar) ya no basta — hace falta un
+    `Usuario` real con `esta_activo=True` (default del modelo)."""
+    usuario = Usuario(
+        nombre_completo=nombre,
+        correo=f"{nombre.lower().replace(' ', '.')}@test.eunoia.pe",
+        rol=RolUsuario.admin,
+    )
+    session.add(usuario)
+    await session.flush()
+    return usuario
 
 
 async def crear_personal_activo(session: AsyncSession, nombre: str = "Especialista Test") -> Personal:

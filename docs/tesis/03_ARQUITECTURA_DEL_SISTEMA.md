@@ -4,7 +4,7 @@
 
 Arquitectura en capas estricta: los routers solo enrutan, la lógica de negocio vive en
 `services/`, y el acceso a datos pasa siempre por SQLAlchemy (nunca SQL crudo disperso en
-services). Esta separación es la que permite que las reglas de negocio (RN01–RN24) tengan un
+services). Esta separación es la que permite que las reglas de negocio (RN01–RN18) tengan un
 único lugar de verdad, independiente del transporte HTTP.
 
 ```mermaid
@@ -95,7 +95,7 @@ flowchart TB
 | Backend | FastAPI (Python 3.12) | Async nativo, tipado con Pydantic, OpenAPI automático |
 | ORM / migraciones | SQLAlchemy 2.0 (async) + Alembic | Integridad referencial real vía FKs, migraciones versionadas |
 | Base de datos | Supabase Postgres (vía connection pooler / PgBouncer) | Postgres gestionado; el pooler es obligatorio en Codespaces por falta de salida IPv6 directa |
-| Cola de tareas | Celery + Redis | No-show automático (RN05) y recordatorios sin bloquear el request HTTP |
+| Cola de tareas | Celery + Redis | No-show automático (RN04) y recordatorios sin bloquear el request HTTP |
 | Auth | JWT (python-jose) + bcrypt | Dual: magic link (clientes) / password (staff) — ver `07_DIAGRAMAS_DE_SECUENCIA.md` |
 | Notificaciones | WhatsApp Business API (Meta Cloud API) | Canal ya usado por el negocio, cero fricción de onboarding para clientas |
 | Frontend | React 19 + TypeScript + Vite | SPA con Fast Refresh, build de producción con type-check integrado |

@@ -31,7 +31,7 @@ descuentos genéricos.
 ## Objetivos de producto (medibles)
 
 - **Cero dobles reservas**: ninguna cita se agenda solapada con otra de la misma especialista
-  (RN13), validado en backend, no solo en la UI.
+  (RT03), validado en backend, no solo en la UI.
 - **Cero fricción de acceso para clientas**: alta y login sin contraseña (magic link por
   WhatsApp) — el tiempo entre "quiero reservar" y "ver el calendario disponible" debe sentirse
   instantáneo.
@@ -65,7 +65,7 @@ financiera del salón (comisiones, ingresos totales).
 
 Necesidades centrales: ver su agenda del día, registrar la llegada de una clienta, avanzar el
 estado de una cita (confirmar → en curso → completada), estar alertada de restricciones de
-salud críticas antes de empezar un servicio (RN09), y — con el módulo de IA planeado — iniciar
+salud críticas antes de empezar un servicio (RT01), y — con el módulo de IA planeado — iniciar
 o consultar una asesoría de estilo durante la cita.
 
 ### Cliente

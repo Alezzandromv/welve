@@ -8,9 +8,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
 from app.models.enums import SeveridadFicha
+from app.models.mixins import TimestampMixin
 
 
-class Cliente(Base):
+class Cliente(TimestampMixin, Base):
     __tablename__ = "clientes"
     __table_args__ = (
         sa.UniqueConstraint("usuario_id", name="uq_clientes_usuario_id"),
@@ -29,8 +30,11 @@ class Cliente(Base):
     fecha_bloqueo: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True), nullable=True)
 
 
-class FichaSalud(Base):
+class FichaSalud(TimestampMixin, Base):
     __tablename__ = "fichas_salud"
+    __table_args__ = (
+        sa.Index("ix_fichas_salud_cliente_id", "cliente_id"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     cliente_id: Mapped[uuid.UUID] = mapped_column(

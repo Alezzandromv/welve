@@ -12,6 +12,7 @@ from app.models.auth import MagicLink
 from app.models.cliente import Cliente
 from app.models.enums import RolUsuario
 from app.models.usuario import Usuario
+from app.services._comunes import verificar_correo_disponible, verificar_telefono_disponible
 from app.utils.timezone import ahora_lima
 from app.utils.whatsapp import enviar_mensaje
 
@@ -207,20 +208,14 @@ async def actualizar_perfil(
         usuario.nombre_completo = nombre_completo.strip()
 
     if correo is not None:
-        existente = (await session.execute(select(Usuario).where(Usuario.correo == correo))).scalar_one_or_none()
-        if existente and existente.id != user_id:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El correo ya está registrado por otro usuario")
+        await verificar_correo_disponible(session, correo, excluir_usuario_id=user_id)
         usuario.correo = correo
 
     if telefono is not None:
         telefono_val = telefono.strip() or None
-        if telefono_val:
-            existente = (await session.execute(select(Usuario).where(Usuario.telefono == telefono_val))).scalar_one_or_none()
-            if existente and existente.id != user_id:
-                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El teléfono ya está registrado por otro usuario")
+        await verificar_telefono_disponible(session, telefono_val, excluir_usuario_id=user_id)
         usuario.telefono = telefono_val
 
-    usuario.actualizado_en = ahora_lima()
     await session.flush()
     return usuario
 
@@ -240,6 +235,5 @@ async def cambiar_password(session: AsyncSession, user_id: UUID, password_actual
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Contraseña actual incorrecta")
 
     usuario.hashed_password = hash_password(password_nueva)
-    usuario.actualizado_en = ahora_lima()
     await session.flush()
     return {"mensaje": "Contraseña actualizada correctamente"}

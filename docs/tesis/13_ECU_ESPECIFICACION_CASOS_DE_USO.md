@@ -4,7 +4,7 @@
 
 **Especificación de Casos de Uso (ECU)**
 
-Versión 1.2
+Versión 1.3
 
 ---
 
@@ -15,6 +15,7 @@ Versión 1.2
 | 08/09/2026 | 1.0 | Elaboración del documento — 32 ECU (Cliente, Trabajador, Administrador) | Vidal Chumacero, Marco Alessandro |
 | 11/09/2026 | 1.1 | Renumeración de los casos de uso planeados de cada actor al final de su rango (antes intercalados con los implementados); retiro de CU-A12 (recálculo de niveles) del catálogo de casos de uso — proceso batch sin punto de decisión humana, documentado solo como regla de negocio; alta de CU-A16 (Consultar métricas de fidelización) | Vidal Chumacero, Marco Alessandro |
 | 12/09/2026 | 1.2 | Renumeración completa a un espacio único `CUS01`–`CUS34` (reemplaza `CU-Cxx`/`CU-Txx`/`CU-Axx`). Fusión de ECU que eran ramas del mismo flujo (cancelar a tiempo/tarde → `CUS08`; llegada + ficha crítica + no-show → `CUS11`; canjear descuento + completar reto → `CUS09`; autenticarse + gestionar cuenta → `CUS13`; gestionar personal + administrar cuentas → `CUS15`). Alta de `CUS04`, `CUS05`, `CUS07`, `CUS16`, `CUS21` (endpoint ya existente sin ECU propia) y de `CUS06`, `CUS12`, `CUS14` (pendientes/brecha de permisos, ver cada ficha). Los 13 ECU de los módulos planeados se movieron a un apéndice (§4). El total pasa de 32 a 34 | Vidal Chumacero, Marco Alessandro |
+| 13/09/2026 | 1.3 | Renumeración completa de las reglas de negocio, en dos pasadas. Primero: alta de 4 reglas que regían el salón pero no tenían ID propio (`RN05` prioridad de atención, `RN06` garantía de cita, `RN08` reclamos post-servicio, `RN09` validez del magic link). Segundo: separación del catálogo en dos espacios — `RN01`–`RN09` quedan como el catálogo de negocio oficial exacto (validado, sin agregados técnicos); los 5 mecanismos técnicos ya implementados que no estaban en ese catálogo (ficha crítica, bloqueo, buffer, límite de descuento, fidelización automática) pasan a numerarse aparte como `RT01`–`RT05`; los 9 de los módulos planeados (IA, fidelización avanzada) se renumeran `RN10`–`RN18`. Ver mapeo completo en `docs/REGLAS_DE_NEGOCIO.md`. Se referencian en las ECU de `CUS01`, `CUS03`, `CUS04`, `CUS11` y `CUS16` donde corresponde | Vidal Chumacero, Marco Alessandro |
 
 ---
 
@@ -112,7 +113,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-El enlace es de un solo uso y expira en 1 hora — mecanismo de seguridad central de este caso de uso, sin código de regla de negocio propio.
+- El enlace es de un solo uso y expira en 1 hora — mecanismo de seguridad central de este caso de uso (RN09).
 
 **Excepciones**
 
@@ -183,9 +184,10 @@ No aplica — caso de uso de una sola vía de éxito.
 
 **Reglas de Negocio**
 
-- Si `cliente.esta_bloqueada=true`, la reserva se rechaza antes de cualquier otra validación (RN11).
-- Si el servicio exige ficha de salud, debe existir una ficha activa registrada para la clienta antes de crear la cita (RN08).
-- El horario disponible ya descuenta el buffer configurado (`personal.minutos_buffer`) más allá del fin de cada cita existente de la especialista (RN13).
+- Si `cliente.esta_bloqueada=true`, la reserva se rechaza antes de cualquier otra validación (RT02).
+- Si el servicio exige ficha de salud, debe existir una ficha activa registrada para la clienta antes de crear la cita (RN07).
+- El horario disponible ya descuenta el buffer configurado (`personal.minutos_buffer`) más allá del fin de cada cita existente de la especialista (RT03).
+- Mientras el depósito no se confirme (CUS04), la cita queda en `pendiente` y no garantiza atención (RN06).
 
 **Excepciones**
 
@@ -221,7 +223,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-El monto del depósito nunca es un valor fijo — siempre se lee de `servicio.monto_deposito`, sin código de regla de negocio propio.
+- Este pago es lo que convierte la reserva `pendiente` en atención garantizada (RN06); el monto nunca es un valor fijo — siempre se lee de `servicio.monto_deposito`.
 
 **Excepciones**
 
@@ -286,7 +288,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-Ninguna con código propio todavía — candidatas: RN01 (techo de anticipación mínima, mismo umbral que cancelar) y RN13 (disponibilidad de la nueva franja).
+Ninguna con código propio todavía — candidatas: RN01 (techo de anticipación mínima, mismo umbral que cancelar) y RT03 (disponibilidad de la nueva franja).
 
 **Excepciones** *(deseadas)*
 
@@ -392,8 +394,8 @@ Ninguna específica.
 
 **Reglas de Negocio**
 
-- `descuento.max_usos_por_cliente` (por defecto 1) se valida contra el conteo de usos previos del cliente antes de aplicar cualquier descuento (RN14).
-- La generación del descuento premio es automática e idempotente — ninguna clienta debe "reclamar" un reto cumplido (RN15).
+- `descuento.max_usos_por_cliente` (por defecto 1) se valida contra el conteo de usos previos del cliente antes de aplicar cualquier descuento (RT04).
+- La generación del descuento premio es automática e idempotente — ninguna clienta debe "reclamar" un reto cumplido (RT05).
 
 **Excepciones**
 
@@ -460,15 +462,16 @@ Ninguna específica.
 
 | N° | Nombre | Descripción |
 | :---: | :---- | :---- |
-| 1 | Atender la alerta de ficha de salud crítica | Al intentar pasar a `en_curso`, si la clienta tiene una `FichaSalud` con severidad `critica`, el sistema responde con el detalle de las fichas sin permitir el avance; la especialista lo revisa (ver CUS12) y reenvía la petición confirmando explícitamente que la revisó, y el sistema permite el avance (RN09). |
+| 1 | Atender la alerta de ficha de salud crítica | Al intentar pasar a `en_curso`, si la clienta tiene una `FichaSalud` con severidad `critica`, el sistema responde con el detalle de las fichas sin permitir el avance; la especialista lo revisa (ver CUS12) y reenvía la petición confirmando explícitamente que la revisó, y el sistema permite el avance (RT01). |
 | 2 | Marcar inasistencia manual (no-show) | Si la clienta no llega, la especialista marca directamente el estado `no_show`, aplicando la pérdida del depósito (RN03). |
-| 3 | Marcar inasistencia automáticamente (no-show) | Cada 5 minutos, el Programador de Tareas (Celery Beat) busca todas las citas `confirmada` con `programada_en + 15 minutos < ahora` y sin `hora_llegada_real`, y las marca `no_show` con la misma penalización — las citas en `pendiente` nunca se ven afectadas (RN05). |
+| 3 | Marcar inasistencia automáticamente (no-show) | Cada 5 minutos, el Programador de Tareas (Celery Beat) busca todas las citas `confirmada` con `programada_en + 15 minutos < ahora` y sin `hora_llegada_real`, y las marca `no_show` con la misma penalización — las citas en `pendiente` nunca se ven afectadas (RN04). |
 
 **Reglas de Negocio**
 
-- Si existe una ficha de salud con severidad crítica, el sistema exige confirmación explícita antes de permitir el paso a `en_curso` (RN09).
-- Al pasar a `completada`, se evalúan automáticamente los retos de fidelización del cliente (RN15).
-- El margen de 15 minutos de la rama automática cubre demoras razonables de tráfico o parking (RN05).
+- Si existe una ficha de salud con severidad crítica, el sistema exige confirmación explícita antes de permitir el paso a `en_curso` (RT01).
+- Al pasar a `completada`, se evalúan automáticamente los retos de fidelización del cliente (RT05).
+- El margen de 15 minutos de la rama automática cubre demoras razonables de tráfico o parking (RN04).
+- Tanto la inasistencia marcada manualmente como la automática pierden el depósito en su totalidad y quedan como cita no atendida (RN03).
 
 **Excepciones**
 
@@ -501,7 +504,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-RN08, RN09 — las mismas que motivan la alerta reactiva de CUS11.
+RN07, RT01 — las mismas que motivan la alerta reactiva de CUS11.
 
 **Excepciones**
 
@@ -609,7 +612,7 @@ Ninguna específica.
 
 **Reglas de Negocio**
 
-- El buffer configurado aquí es el que se valida en cada reserva de cliente (RN13, ver CUS03/CUS16).
+- El buffer configurado aquí es el que se valida en cada reserva de cliente (RT03, ver CUS03/CUS16).
 
 **Excepciones**
 
@@ -637,11 +640,13 @@ Ninguna específica.
 
 **Sub-Flujo**
 
-No aplica.
+| N° | Nombre | Descripción |
+| :---: | :---- | :---- |
+| 1 | Priorizar solicitudes en conflicto | Si dos solicitudes compiten por el mismo horario/especialista, una con depósito confirmado y otra sin él, el administrador prioriza manualmente a la que ya pagó (RN05) — hoy sin cola de espera ni endpoint dedicado. |
 
 **Reglas de Negocio**
 
-RN08, RN11, RN13 — las mismas que valida CUS03 al crear una cita; no se redocumentan aparte.
+RN05 (prioridad de atención), RN06 (sin depósito no garantiza atención), RN07, RT02, RT03 — las últimas tres, las mismas que valida CUS03 al crear una cita; no se redocumentan aparte.
 
 **Excepciones**
 
@@ -678,8 +683,8 @@ RN08, RN11, RN13 — las mismas que valida CUS03 al crear una cita; no se redocu
 
 **Reglas de Negocio**
 
-- Una clienta bloqueada no puede reservar — el sistema rechaza la reserva con un mensaje genérico, sin exponer el motivo (RN11, ver CUS03).
-- Un servicio con `requiere_ficha_salud=true` no puede reservarse sin una ficha activa registrada aquí para esa clienta (RN08, ver CUS03). Una ficha con `severidad='critica'` dispara la alerta de CUS11 al iniciar la cita — hoy el trabajador no puede consultarla aparte (ver la brecha de permisos de CUS12).
+- Una clienta bloqueada no puede reservar — el sistema rechaza la reserva con un mensaje genérico, sin exponer el motivo (RT02, ver CUS03).
+- Un servicio con `requiere_ficha_salud=true` no puede reservarse sin una ficha activa registrada aquí para esa clienta (RN07, ver CUS03). Una ficha con `severidad='critica'` dispara la alerta de CUS11 al iniciar la cita — hoy el trabajador no puede consultarla aparte (ver la brecha de permisos de CUS12).
 
 **Excepciones**
 
@@ -747,7 +752,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-- Los límites de uso configurados aquí son los que valida el canje de CUS09 (RN14). Limitación actual: solo crear y listar, sin edición ni borrado (ver `docs/FASES.md`, Fase 3).
+- Los límites de uso configurados aquí son los que valida el canje de CUS09 (RT04). Limitación actual: solo crear y listar, sin edición ni borrado (ver `docs/FASES.md`, Fase 3).
 
 **Excepciones**
 
@@ -811,7 +816,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-Ninguna con código propio — es el punto de configuración de los umbrales que validan RN01, RN02 y RN08 en tiempo de reserva (CUS03/CUS16).
+Ninguna con código propio — es el punto de configuración de los umbrales que validan RN01, RN02 y RN07 en tiempo de reserva (CUS03/CUS16).
 
 **Excepciones**
 
@@ -858,9 +863,9 @@ solo lo construido hasta la fecha de corte.
 
 **Reglas de Negocio**
 
-- El consentimiento de procesamiento de imagen es obligatorio antes de activar la cámara (RN16).
-- La foto nunca se persiste — se procesa en memoria y se descarta de inmediato (RN17).
-- Existe un límite diario de consultas por cliente, configurable por el administrador (RN18).
+- El consentimiento de procesamiento de imagen es obligatorio antes de activar la cámara (RN10).
+- La foto nunca se persiste — se procesa en memoria y se descarta de inmediato (RN11).
+- Existe un límite diario de consultas por cliente, configurable por el administrador (RN12).
 
 **Excepciones**
 
@@ -893,7 +898,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-Ninguna nueva — reutiliza el catálogo de RN16–RN19 sin pasar por el análisis de imagen.
+Ninguna nueva — reutiliza el catálogo de RN10–RN13 sin pasar por el análisis de imagen.
 
 **Excepciones**
 
@@ -925,7 +930,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-- El nivel refleja el comportamiento reciente del cliente contra los umbrales activos, en orden descendente (RN20).
+- El nivel refleja el comportamiento reciente del cliente contra los umbrales activos, en orden descendente (RN14).
 
 **Excepciones**
 
@@ -960,9 +965,9 @@ No aplica.
 
 **Reglas de Negocio**
 
-- El nivel mínimo se valida en el backend, no solo se oculta en la interfaz — defensa en profundidad (RN22).
-- La confirmación del pago vía webhook es idempotente, porque los webhooks de pasarelas de pago pueden reintentar la entrega (RN23).
-- Un pago rechazado marca el pedido como `cancelado`, sin afectar el nivel de fidelización del cliente (RN24).
+- El nivel mínimo se valida en el backend, no solo se oculta en la interfaz — defensa en profundidad (RN16).
+- La confirmación del pago vía webhook es idempotente, porque los webhooks de pasarelas de pago pueden reintentar la entrega (RN17).
+- Un pago rechazado marca el pedido como `cancelado`, sin afectar el nivel de fidelización del cliente (RN18).
 
 **Excepciones**
 
@@ -999,7 +1004,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-Mismas de CUS22: consentimiento obligatorio (RN16), no persistencia de la foto (RN17), límite diario de consultas (RN18), selección ligada a una cita real (RN19).
+Mismas de CUS22: consentimiento obligatorio (RN10), no persistencia de la foto (RN11), límite diario de consultas (RN12), selección ligada a una cita real (RN13).
 
 **Excepciones**
 
@@ -1030,7 +1035,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-- El historial mostrado corresponde solo a selecciones ligadas a una cita real con esa clienta (RN19).
+- El historial mostrado corresponde solo a selecciones ligadas a una cita real con esa clienta (RN13).
 
 **Excepciones**
 
@@ -1097,7 +1102,7 @@ Ninguna específica.
 
 **Reglas de Negocio**
 
-RN16, RN17, RN18, RN19 — el catálogo es la única fuente de imágenes del módulo.
+RN10, RN11, RN12, RN13 — el catálogo es la única fuente de imágenes del módulo.
 
 **Excepciones**
 
@@ -1159,7 +1164,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-- El límite diario configurado aquí es el que se valida en cada consulta de CUS22/CUS26 (RN18).
+- El límite diario configurado aquí es el que se valida en cada consulta de CUS22/CUS26 (RN12).
 
 **Excepciones**
 
@@ -1191,7 +1196,7 @@ No aplica (ver CUS33 para la gestión de pedidos como caso de uso propio).
 
 **Reglas de Negocio**
 
-RN20, RN21, RN22, RN23, RN24.
+RN14, RN15, RN16, RN17, RN18.
 
 **Excepciones**
 
@@ -1223,7 +1228,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-- El pedido debe haber llegado a `pagado` de forma idempotente antes de poder entregarse (RN23).
+- El pedido debe haber llegado a `pagado` de forma idempotente antes de poder entregarse (RN17).
 
 **Excepciones**
 
@@ -1255,7 +1260,7 @@ No aplica.
 
 **Reglas de Negocio**
 
-Ninguna con código propio — lee el resultado de RN20/RN21 (recálculo de niveles, proceso automático sin caso de uso propio, ver §2.2 de este documento) y de las compras registradas en CUS25.
+Ninguna con código propio — lee el resultado de RN14/RN15 (recálculo de niveles, proceso automático sin caso de uso propio, ver §2.2 de este documento) y de las compras registradas en CUS25.
 
 **Excepciones**
 

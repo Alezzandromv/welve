@@ -7,9 +7,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
 from app.models.enums import TipoContrato
+from app.models.mixins import TimestampMixin
 
 
-class Personal(Base):
+class Personal(TimestampMixin, Base):
     __tablename__ = "personal"
     __table_args__ = (
         sa.UniqueConstraint("usuario_id", name="uq_personal_usuario_id"),
@@ -34,8 +35,11 @@ class Personal(Base):
     esta_activo: Mapped[bool] = mapped_column(sa.Boolean, default=True, nullable=False)
 
 
-class DisponibilidadPersonal(Base):
+class DisponibilidadPersonal(TimestampMixin, Base):
     __tablename__ = "disponibilidad_personal"
+    __table_args__ = (
+        sa.Index("ix_disponibilidad_personal_personal_id", "personal_id"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     personal_id: Mapped[uuid.UUID] = mapped_column(

@@ -2,6 +2,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import hash_password
@@ -14,6 +15,7 @@ from app.schemas.usuarios import (
     CrearUsuarioRequest,
     ResetearPasswordRequest,
 )
+from app.services._comunes import verificar_correo_disponible, verificar_telefono_disponible
 
 
 async def crear(session: AsyncSession, body: CrearUsuarioRequest) -> Usuario:
@@ -25,14 +27,8 @@ async def crear(session: AsyncSession, body: CrearUsuarioRequest) -> Usuario:
     if body.rol == "cliente" and not body.telefono:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="El teléfono es requerido para clientes")
 
-    if body.correo:
-        existente = (await session.execute(select(Usuario).where(Usuario.correo == str(body.correo)))).scalar_one_or_none()
-        if existente:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El correo ya está registrado")
-    if body.telefono:
-        existente = (await session.execute(select(Usuario).where(Usuario.telefono == body.telefono))).scalar_one_or_none()
-        if existente:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El teléfono ya está registrado")
+    await verificar_correo_disponible(session, str(body.correo) if body.correo else None)
+    await verificar_telefono_disponible(session, body.telefono)
 
     usuario = Usuario(
         nombre_completo=body.nombre_completo,
@@ -42,7 +38,11 @@ async def crear(session: AsyncSession, body: CrearUsuarioRequest) -> Usuario:
         rol=RolUsuario(body.rol),
     )
     session.add(usuario)
-    await session.flush()
+    try:
+        await session.flush()
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El correo o teléfono ya está registrado") from None
 
     if body.rol == "cliente":
         session.add(Cliente(usuario_id=usuario.id))
@@ -51,12 +51,16 @@ async def crear(session: AsyncSession, body: CrearUsuarioRequest) -> Usuario:
     return usuario
 
 
-async def listar(session: AsyncSession, rol: str | None = None, esta_activo: bool | None = None) -> list[Usuario]:
+async def listar(
+    session: AsyncSession, rol: str | None = None, esta_activo: bool | None = None,
+    limit: int = 50, offset: int = 0,
+) -> list[Usuario]:
     stmt = select(Usuario)
     if rol:
         stmt = stmt.where(Usuario.rol == rol)
     if esta_activo is not None:
         stmt = stmt.where(Usuario.esta_activo == esta_activo)
+    stmt = stmt.order_by(Usuario.nombre_completo.asc()).limit(limit).offset(offset)
     return list((await session.execute(stmt)).scalars().all())
 
 
@@ -80,12 +84,7 @@ async def cambiar_correo(session: AsyncSession, usuario_id: UUID, body: CambiarC
     usuario = await obtener(session, usuario_id)
     correo_nuevo = str(body.correo)
     if correo_nuevo != (usuario.correo or ""):
-        existente = (await session.execute(select(Usuario).where(Usuario.correo == correo_nuevo))).scalar_one_or_none()
-        if existente and str(existente.id) != str(usuario_id):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="El correo ya está en uso por otro usuario",
-            )
+        await verificar_correo_disponible(session, correo_nuevo, excluir_usuario_id=usuario_id)
     usuario.correo = correo_nuevo
     usuario.correo_verificado = False
     await session.flush()

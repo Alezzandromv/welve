@@ -13,12 +13,12 @@ stateDiagram-v2
     pendiente --> confirmada : admin/trabajador confirma
     pendiente --> cancelada : cliente cancela a tiempo (RN01)
 
-    confirmada --> en_curso : trabajador inicia servicio (RN09)
+    confirmada --> en_curso : trabajador inicia servicio (RT01)
     confirmada --> cancelada : cliente cancela a tiempo (RN01)
     confirmada --> cancelada_tardia : cliente cancela tarde (RN02)
-    confirmada --> no_show : automático tras 15min (RN05) o manual (RN03)
+    confirmada --> no_show : automático tras 15min (RN04) o manual (RN03)
 
-    en_curso --> completada : trabajador termina el servicio (RN15)
+    en_curso --> completada : trabajador termina el servicio (RT05)
     en_curso --> no_show : marcado manualmente
 
     completada --> [*]
@@ -28,20 +28,20 @@ stateDiagram-v2
 
     note right of pendiente
         Nota: las citas en 'pendiente' NO son
-        candidatas al no-show automático de RN05 —
+        candidatas al no-show automático de RN04 —
         solo 'confirmada' lo es.
     end note
 
     note right of completada
         Al entrar aquí se dispara
-        verificar_retos_completados() (RN15/CUS09).
+        verificar_retos_completados() (RT05/CUS09).
     end note
 ```
 
 Estados terminales (`completada`, `cancelada`, `cancelada_tardia`, `no_show`): ninguno tiene
 transición de salida — una vez ahí, la cita es inmutable en cuanto a estado (`_ESTADOS_
 BLOQUEADOS` en el código, usado también para excluir estas citas del cálculo de solapamiento de
-RN13).
+RT03).
 
 ## Ciclo de vida de `PedidoCatalogo` *(planeado)*
 
@@ -49,8 +49,8 @@ RN13).
 stateDiagram-v2
     [*] --> pendiente : cliente inicia checkout (CUS25)
 
-    pendiente --> pagado : webhook Culqi confirma (RN23, idempotente)
-    pendiente --> cancelado : webhook Culqi rechaza (RN24)
+    pendiente --> pagado : webhook Culqi confirma (RN17, idempotente)
+    pendiente --> cancelado : webhook Culqi rechaza (RN18)
 
     pagado --> entregado : admin marca entrega física (CUS33)
 
@@ -65,7 +65,7 @@ stateDiagram-v2
 
     note right of pagado
         No se puede pasar a 'entregado' un pedido
-        que no esté en 'pagado' (RN23) — 422 si se
+        que no esté en 'pagado' (RN17) — 422 si se
         intenta.
     end note
 ```
@@ -80,18 +80,18 @@ tres niveles (Bronce/Plata/Oro); en producción puede haber cualquier cantidad c
 stateDiagram-v2
     [*] --> SinNivel : cliente nuevo
 
-    SinNivel --> Bronce : cumple umbral de Bronce (RN20)
-    Bronce --> Plata : cumple umbral de Plata (RN20)
-    Plata --> Oro : cumple umbral de Oro (RN20)
+    SinNivel --> Bronce : cumple umbral de Bronce (RN14)
+    Bronce --> Plata : cumple umbral de Plata (RN14)
+    Plata --> Oro : cumple umbral de Oro (RN14)
 
-    Oro --> Plata : recálculo — ya no cumple Oro (RN21)
-    Plata --> Bronce : recálculo — ya no cumple Plata (RN21)
-    Bronce --> SinNivel : recálculo — ya no cumple Bronce (RN21)
+    Oro --> Plata : recálculo — ya no cumple Oro (RN15)
+    Plata --> Bronce : recálculo — ya no cumple Plata (RN15)
+    Bronce --> SinNivel : recálculo — ya no cumple Bronce (RN15)
 
     Oro --> SinNivel : recálculo — cae directo (umbral por ventana de tiempo)
 
     note right of Oro
-        RN21: un downgrade nunca revoca
+        RN15: un downgrade nunca revoca
         pedidos ya hechos mientras el
         cliente tenía el nivel superior.
     end note

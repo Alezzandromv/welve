@@ -25,10 +25,10 @@ Cada fase lista objetivo, entregables, criterios de aceptación y dependencias.
   - ✅ `seed.py` puebla datos demo sin excepciones.
   - ✅ Backend arriba, smoke test de endpoints clave (login, servicios, citas admin con
     `enriquecer_cita()`) contra la base real.
-  - ✅ Suite de tests (`backend/tests/`) cubriendo auth, RN01/RN02/RN09/RN13, RN14/RN15 —
+  - ✅ Suite de tests (`backend/tests/`) cubriendo auth, RN01/RN02/RT01/RT03, RT04/RT05 —
     11/11 en verde, corriendo con transacciones que se revierten (no ensucian los datos de
     seed).
-  - ✅ Tarea de Celery `verificar_no_show` (RN05) ejecutada sin excepciones contra Redis local.
+  - ✅ Tarea de Celery `verificar_no_show` (RN04) ejecutada sin excepciones contra Redis local.
 - **Dependencias**: proyecto Supabase real con `DATABASE_URL` accesible desde el entorno de
   desarrollo — ya configurado en `backend/.env`.
 
@@ -58,6 +58,59 @@ Cada fase lista objetivo, entregables, criterios de aceptación y dependencias.
   `GET /clientes/{id}/fichas-salud` y `GET /clientes/{id}/historial` (`CUS12`/`CUS14`, ver
   `docs/ROLES_Y_PERMISOS.md`).
 
+## Fase 2.5 — Optimización de backend: performance, seguridad y observabilidad ✅ (esta ronda)
+
+- **Objetivo**: aplicar mejores prácticas y patrones al backend ya existente (sin agregar
+  features nuevas) para que quede modularizado, más rápido y observable en producción — a
+  partir de una auditoría completa de `core/`, `models/`, `schemas/`, `services/`, `routers/`,
+  `tasks/` y `utils/`.
+- **Entregables**:
+  - **Fundamentos compartidos**: `services/_comunes.py` (get-or-404, lookups de
+    Cliente/Personal por `usuario_id`, chequeo de unicidad correo/teléfono, mapper de citas,
+    resolución de servicios) y `utils/disponibilidad.py` (`se_solapa`, única fuente de verdad
+    de RT03 — antes duplicada de forma independiente en `citas_service` y `servicios_service`).
+  - **Seguridad**: `core/security.py::obtener_usuario_actual` ahora revalida `esta_activo`/
+    `esta_bloqueada`/`rol` contra la DB en cada request — antes un usuario desactivado o
+    bloqueado seguía autenticado con su JWT viejo hasta que expirara. `secret_key` con
+    validación mínima de longitud (rotado en `.env` de desarrollo, quedó por debajo del mínimo).
+    `ENVIRONMENT=production` ahora oculta `/docs`/`/redoc` y desactiva el regex de CORS de
+    Codespaces.
+  - **Performance**: índice compuesto `(personal_id, programada_en)` en `citas` (la validación
+    de solapamiento pasó de *Seq Scan* a *Index Scan*, confirmado con `EXPLAIN`) más índices en
+    todas las FK que antes no tenían ninguno; N+1 resuelto en
+    `servicios_service.calcular_disponibilidad` (2 queries totales en vez de 2 por
+    especialista); paginación (`limit`/`offset`) en los listados admin de citas, clientes,
+    usuarios, personal, descuentos y retos.
+  - **Auditoría de datos**: `models/mixins.py::TimestampMixin` (`creado_en`/`actualizado_en`
+    con `server_default`/`onupdate` a nivel de servidor) aplicado a los 9 modelos que no tenían
+    ningún timestamp; corregido `Usuario.actualizado_en` (le faltaba `onupdate`, nunca se
+    actualizaba tras el INSERT inicial).
+  - **Robustez**: exception handler global de `IntegrityError`→409 (antes: 500 genérico bajo
+    requests concurrentes contra columnas únicas) más manejo puntual en los 5 puntos de
+    check-then-insert sin protección; RN07 (ficha de salud requerida) unificado entre `crear`
+    (reserva de cliente) y `crear_para_admin` (antes el admin podía saltárselo en silencio).
+  - **Observabilidad**: logging estructurado (`structlog`, nuevo — JSON en producción, consola
+    en desarrollo) con middleware de `request_id`; handler global de excepciones no
+    anticipadas con stacktrace; health check real (`/health` verifica Postgres, no un ping
+    trivial); `GZipMiddleware`.
+  - **Rate limiting**: `slowapi` (nuevo, respaldado por Redis) en `POST /auth/login` (5/min) y
+    `POST /auth/solicitar-acceso` (3/min) — antes sin ningún límite.
+  - **WhatsApp/Celery**: `utils/whatsapp.py` con timeout explícito, manejo de errores de red y
+    de rate-limit de Meta (429), y logging de cada resultado (antes: sin try/except, sin
+    logging, valor de retorno ignorado por el caller). Reintentos (`autoretry_for`,
+    `retry_backoff`) en las tasks de Celery. **Recordatorios de WhatsApp 24h/2h activados** —
+    existían como código desde antes pero nunca se disparaban (no estaban en el beat ni se
+    llamaban desde ningún lado); ahora se agendan vía `apply_async(eta=...)` al crear la cita.
+- **Criterios de aceptación**: suite de tests en verde (15/15, incluyendo 4 tests nuevos de
+  seguridad/rate-limiting) sin tocar los existentes salvo por el helper `crear_usuario_admin`
+  en `tests/conftest.py` (necesario porque la revalidación contra DB rompía tokens de prueba
+  con un `sub` inventado); `ruff check app/` limpio; `alembic check` sin operaciones
+  pendientes; smoke test manual de punta a punta (login, disponibilidad, paginación, 409 bajo
+  concurrencia real, recordatorios agendados verificados con `celery inspect scheduled`).
+- **Deliberadamente fuera de alcance** (no tocado en esta ronda, ver ítems ya documentados en
+  Fase 5 más abajo): la falta de guarda de rol en `POST /auth/registrar`, CI en cada PR, el
+  salto de Tailwind (frontend).
+
 ## Fase 3 — Fidelización avanzada (futuro)
 
 Objetivo general: implementar niveles de fidelización configurables, catálogo exclusivo y
@@ -74,7 +127,7 @@ tests como base estable); cuenta de comercio Culqi con credenciales de sandbox a
 
 **3.2 — Services y reglas de negocio (backend)**
 - `app/services/catalogo_service.py`: CRUD de niveles/productos, `calcular_nivel_cliente()`
-  (RN20), lógica de downgrade sin retroactividad (RN21).
+  (RN14), lógica de downgrade sin retroactividad (RN15).
 - Completar el CRUD pendiente de `Descuento`/`Reto` en `app/services/fidelizacion_service.py`
   (editar/eliminar) — se aprovecha esta fase para cerrar ese gap detectado en la Fase 2.
 - Tests: casos de umbral por visitas, por gasto acumulado, por ventana; downgrade no afecta
@@ -93,8 +146,8 @@ tests como base estable); cuenta de comercio Culqi con credenciales de sandbox a
 - `app/services/pasarela_service.py` (Culqi: crear cargo, verificar firma) y
   `app/routers/webhooks.py` (`POST /webhooks/culqi`, sin JWT, autenticado por firma).
 - Job `app/tasks/recalcular_niveles.py` en Celery beat.
-- *Aceptación*: RN23 (idempotencia del webhook) verificada con un test que envía el mismo
-  evento dos veces y confirma que `PedidoCatalogo` no duplica efectos; RN24 verificada (pago
+- *Aceptación*: RN17 (idempotencia del webhook) verificada con un test que envía el mismo
+  evento dos veces y confirma que `PedidoCatalogo` no duplica efectos; RN18 verificada (pago
   rechazado no altera nivel).
 
 **3.5 — Vistas admin (frontend)**
@@ -110,7 +163,7 @@ tests como base estable); cuenta de comercio Culqi con credenciales de sandbox a
   (cliente), `components/client/CheckoutCulqi.tsx`.
 - *Aceptación*: un cliente de nivel bajo ve los productos superiores bloqueados con teaser; el
   intento de compra vía API directa (sin pasar por la UI) contra un producto no habilitado
-  responde 403 (RN22 verificada también a nivel de API, no solo de UI).
+  responde 403 (RN16 verificada también a nivel de API, no solo de UI).
 
 **3.7 — Notificaciones**
 - WhatsApp de subida de nivel y de confirmación/entrega de pedido, reutilizando
@@ -119,10 +172,10 @@ tests como base estable); cuenta de comercio Culqi con credenciales de sandbox a
   transición relevante, verificado con el mismo patrón de test que ya usa `auth_service`.
 
 **3.8 — QA y cierre**
-- Suite de tests de backend en verde (RN20–RN24), `ruff check` limpio, `npm run build`/`lint`
+- Suite de tests de backend en verde (RN14–RN18), `ruff check` limpio, `npm run build`/`lint`
   limpios, smoke test manual del flujo completo: cliente sube de nivel → ve catálogo
   desbloqueado → compra → webhook confirma → pedido marcado entregado por admin.
-- *Criterio de aceptación de la fase completa*: RN20–RN24 implementadas y testeadas; webhook
+- *Criterio de aceptación de la fase completa*: RN14–RN18 implementadas y testeadas; webhook
   idempotente verificado con reintentos simulados; UI muestra correctamente productos
   bloqueados con su teaser de nivel.
 
@@ -139,7 +192,7 @@ recomendar).
   configuración persistida en DB, una tabla `configuracion_ia` de fila única.
 - Migración de Alembic; `core/config.py` gana `gemini_api_key`.
 - *Aceptación*: `alembic upgrade head` limpio; ninguna de las tres tablas tiene una columna de
-  imagen de cliente (verificación explícita de RN17 a nivel de esquema).
+  imagen de cliente (verificación explícita de RN11 a nivel de esquema).
 
 **4.2 — Cliente de Gemini y service de análisis (backend)**
 - `app/utils/gemini_client.py` (mismo patrón que `utils/whatsapp.py`: una función async, sin
@@ -149,19 +202,19 @@ recomendar).
   `EstiloCatalogo`, `calcular_metricas()`.
 - *Aceptación*: test que verifica que `crear_consulta()` no deja ningún archivo nuevo en el
   sistema de archivos ni en ningún bucket de storage tras ejecutarse (auditoría automatizada de
-  RN17, no solo revisión manual de código).
+  RN11, no solo revisión manual de código).
 
 **4.3 — Endpoints (backend)**
 - `app/routers/ia.py` con los endpoints listados en
   `docs/MODULO_ASESORIA_IA.md#endpoints-nuevos-api`.
-- *Aceptación*: RN18 (límite diario) probado con un test que agota el límite y confirma 429/422
-  en el intento siguiente; RN19 (selección solo ligable a cita válida) probado con un intento
+- *Aceptación*: RN12 (límite diario) probado con un test que agota el límite y confirma 429/422
+  en el intento siguiente; RN13 (selección solo ligable a cita válida) probado con un intento
   de ligar a una cita ya cancelada, esperando rechazo.
 
 **4.4 — Vistas cliente (frontend)**
 - `pages/client/AsesoriaIA.tsx`, `components/client/CamaraConsulta.tsx`,
   `components/client/GridEstilos.tsx`, botón de entrada desde `Reservar.tsx` y `MisCitas.tsx`.
-- *Aceptación*: el flujo de consentimiento bloquea la cámara hasta aceptar (RN16 verificado en
+- *Aceptación*: el flujo de consentimiento bloquea la cámara hasta aceptar (RN10 verificado en
   UI); `npm run build` limpio.
 
 **4.5 — Vistas trabajador (frontend)**
@@ -182,10 +235,10 @@ recomendar).
 - *Aceptación*: ambas funcionalidades cubiertas por al menos un test de servicio cada una.
 
 **4.8 — QA y cierre**
-- Auditoría final de RN16–RN19 (incluyendo la prueba automatizada de no-persistencia de fotos
+- Auditoría final de RN10–RN13 (incluyendo la prueba automatizada de no-persistencia de fotos
   de 4.2 corrida contra el flujo end-to-end completo, no solo la función aislada); consumo de
   la API de Gemini verificado dentro de los límites de costo configurados por el admin.
-- *Criterio de aceptación de la fase completa*: RN16–RN19 implementadas y testeadas; verificado
+- *Criterio de aceptación de la fase completa*: RN10–RN13 implementadas y testeadas; verificado
   que ninguna foto original se persiste bajo ningún flujo (cliente, trabajador, ni en caso de
   error de la API de Gemini a mitad de request); `npm run build`/`ruff check`/tests en verde.
 
@@ -194,12 +247,20 @@ recomendar).
 - **Objetivo**: preparar el sistema para operar en producción real, más allá del entorno de
   desarrollo en Codespaces.
 - **Entregables** (no exhaustivo, a detallar cuando se aborde):
-  - Corregir la falta de guarda de rol en `POST /auth/registrar`.
+  - Corregir la falta de guarda de rol en `POST /auth/registrar` — sigue pendiente, es un
+    hallazgo de seguridad real (cualquiera sin autenticar puede crear una cuenta admin/
+    trabajador) deliberadamente dejado fuera de la Fase 2.5 por requerir decidir primero cómo
+    se bootstrapea el primer admin del sistema sin ese endpoint abierto.
   - CI (lint + tests) en cada PR.
-  - Observabilidad: logging estructurado, alertas de errores en producción.
-  - Rotación de `SECRET_KEY` y política de expiración de tokens revisada.
+  - ~~Observabilidad: logging estructurado~~ — hecho en la Fase 2.5 (`structlog` + middleware
+    de `request_id` + exception handler global). Pendiente aquí: alertas activas en producción
+    (ej. Sentry u otro colector) sobre los logs ya estructurados.
+  - `SECRET_KEY`: ya tiene validación mínima de longitud (Fase 2.5). Pendiente: política de
+    rotación periódica en producción (hoy es manual) y evaluar acortar
+    `ACCESS_TOKEN_EXPIRE_MINUTES` dado que ya existe revalidación de `esta_activo` contra DB.
   - Evaluar el salto Tailwind v3 → v4 (pospuesto en la Fase 2 por criterio conservador).
-  - Rate limiting en endpoints públicos (`/auth/solicitar-acceso`, `/auth/login`) contra abuso.
+  - ~~Rate limiting en endpoints públicos (`/auth/solicitar-acceso`, `/auth/login`)~~ — hecho
+    en la Fase 2.5 (`slowapi`, 5/min y 3/min respectivamente, respaldado por Redis).
 - **Dependencias**: Fases 3 y 4 completas (o al menos las que se decida llevar a producción).
 - **Hallazgo de la Fase 2 pendiente de resolver aquí**: `npm run lint` reporta 5 errores
   `react-hooks` de tipo "Calling setState synchronously within an effect can trigger cascading

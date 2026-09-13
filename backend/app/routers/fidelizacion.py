@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
@@ -55,8 +55,13 @@ async def aplicar_descuento(
 # ── Admin ──────────────────────────────────────────────────────────────────────
 
 @router.get("/descuentos", response_model=list[DescuentoResponse])
-async def listar_descuentos(usuario: dict = _admin, session: AsyncSession = Depends(get_session)) -> list[DescuentoResponse]:
-    descuentos = await fidelizacion_service.listar_descuentos(session)
+async def listar_descuentos(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    usuario: dict = _admin,
+    session: AsyncSession = Depends(get_session),
+) -> list[DescuentoResponse]:
+    descuentos = await fidelizacion_service.listar_descuentos(session, limit, offset)
     return [DescuentoResponse.model_validate(d) for d in descuentos]
 
 
@@ -71,8 +76,13 @@ async def crear_descuento(
 
 
 @router.get("/retos", response_model=list[RetoResponse])
-async def listar_retos(usuario: dict = _admin, session: AsyncSession = Depends(get_session)) -> list[RetoResponse]:
-    retos = await fidelizacion_service.listar_retos(session)
+async def listar_retos(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    usuario: dict = _admin,
+    session: AsyncSession = Depends(get_session),
+) -> list[RetoResponse]:
+    retos = await fidelizacion_service.listar_retos(session, limit, offset)
     return [RetoResponse.model_validate(r) for r in retos]
 
 

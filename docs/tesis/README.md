@@ -46,7 +46,7 @@ formato.
   ordenado por importancia dentro de cada uno) y **`CUS22`–`CUS34`** el apéndice de casos de uso
   planeados. Reemplaza la convención anterior por actor (`CU-C0x`/`CU-T0x`/`CU-A0x`) — el mapeo
   completo entre ambas está en `02_CASOS_DE_USO_UML.md#mapeo-con-la-numeración-anterior`. Las
-  reglas de negocio siguen la numeración de `docs/REGLAS_DE_NEGOCIO.md` (`RN01`–`RN24`), sin
+  reglas de negocio siguen la numeración de `docs/REGLAS_DE_NEGOCIO.md` (`RN01`–`RN18`), sin
   cambios.
 - Todo lo marcado **(planeado)** pertenece a los dos módulos aún no implementados
   (`docs/MODULO_ASESORIA_IA.md`, `docs/MODULO_FIDELIZACION_AVANZADA.md`) — se documenta con el

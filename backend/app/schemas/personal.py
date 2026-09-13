@@ -2,7 +2,10 @@ from datetime import date
 from datetime import time as _Time
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from app.schemas._shared import RechazaCredencialesMixin
+from app.utils.horarios import hhmm
 
 
 class CrearPersonalRequest(BaseModel):
@@ -15,7 +18,7 @@ class CrearPersonalRequest(BaseModel):
     fecha_ingreso: date | None = None
 
 
-class ActualizarPersonalRequest(BaseModel):
+class ActualizarPersonalRequest(RechazaCredencialesMixin, BaseModel):
     especialidad: str | None = None
     biografia: str | None = None
     color_agenda: str | None = None
@@ -24,15 +27,6 @@ class ActualizarPersonalRequest(BaseModel):
     esta_activo: bool | None = None
     nombre_completo: str | None = None
     telefono: str | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def rechazar_credenciales(cls, v: object) -> object:
-        if isinstance(v, dict) and ("correo" in v or "password" in v or "contrasena" in v):
-            raise ValueError(
-                "Los campos correo y contraseña solo se modifican desde /api/v1/admin/usuarios"
-            )
-        return v
 
 
 class PersonalResponse(BaseModel):
@@ -82,3 +76,12 @@ class DisponibilidadPersonalResponse(BaseModel):
     hora_fin: str
     minutos_buffer: int
     esta_activo: bool
+
+    @field_validator("hora_inicio", "hora_fin", mode="before")
+    @classmethod
+    def _serializar_hora(cls, v: object) -> object:
+        # Hardening defensivo: hoy los services siempre pasan un dict ya convertido con
+        # `hhmm()` (ver `personal_service._disp_a_dict`), pero si algún día se pasa el ORM
+        # crudo (`DisponibilidadPersonal.hora_inicio` es `datetime.time`), este validador
+        # evita un 500 de Pydantic por tipo inválido.
+        return hhmm(v) if isinstance(v, _Time) else v

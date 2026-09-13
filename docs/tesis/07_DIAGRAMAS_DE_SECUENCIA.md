@@ -91,7 +91,7 @@ sequenceDiagram
     end
 ```
 
-## Crear una cita (con validaciones RN08/RN11/RN13)
+## Crear una cita (con validaciones RN07/RT02/RT03)
 
 ```mermaid
 sequenceDiagram
@@ -106,18 +106,18 @@ sequenceDiagram
     R->>S: crear(session, body, usuario_id)
     S->>DB: SELECT Cliente WHERE usuario_id=...
     alt esta_bloqueada = true
-        S-->>R: 403 (RN11)
+        S-->>R: 403 (RT02)
         R-->>FE: 403
     else no bloqueada
         S->>DB: SELECT Servicio.* WHERE id IN (servicio_ids)
         alt algún servicio requiere ficha y no existe activa
-            S-->>R: 422 (RN08)
+            S-->>R: 422 (RN07)
             R-->>FE: 422
         else validación de ficha OK
             S->>DB: SELECT Personal WHERE id=personal_id
             S->>DB: SELECT DisponibilidadPersonal (buffer)
             S->>DB: SELECT Cita WHERE personal_id=... AND ventana de ±1 día
-            alt solapamiento detectado (RN13)
+            alt solapamiento detectado (RT03)
                 S-->>R: 409
                 R-->>FE: 409
                 FE-->>C: refresca disponibilidad
@@ -134,7 +134,7 @@ sequenceDiagram
     end
 ```
 
-## Cambiar estado de cita con alerta de ficha crítica (RN09)
+## Cambiar estado de cita con alerta de ficha crítica (RT01)
 
 ```mermaid
 sequenceDiagram
@@ -183,7 +183,7 @@ sequenceDiagram
     S->>G: analizar(foto_bytes, atributos_catalogo)
     G-->>S: [{estilo_id, score}, ...] + atributos detectados
     S->>S: descartar foto_bytes (nunca se escribe a disco)
-    Note over S: RN17 — la foto nunca sale de esta función
+    Note over S: RN11 — la foto nunca sale de esta función
     S->>DB: INSERT ConsultaIA(analisis_ia, estilos_sugeridos)
     S-->>R: ConsultaIAResponse
     R-->>FE: 200 (sugerencias, sin ninguna imagen de la clienta)
@@ -223,13 +223,13 @@ sequenceDiagram
         WH->>CS: confirmar_pago_webhook(session, referencia_pasarela, resultado)
         CS->>DB: SELECT PedidoCatalogo WHERE referencia_pasarela=...
         alt pedido ya estaba en 'pagado' (webhook reintentado)
-            CS-->>WH: no-op — idempotente (RN23)
+            CS-->>WH: no-op — idempotente (RN17)
         else pedido en 'pendiente'
             alt resultado = aprobado
                 CS->>DB: UPDATE PedidoCatalogo SET estado=pagado
             else resultado = rechazado
                 CS->>DB: UPDATE PedidoCatalogo SET estado=cancelado
-                Note over CS: RN24 — sin efecto en el nivel del cliente
+                Note over CS: RN18 — sin efecto en el nivel del cliente
             end
         end
         WH-->>Cq: 200 OK

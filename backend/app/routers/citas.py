@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_session
 from app.core.security import obtener_usuario_actual, requerir_rol
 from app.schemas.citas import (
-    CambiarEstadoRequest,
+    CambiarEstadoCitaRequest,
     CancelarCitaRequest,
     CitaResponse,
     CitaServicioResponse,
@@ -55,7 +55,7 @@ async def cancelar_cita(
 @router.patch("/{cita_id}/estado", response_model=CitaResponse)
 async def cambiar_estado(
     cita_id: UUID,
-    body: CambiarEstadoRequest,
+    body: CambiarEstadoCitaRequest,
     usuario: dict = _staff,
     session: AsyncSession = Depends(get_session),
 ) -> CitaResponse:

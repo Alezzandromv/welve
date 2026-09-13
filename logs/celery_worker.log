@@ -1,0 +1,33 @@
+ 
+ -------------- celery@codespaces-ba715e v5.6.3 (recovery)
+--- ***** ----- 
+-- ******* ---- Linux-6.8.0-1064-azure-x86_64-with-glibc2.39 2026-09-12 21:27:40
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         welve:0x767931fbcfb0
+- ** ---------- .> transport:   redis://localhost:6379//
+- ** ---------- .> results:     redis://localhost:6379/
+- *** --- * --- .> concurrency: 2 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . app.tasks.no_show.verificar_no_show
+  . app.tasks.recordatorios.recordatorio_24h
+  . app.tasks.recordatorios.recordatorio_2h
+
+[2026-09-12 21:27:40,776: INFO/MainProcess] Connected to redis://localhost:6379//
+[2026-09-12 21:27:40,780: INFO/MainProcess] mingle: searching for neighbors
+[2026-09-12 21:27:41,792: INFO/MainProcess] mingle: all alone
+[2026-09-12 21:27:41,815: INFO/MainProcess] celery@codespaces-ba715e ready.
+[2026-09-12 21:27:41,819: INFO/MainProcess] Task app.tasks.recordatorios.recordatorio_2h[70b4ad24-dfb9-467d-903f-9b36480a8b9e] received
+[2026-09-12 21:27:41,820: INFO/MainProcess] Task app.tasks.recordatorios.recordatorio_2h[d4e6b889-7842-4514-95b7-aed8493e921f] received
+[2026-09-12 21:27:41,823: INFO/MainProcess] Task app.tasks.recordatorios.recordatorio_24h[024206d5-0e4c-491f-ab32-37f382ae6462] received
+[2026-09-12 21:27:41,825: INFO/MainProcess] Task app.tasks.recordatorios.recordatorio_2h[e44616c2-7284-4796-aef2-f529e1134c8a] received
+[2026-09-12 21:28:06,091: INFO/MainProcess] Task app.tasks.recordatorios.recordatorio_2h[3ed8b1bb-8436-4798-81b2-714f32842c25] received
+
+worker: Warm shutdown (MainProcess)
+[2026-09-12 21:28:42,398: WARNING/MainProcess] Restoring 5 unacknowledged message(s)

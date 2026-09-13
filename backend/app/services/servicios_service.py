@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.cita import Cita
@@ -17,6 +18,7 @@ from app.schemas.servicios import (
     DisponibilidadResponse,
     HorarioDisponible,
 )
+from app.utils.disponibilidad import se_solapa
 
 LIMA_TZ = ZoneInfo("America/Lima")
 
@@ -61,28 +63,43 @@ async def calcular_disponibilidad(session: AsyncSession, servicio_id: UUID, fech
 
     inicio_dia = datetime(fecha.year, fecha.month, fecha.day, tzinfo=LIMA_TZ)
     fin_dia = inicio_dia + timedelta(days=1)
-    resultados: list[DisponibilidadResponse] = []
+    personal_ids = [p.id for p in personal_activo]
 
-    for personal in personal_activo:
-        stmt = select(DisponibilidadPersonal).where(
-            DisponibilidadPersonal.personal_id == personal.id,
+    # Batch: 2 queries totales en vez de 2 por especialista (antes N+1 — ver
+    # citas_service.listar_todas_con_nombres para el mismo patrón de agrupación).
+    disp_res = await session.execute(
+        select(DisponibilidadPersonal).where(
+            DisponibilidadPersonal.personal_id.in_(personal_ids),
             DisponibilidadPersonal.dia_semana == dia_modelo,
             DisponibilidadPersonal.esta_activo,
         )
-        disponibilidades = list((await session.execute(stmt)).scalars().all())
-
-        if not disponibilidades:
-            continue
-
-        buffer = timedelta(minutes=disponibilidades[0].minutos_buffer)
-
-        stmt_citas = select(Cita).where(
-            Cita.personal_id == personal.id,
+    )
+    citas_res = await session.execute(
+        select(Cita).where(
+            Cita.personal_id.in_(personal_ids),
             Cita.programada_en >= inicio_dia,
             Cita.programada_en < fin_dia,
         )
-        citas_dia = list((await session.execute(stmt_citas)).scalars().all())
-        citas_activas = [c for c in citas_dia if c.estado not in _ESTADOS_BLOQUEADOS]
+    )
+
+    disp_por_personal: dict[UUID, list[DisponibilidadPersonal]] = {}
+    for d in disp_res.scalars().all():
+        disp_por_personal.setdefault(d.personal_id, []).append(d)
+
+    citas_por_personal: dict[UUID, list[Cita]] = {}
+    for c in citas_res.scalars().all():
+        if c.estado not in _ESTADOS_BLOQUEADOS:
+            citas_por_personal.setdefault(c.personal_id, []).append(c)
+
+    resultados: list[DisponibilidadResponse] = []
+
+    for personal in personal_activo:
+        disponibilidades = disp_por_personal.get(personal.id, [])
+        if not disponibilidades:
+            continue
+
+        buffer_minutos = disponibilidades[0].minutos_buffer
+        citas_activas = citas_por_personal.get(personal.id, [])
 
         horarios: list[HorarioDisponible] = []
         for disp in disponibilidades:
@@ -102,7 +119,7 @@ async def calcular_disponibilidad(session: AsyncSession, servicio_id: UUID, fech
                 fin_slot = cursor + duracion
                 # RN13: slot conflicta si se solapa con cualquier cita (considerando buffer)
                 ocupado = any(
-                    cursor < (c.termina_en + buffer) and c.programada_en < (fin_slot + buffer)
+                    se_solapa(cursor, fin_slot, c.programada_en, c.termina_en, buffer_minutos)
                     for c in citas_activas
                 )
                 if not ocupado:
@@ -145,7 +162,11 @@ async def actualizar_categoria(session: AsyncSession, categoria_id: UUID, body: 
     datos = body.model_dump(exclude_none=True)
     for campo, valor in datos.items():
         setattr(categoria, campo, valor)
-    await session.flush()
+    try:
+        await session.flush()
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ya existe una categoría con ese nombre") from None
     return categoria
 
 
@@ -158,7 +179,11 @@ async def crear_categoria(session: AsyncSession, body: CrearCategoriaRequest) ->
         )
     categoria = Categoria(**body.model_dump())
     session.add(categoria)
-    await session.flush()
+    try:
+        await session.flush()
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ya existe una categoría con ese nombre") from None
     return categoria
 
 

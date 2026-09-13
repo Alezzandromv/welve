@@ -2,6 +2,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.enums import TipoContrato
@@ -12,6 +13,7 @@ from app.schemas.personal import (
     CrearDisponibilidadRequest,
     CrearPersonalRequest,
 )
+from app.services._comunes import aplicar_campos, extraer_campos_usuario
 from app.utils.horarios import hhmm, parse_hhmm
 
 
@@ -34,9 +36,14 @@ async def listar(session: AsyncSession) -> list[Personal]:
     return list((await session.execute(stmt)).scalars().all())
 
 
-async def listar_todos_con_usuario(session: AsyncSession) -> list[dict]:
+async def listar_todos_con_usuario(session: AsyncSession, limit: int = 50, offset: int = 0) -> list[dict]:
     """Devuelve todo el personal (incluido inactivo) enriquecido con datos de usuario."""
-    stmt = select(Personal, Usuario).join(Usuario, Personal.usuario_id == Usuario.id)
+    stmt = (
+        select(Personal, Usuario)
+        .join(Usuario, Personal.usuario_id == Usuario.id)
+        .order_by(Usuario.nombre_completo.asc())
+        .limit(limit).offset(offset)
+    )
     filas = (await session.execute(stmt)).all()
 
     result = []
@@ -86,7 +93,11 @@ async def crear(session: AsyncSession, body: CrearPersonalRequest) -> Personal:
     datos["tipo_contrato"] = TipoContrato(datos["tipo_contrato"])
     personal = Personal(**datos)
     session.add(personal)
-    await session.flush()
+    try:
+        await session.flush()
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Este usuario ya tiene perfil de personal") from None
     return personal
 
 
@@ -96,17 +107,15 @@ async def actualizar(session: AsyncSession, personal_id: UUID, body: ActualizarP
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Personal no encontrado")
 
     datos = body.model_dump(exclude_none=True)
-    campos_usuario = {c: datos.pop(c) for c in ("nombre_completo", "telefono") if c in datos}
+    campos_usuario = extraer_campos_usuario(datos)
     if "tipo_contrato" in datos:
         datos["tipo_contrato"] = TipoContrato(datos["tipo_contrato"])
 
     usuario = await session.get(Usuario, personal.usuario_id)
     if campos_usuario and usuario:
-        for campo, valor in campos_usuario.items():
-            setattr(usuario, campo, valor)
+        aplicar_campos(usuario, campos_usuario)
 
-    for campo, valor in datos.items():
-        setattr(personal, campo, valor)
+    aplicar_campos(personal, datos)
     await session.flush()
 
     return {

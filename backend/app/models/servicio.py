@@ -5,9 +5,10 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
+from app.models.mixins import TimestampMixin
 
 
-class Categoria(Base):
+class Categoria(TimestampMixin, Base):
     __tablename__ = "categorias"
     __table_args__ = (
         sa.UniqueConstraint("nombre", name="uq_categorias_nombre"),
@@ -22,8 +23,11 @@ class Categoria(Base):
     esta_activo: Mapped[bool] = mapped_column(sa.Boolean, default=True, nullable=False)
 
 
-class Servicio(Base):
+class Servicio(TimestampMixin, Base):
     __tablename__ = "servicios"
+    __table_args__ = (
+        sa.Index("ix_servicios_categoria_id", "categoria_id"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     categoria_id: Mapped[uuid.UUID] = mapped_column(

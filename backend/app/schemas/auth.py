@@ -1,7 +1,8 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class SolicitarAccesoRequest(BaseModel):
@@ -20,15 +21,15 @@ class VerificarTokenResponse(BaseModel):
 
 
 class LoginStaffRequest(BaseModel):
-    correo: str
+    correo: EmailStr
     contrasena: str
 
 
 class RegistroStaffRequest(BaseModel):
     nombre_completo: str
-    correo: str
+    correo: EmailStr
     contrasena: str
-    rol: str  # 'admin' | 'trabajador'
+    rol: Literal["admin", "trabajador"]
 
 
 class TokenResponse(BaseModel):
@@ -53,7 +54,7 @@ class PerfilResponse(BaseModel):
 
 class ActualizarPerfilRequest(BaseModel):
     nombre_completo: str | None = None
-    correo: str | None = None
+    correo: EmailStr | None = None
     telefono: str | None = None
 
 

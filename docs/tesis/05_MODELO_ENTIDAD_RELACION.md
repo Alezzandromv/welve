@@ -196,7 +196,7 @@ erDiagram
 ```
 
 **Restricción compuesta relevante**: `descuento_usos` tiene `UNIQUE(descuento_id, cliente_id,
-cita_id)` — es lo que hace atómica la validación de RN14 bajo `SELECT ... FOR UPDATE`.
+cita_id)` — es lo que hace atómica la validación de RT04 bajo `SELECT ... FOR UPDATE`.
 
 ## Esquema planeado — Fidelización avanzada
 
@@ -289,6 +289,6 @@ erDiagram
     }
 ```
 
-**Garantía de esquema (RN17)**: ninguna de las tres tablas de este bloque tiene una columna de
+**Garantía de esquema (RN11)**: ninguna de las tres tablas de este bloque tiene una columna de
 tipo imagen/blob para la foto de la clienta — la única columna de imagen del bloque completo es
 `estilos_catalogo.imagen_url`, que es una imagen de referencia del catálogo, no de una clienta.

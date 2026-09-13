@@ -7,7 +7,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
 from app.models.enums import RolUsuario
-from app.utils.timezone import ahora_lima
 
 
 class Usuario(Base):
@@ -38,5 +37,7 @@ class Usuario(Base):
     foto_perfil_url: Mapped[str | None] = mapped_column(sa.String, nullable=True)
     acepta_whatsapp: Mapped[bool] = mapped_column(sa.Boolean, default=True, nullable=False)
     ultimo_acceso: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True), nullable=True)
-    fecha_creacion: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), default=ahora_lima, nullable=False)
-    actualizado_en: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), default=ahora_lima, nullable=False)
+    fecha_creacion: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False)
+    actualizado_en: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True), server_default=sa.func.now(), onupdate=sa.func.now(), nullable=False
+    )

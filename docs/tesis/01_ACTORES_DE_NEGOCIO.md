@@ -157,10 +157,10 @@ classDiagram
 - **Naturaleza**: sistema interno (parte de la infraestructura propia de Welve, no un tercero),
   pero se modela como actor secundario de la rama automática de CUS11 porque **inicia** esa
   transición sin que ningún humano la dispare directamente en ese momento — es quien realmente
-  ejecuta RN05 (no-show automático), con una consecuencia visible y accionable por el trabajador
+  ejecuta RN04 (no-show automático), con una consecuencia visible y accionable por el trabajador
   (pierde el depósito, cambia su agenda).
 - **Rol en el sistema**: dispara `verificar_no_show` cada 5 minutos. También dispara, planeado,
-  `recalcular_niveles` en un intervalo configurable (RN20/RN21) — pero ese segundo job **no se
+  `recalcular_niveles` en un intervalo configurable (RN14/RN15) — pero ese segundo job **no se
   modela como caso de uso propio**: no tiene ningún punto de decisión humana ni consecuencia que
   un actor deba atender en el momento, así que se documenta directamente como regla de negocio
   (ver `docs/REGLAS_DE_NEGOCIO.md`) y en `06_DIAGRAMAS_DE_ACTIVIDAD.md`, sin ficha de caso de uso.
@@ -175,8 +175,8 @@ módulo — esta tabla es solo el resumen de qué actor participa en qué módul
 | Módulo | Cliente | Trabajador | Admin | WhatsApp | Gemini | Culqi | Beat |
 |---|---|---|---|---|---|---|---|
 | Autenticación | ✅ (magic link) | ✅ (password) | ✅ (password) | ✅ (envía enlace) | — | — | — |
-| Citas | ✅ | ✅ | ✅ | — | — | — | ✅ (RN05) |
+| Citas | ✅ | ✅ | ✅ | — | — | — | ✅ (RN04) |
 | Pagos (manual) | — | — | ✅ | — | — | — | — |
 | Fidelización actual | ✅ | — | ✅ | — | — | — | — |
-| Fidelización avanzada *(planeado)* | ✅ | (informativo) | ✅ | ✅ (notif.) | — | ✅ | ✅ (RN20) |
+| Fidelización avanzada *(planeado)* | ✅ | (informativo) | ✅ | ✅ (notif.) | — | ✅ | ✅ (RN14) |
 | Asesoría IA *(planeado)* | ✅ | ✅ | ✅ | ✅ (notif.) | ✅ | — | — |

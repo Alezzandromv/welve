@@ -22,5 +22,5 @@ convenciones) — estos documentos son su complemento de producto, diseño y pla
 en este código) lo carga automáticamente como contexto de cada sesión — no se movió aquí para
 no romper esa convención. Su contenido se recortó para no duplicar lo que ahora vive en
 `docs/`: sigue teniendo comandos, arquitectura de código, convenciones y las reglas de negocio
-operativas (RN01–RN15), pero la filosofía de producto/diseño extendida y los módulos planeados
+operativas (RN01–RT05), pero la filosofía de producto/diseño extendida y los módulos planeados
 ahora se documentan aquí, con un puntero desde `CLAUDE.md`.

@@ -1,6 +1,5 @@
 """Tests de reglas de negocio del módulo de citas: RN01/RN02 (cancelación con/sin
 penalidad), RN09 (ficha crítica al iniciar cita) y RN13 (buffer/solapamiento)."""
-import uuid
 from datetime import timedelta
 
 import pytest
@@ -10,7 +9,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.cliente import FichaSalud
 from app.models.enums import SeveridadFicha
 from app.utils.timezone import ahora_lima
-from tests.conftest import crear_personal_activo, crear_servicio_test, crear_usuario_cliente, token_para
+from tests.conftest import (
+    crear_personal_activo,
+    crear_servicio_test,
+    crear_usuario_admin,
+    crear_usuario_cliente,
+    token_para,
+)
 
 
 async def _crear_cita(
@@ -80,8 +85,9 @@ async def test_ficha_critica_bloquea_inicio_sin_confirmar(client: AsyncClient, d
     cliente = await crear_usuario_cliente(db_session, telefono="+51900111003")
     personal = await crear_personal_activo(db_session, nombre="Especialista RN09")
     servicio = await crear_servicio_test(db_session, nombre="Servicio RN09")
+    admin = await crear_usuario_admin(db_session)
     cliente_token = token_para(cliente.usuario_id, "cliente")
-    admin_token = token_para(uuid.uuid4(), "admin")  # admin puede operar cualquier cita, sin importar el asignado
+    admin_token = token_para(admin.id, "admin")  # admin puede operar cualquier cita, sin importar el asignado
 
     db_session.add(FichaSalud(
         cliente_id=cliente.id,

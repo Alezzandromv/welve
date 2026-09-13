@@ -7,10 +7,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
 from app.models.enums import RecompensaTipo, ScopeDescuento, TipoDescuento
-from app.utils.timezone import ahora_lima
+from app.models.mixins import TimestampMixin
 
 
-class Descuento(Base):
+class Descuento(TimestampMixin, Base):
     __tablename__ = "descuentos"
     __table_args__ = (
         sa.Index(
@@ -42,7 +42,7 @@ class Descuento(Base):
     esta_activo: Mapped[bool] = mapped_column(sa.Boolean, default=True, nullable=False)
 
 
-class Reto(Base):
+class Reto(TimestampMixin, Base):
     __tablename__ = "retos"
 
     id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -67,6 +67,9 @@ class DescuentoUso(Base):
             "descuento_id", "cliente_id", "cita_id",
             name="uq_descuento_uso_cliente_cita",
         ),
+        sa.Index("ix_descuento_usos_cliente_id", "cliente_id"),
+        sa.Index("ix_descuento_usos_cita_id", "cita_id"),
+        sa.Index("ix_descuento_usos_reto_origen_id", "reto_origen_id"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -82,4 +85,4 @@ class DescuentoUso(Base):
     reto_origen_id: Mapped[uuid.UUID | None] = mapped_column(
         PG_UUID(as_uuid=True), sa.ForeignKey("retos.id"), nullable=True
     )
-    fecha_canje: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), default=ahora_lima, nullable=False)
+    fecha_canje: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False)

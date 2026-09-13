@@ -1,16 +1,20 @@
 from datetime import datetime, timedelta
 from uuid import UUID
-from zoneinfo import ZoneInfo
 
 import bcrypt as _bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.database import get_session
+from app.models.cliente import Cliente
+from app.models.usuario import Usuario
+from app.utils.timezone import LIMA_TZ
 
 ALGORITHM = "HS256"
-LIMA_TZ = ZoneInfo("America/Lima")
 
 bearer_scheme = HTTPBearer()
 
@@ -46,8 +50,26 @@ def decodificar_token(token: str) -> dict:
 
 async def obtener_usuario_actual(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    session: AsyncSession = Depends(get_session),
 ) -> dict:
-    return decodificar_token(credentials.credentials)
+    """Decodifica el JWT y revalida contra la DB que la cuenta siga activa (y, para
+    clientes, no bloqueada) — sin esto, desactivar/bloquear a un usuario no tiene efecto
+    hasta que su token expire (hasta `access_token_expire_minutes`)."""
+    payload = decodificar_token(credentials.credentials)
+
+    usuario = await session.get(Usuario, UUID(payload["sub"]))
+    if not usuario or not usuario.esta_activo:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cuenta inactiva o inexistente")
+    if usuario.rol.value != payload.get("rol"):
+        # El rol cambió desde que se emitió el token (ej. admin lo reasignó) — forzar re-login.
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token desactualizado, vuelve a iniciar sesión")
+
+    if payload.get("rol") == "cliente":
+        cliente = (await session.execute(select(Cliente).where(Cliente.usuario_id == usuario.id))).scalar_one_or_none()
+        if cliente and cliente.esta_bloqueada:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cuenta bloqueada")
+
+    return payload
 
 
 def requerir_rol(*roles: str):

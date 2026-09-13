@@ -12,8 +12,8 @@ engine = create_async_engine(
     settings.database_url,
     pool_pre_ping=True,
     pool_recycle=300,
-    pool_size=5,
-    max_overflow=5,
+    pool_size=settings.db_pool_size,
+    max_overflow=settings.db_max_overflow,
     connect_args={"statement_cache_size": 0},
 )
 

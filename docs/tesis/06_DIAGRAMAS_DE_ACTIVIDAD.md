@@ -11,16 +11,16 @@ flowchart TD
     Start([Cliente inicia reserva]) --> A[Elegir uno o más servicios]
     A --> B{¿Cliente bloqueada?}
     B -->|Sí, esta_bloqueada=true| RejBloq[Rechazar con mensaje genérico]:::reject
-    RejBloq --> End1([Fin — RN11])
+    RejBloq --> End1([Fin — RT02])
     B -->|No| C[Elegir especialista y horario]
     C --> D{"¿Algún servicio<br/>requiere_ficha_salud?"}
     D -->|Sí| E{"¿Existe FichaSalud<br/>activa del cliente?"}
     E -->|No| RejFicha[422: registrar ficha con administración]:::reject
-    RejFicha --> End2([Fin — RN08])
+    RejFicha --> End2([Fin — RN07])
     E -->|Sí| F
     D -->|No| F{"¿Horario solapa con otra<br/>cita + buffer de la especialista?"}
     F -->|Sí| RejSolape[409: horario no disponible]:::reject
-    RejSolape --> End3([Fin — RN13])
+    RejSolape --> End3([Fin — RT03])
     F -->|No| G[Crear Cita en estado 'pendiente']
     G --> H[Crear CitaServicio por cada servicio]
     H --> End4([Fin — reserva confirmada])
@@ -48,7 +48,7 @@ flowchart TD
     classDef warn fill:#fff3cd,stroke:#ffc107
 ```
 
-## No-show automático (RN05 — disparado por Celery Beat)
+## No-show automático (RN04 — disparado por Celery Beat)
 
 ```mermaid
 flowchart TD
@@ -57,7 +57,7 @@ flowchart TD
     B --> C{"¿Hay filas?"}
     C -->|No| End1([Fin — nada que hacer])
     C -->|Sí| D["UPDATE en un solo statement:<br/>estado='no_show'<br/>penalizacion_aplicada=true"]
-    D --> End2([Fin — RN05])
+    D --> End2([Fin — RN04])
 ```
 
 ## Completar una cita y verificar retos (CUS11 → CUS09)
@@ -72,7 +72,7 @@ flowchart TD
     C --> D{"¿visitas ≥<br/>visitas_requeridas?"}
     D -->|No| End2([Fin — sin premio])
     D -->|Sí| E["INSERT Descuento premio<br/>ON CONFLICT DO NOTHING<br/>(código único por cliente+reto)"]
-    E --> End3([Fin — RN15, descuento disponible])
+    E --> End3([Fin — RT05, descuento disponible])
 
     classDef reject fill:#f8d7da,stroke:#dc3545
 ```
@@ -82,10 +82,10 @@ flowchart TD
 ```mermaid
 flowchart TD
     Start([Actor activa la cámara]) --> A{"¿Aceptó el<br/>consentimiento?"}
-    A -->|No| End1([Cámara no se activa — RN16])
+    A -->|No| End1([Cámara no se activa — RN10])
     A -->|Sí| B{"¿Superó el límite<br/>diario de consultas?"}
     B -->|Sí| RejLim["Mostrar cuándo se resetea"]:::reject
-    RejLim --> End2([Fin — RN18])
+    RejLim --> End2([Fin — RN12])
     B -->|No| C[Capturar foto]
     C --> D["Enviar foto + atributos del<br/>catálogo a Gemini (efímero)"]
     D --> E["Gemini devuelve ranking<br/>de EstiloCatalogo"]
@@ -96,7 +96,7 @@ flowchart TD
     I -->|No| J["Guardar selección,<br/>botón 'enviar' deshabilitado"]
     J --> End3([Fin])
     I -->|Sí| K["Crear SeleccionEstilo<br/>ligada a esa Cita"]
-    K --> End4([Fin — RN19, visible en agenda de la especialista])
+    K --> End4([Fin — RN13, visible en agenda de la especialista])
 
     classDef reject fill:#f8d7da,stroke:#dc3545
     classDef critical fill:#fff3cd,stroke:#ffc107,stroke-width:2px
@@ -107,16 +107,16 @@ flowchart TD
 ```mermaid
 flowchart TD
     Start([Cliente elige un producto]) --> A{"¿nivel_actual ≥<br/>producto.nivel_minimo?"}
-    A -->|No| Rej["403 — incluso si la UI<br/>ya lo ocultaba (RN22)"]:::reject
+    A -->|No| Rej["403 — incluso si la UI<br/>ya lo ocultaba (RN16)"]:::reject
     Rej --> End1([Fin])
     A -->|Sí| B["Generar token de checkout<br/>con el SDK de Culqi"]
     B --> C["Backend crea cargo en Culqi<br/>y PedidoCatalogo en 'pendiente'"]
     C --> D["Culqi procesa el pago"]
     D --> E{"Webhook de Culqi:<br/>¿pago confirmado?"}
     E -->|Sí| F["UPDATE idempotente:<br/>PedidoCatalogo.estado = pagado"]:::ok
-    F --> End2([Fin — RN23])
+    F --> End2([Fin — RN17])
     E -->|No| G["PedidoCatalogo.estado = cancelado<br/>(sin efecto en el nivel del cliente)"]:::warn
-    G --> End3([Fin — RN24])
+    G --> End3([Fin — RN18])
 
     classDef reject fill:#f8d7da,stroke:#dc3545
     classDef ok fill:#d4edda,stroke:#28a745

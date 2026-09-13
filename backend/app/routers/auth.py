@@ -1,9 +1,10 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
+from app.core.ratelimit import limiter
 from app.core.security import obtener_usuario_actual
 from app.schemas.auth import (
     ActualizarPerfilRequest,
@@ -22,7 +23,9 @@ router = APIRouter()
 
 
 @router.post("/solicitar-acceso", response_model=SolicitarAccesoResponse)
+@limiter.limit("3/minute")
 async def solicitar_acceso(
+    request: Request,
     body: SolicitarAccesoRequest,
     session: AsyncSession = Depends(get_session),
 ) -> SolicitarAccesoResponse:
@@ -49,7 +52,8 @@ async def registrar(body: RegistroStaffRequest, session: AsyncSession = Depends(
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(body: LoginStaffRequest, session: AsyncSession = Depends(get_session)) -> TokenResponse:
+@limiter.limit("5/minute")
+async def login(request: Request, body: LoginStaffRequest, session: AsyncSession = Depends(get_session)) -> TokenResponse:
     resultado = await auth_service.login_staff(
         session,
         correo=body.correo,
